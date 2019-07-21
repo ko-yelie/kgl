@@ -1,0 +1,38 @@
+{
+  "name": "@ko-yelie/kgl",
+  "moduleName": "kgl",
+  "version": "0.1.0",
+  "description": "WebGL library",
+  "main": "dist/kgl.es.js",
+  "unpkg": "dist/kgl.iife.min.js",
+  "files": [
+    "dist/"
+  ],
+  "scripts": {
+    "build": "bili",
+    "docs": "esdoc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ko-yelie/kgl.git"
+  },
+  "keywords": [],
+  "author": "Ko.Yelie",
+  "license": "MIT",
+  "year": 2019,
+  "bugs": {
+    "url": "https://github.com/ko-yelie/kgl/issues"
+  },
+  "homepage": "https://github.com/ko-yelie/kgl#readme",
+  "devDependencies": {
+    "banner-package": "^0.1.0",
+    "bili": "^4.8.0",
+    "esdoc": "^1.1.0",
+    "esdoc-standard-plugin": "^1.0.0",
+    "rollup-plugin-glslify": "^1.1.2"
+  },
+  "dependencies": {
+    "glsl-fast-gaussian-blur": "^1.0.2",
+    "glsl-random": "^0.0.5"
+  }
+}
