@@ -3,8 +3,8 @@
   "moduleName": "kgl",
   "version": "0.1.0",
   "description": "WebGL library",
-  "main": "dist/kgl.es.js",
-  "unpkg": "dist/kgl.iife.min.js",
+  "main": "dist/index.esm.js",
+  "unpkg": "dist/index.iife.min.js",
   "files": [
     "dist/"
   ],

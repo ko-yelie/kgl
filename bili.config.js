@@ -5,7 +5,7 @@ module.exports = {
   banner: require('banner-package'),
   output: {
     moduleName: 'Kgl',
-    format: ['es-min', 'iife', 'iife-min'],
+    format: ['es', 'iife', 'iife-min'],
     sourceMap: false
   },
   plugins: {
