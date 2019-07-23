@@ -16,9 +16,10 @@ export default class Program {
     this.webgl = webgl
 
     const {
-      vertexShader = noneVert,
-      fragmentShaderSelector,
-      fragmentShader = document.querySelector(fragmentShaderSelector).textContent,
+      vertexShaderId,
+      vertexShader = vertexShaderId ? document.getElementById(vertexShaderId).textContent : noneVert,
+      fragmentShaderId,
+      fragmentShader = document.getElementById(fragmentShaderId).textContent,
       attributes,
       instancedAttributes,
       uniforms,
@@ -40,7 +41,7 @@ export default class Program {
       isClear = defaultValue
     } = option
 
-    const isWhole = !option.vertexShader
+    const isWhole = !(option.vertexShaderId || option.vertexShader)
 
     this.mode = mode
     this.glMode = gl[mode || 'TRIANGLE_STRIP']
