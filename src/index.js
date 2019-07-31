@@ -148,8 +148,10 @@ export default class Kgl {
     const {
       framebuffer,
       textureIndex,
-      depthRenderBuffer
+      depthRenderBuffer,
+      isFloat
     } = this.framebuffers[key]
+    if (isFloat) return
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
     gl.bindRenderbuffer(gl.RENDERBUFFER, depthRenderBuffer)
@@ -187,7 +189,8 @@ export default class Kgl {
 
     this.framebuffers[key] = {
       framebuffer,
-      textureIndex
+      textureIndex,
+      isFloat: true
     }
   }
 
