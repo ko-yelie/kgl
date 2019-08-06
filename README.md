@@ -13,7 +13,7 @@ WebGL library
 <script type="x-shader/x-fragment" id="fs">
   precision highp float;
 
-  uniform vec2 resolution; // auto added
+  uniform vec2 resolution; // window size (auto added)
   uniform float time;
 
   void main() {
