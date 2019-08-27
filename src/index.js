@@ -95,6 +95,7 @@ export default class Kgl {
       this.canvas = canvas
     } else {
       this.canvas = document.createElement('canvas')
+      this.canvas.style.display = 'block'
       this.canvas.style.width = '100%'
       this.canvas.style.height = '100%'
       document.body.appendChild(this.canvas)
