@@ -10,8 +10,7 @@
   ],
   "scripts": {
     "build": "bili",
-    "docs": "esdoc",
-    "publish": "npm run build && npm publish"
+    "docs": "esdoc"
   },
   "repository": {
     "type": "git",
