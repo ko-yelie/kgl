@@ -8,6 +8,7 @@ export default class Kgl {
     this.effects = {}
     this.framebuffers = {}
     this.textureIndex = -1
+    this.ticks = []
     this.mMatrix = matIV.identity(matIV.create())
     this.vMatrix = matIV.identity(matIV.create())
     this.pMatrix = matIV.identity(matIV.create())
@@ -49,7 +50,7 @@ export default class Kgl {
     this.eyeDirection = eyeDirection
     this.ambientColor = ambientColor
 
-    this.tick = tick
+    this.addTick(tick)
     this.onResize = onResize
     this.isClear = isClear
     this.clearedColor = this.isClear ? clearedColor || [0, 0, 0, 0] : null
@@ -315,6 +316,10 @@ export default class Kgl {
     })
   }
 
+  addTick (tick) {
+    this.ticks.push(tick)
+  }
+
   start () {
     const { gl } = this
     let initialTimestamp
@@ -331,7 +336,7 @@ export default class Kgl {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
       }
 
-      if (this.tick) this.tick(time)
+      this.ticks.forEach(tick => tick(time))
 
       this.requestID = requestAnimationFrame(render)
     }
