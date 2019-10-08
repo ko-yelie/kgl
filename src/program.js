@@ -247,6 +247,8 @@ export default class Program {
             }
             break
           case 'HTMLImageElement':
+          case 'HTMLVideoElement':
+          case 'HTMLCanvasElement':
             uniformType = '1i'
             uniformValue = this.createTexture(key, value)
             break
