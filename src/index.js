@@ -38,7 +38,7 @@ export default class Kgl {
       isAutoStart = true
     } = option
 
-    this.initWebgl(canvas)
+    this._initWebgl(canvas)
 
     this.fov = typeof fov !== 'undefined' ? fov : Math.atan(this.canvas.clientHeight / 2 / cameraPosition[2]) * (180 / Math.PI) * 2
     this.near = near
@@ -63,7 +63,7 @@ export default class Kgl {
       this.createEffect(key)
     })
 
-    this.initSize()
+    this._initSize()
 
     switch (framebuffers.constructor.name) {
       case 'Array':
@@ -89,7 +89,7 @@ export default class Kgl {
     if (isAutoStart) this.start()
   }
 
-  initWebgl (canvas) {
+  _initWebgl (canvas) {
     if (typeof canvas === 'string') {
       this.canvas = document.querySelector(canvas)
     } else if (typeof canvas === 'object' && canvas.constructor.name === 'HTMLCanvasElement') {
@@ -245,9 +245,10 @@ export default class Kgl {
     if (this.onResize) this.onResize()
   }
 
-  initSize () {
+  _initSize () {
     this.setSize()
-    window.addEventListener('resize', () => { this.setSize() })
+    this._setSize = () => { this.setSize() }
+    window.addEventListener('resize', this._setSize)
   }
 
   updateCamera () {
@@ -348,5 +349,10 @@ export default class Kgl {
 
     cancelAnimationFrame(this.requestID)
     this.requestID = null
+  }
+
+  destroy() {
+    this.stop()
+    window.removeEventListener('resize', this._setSize)
   }
 }
