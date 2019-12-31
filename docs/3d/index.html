@@ -1,0 +1,27 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>KGL Library Demo - 3D</title><link rel="stylesheet" href="/kgl/3d.a8d3693c.css"></head><body> <script id="vs" type="x-shader/x-vertex">
+    attribute vec3 position;
+    attribute vec2 uv;
+
+    uniform mat4 mvpMatrix;
+
+    varying vec2 vUv;
+
+    void main() {
+      vUv = uv;
+
+      gl_Position = mvpMatrix * vec4(position, 1.);
+    }
+  </script> <script id="fs" type="x-shader/x-fragment">
+    precision highp float;
+
+    uniform vec2 resolution; // window size (auto added)
+    uniform float time;
+
+    varying vec2 vUv;
+
+    void main() {
+      gl_FragColor = vec4(vec3(1. / length(vUv * 2. - 1.) * (sin(time) * 0.5 + 0.5)), 1.);
+      // gl_FragColor = vec4(vec3(vUv, 0.), 1.);
+    }
+  </script> <script src="/kgl/3d.7216c342.js"></script>
+</body></html>
