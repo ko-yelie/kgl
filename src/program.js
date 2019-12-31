@@ -35,7 +35,7 @@ export default class Program {
 
     const defaultValue = isFloats ? false : true
     const {
-      hasResolution = defaultValue,
+      isAutoResolution = uniforms.resolution ? false : defaultValue,
       hasCamera = defaultValue,
       hasLight = defaultValue,
       isClear = defaultValue
@@ -48,7 +48,7 @@ export default class Program {
     this.drawType = drawType
     this.isTransparent = isTransparent
     this.isAdditive = isAdditive
-    this.hasResolution = hasResolution
+    this.isAutoResolution = isAutoResolution
     this.hasCamera = hasCamera
     this.hasLight = hasLight
     this.isClear = isClear
@@ -184,7 +184,7 @@ export default class Program {
   createUniform (data) {
     const mergedData = Object.assign({}, data)
 
-    if (this.hasResolution && !mergedData.resolution) mergedData.resolution = [1, 1]
+    if (this.isAutoResolution && !mergedData.resolution) mergedData.resolution = [1, 1]
     if (this.hasCamera) {
       mergedData.mvpMatrix = new Float32Array(16)
       mergedData.invMatrix = new Float32Array(16)

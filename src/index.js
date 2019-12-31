@@ -18,7 +18,7 @@ export default class Kgl {
 
     const {
       canvas,
-      fov,
+      fov = 50,
       near = 0.1,
       far = 2000,
       cameraPosition = [0, 0, 30],
@@ -40,11 +40,13 @@ export default class Kgl {
 
     this._initWebgl(canvas)
 
-    this.fov = typeof fov !== 'undefined' ? fov : Math.atan(this.canvas.clientHeight / 2 / cameraPosition[2]) * (180 / Math.PI) * 2
+    this.fov = fov
     this.near = near
     this.far = far
     this.cameraPosition = cameraPosition
     this.cameraRotation = cameraRotation
+
+    this.isAutoUpdateCameraPositionZ = typeof option.cameraPosition === 'undefined'
 
     this.lightDirection = lightDirection
     this.eyeDirection = eyeDirection
@@ -221,7 +223,7 @@ export default class Kgl {
 
     Object.keys(this.programs).forEach(key => {
       const program = this.programs[key]
-      if (program.hasResolution) {
+      if (program.isAutoResolution) {
         program.use()
         program.uniforms.resolution = [width, height]
       }
@@ -229,7 +231,7 @@ export default class Kgl {
 
     Object.keys(this.effects).forEach(key => {
       const program = this.effects[key]
-      if (program.hasResolution) {
+      if (program.isAutoResolution) {
         program.use()
         program.uniforms.resolution = [width, height]
       }
@@ -242,7 +244,7 @@ export default class Kgl {
     this.updateCamera()
     this.updateLight()
 
-    if (this.onResize) this.onResize()
+    if (this.onResize) this.onResize(this)
   }
 
   _initSize () {
@@ -269,7 +271,11 @@ export default class Kgl {
 
     // cameraPosition[0] += (pointer.x * cameraPositionRate - cameraPosition[0]) * 0.1
     // cameraPosition[1] += (pointer.y * cameraPositionRate - cameraPosition[1]) * 0.1
-    // cameraPosition[2] += (settings.zPosition - cameraPosition[2]) * 0.1
+    if (this.isAutoUpdateCameraPositionZ) {
+      cameraPosition[2] = Math.min(this.canvas.width, this.canvas.height) / 2 / Math.tan((this.fov / 2) * (Math.PI / 180))
+    } else {
+      // cameraPosition[2] += (settings.zPosition - cameraPosition[2]) * 0.1
+    }
     this.eyeDirection = cameraPosition
 
     matIV.identity(mMatrix)
@@ -337,7 +343,7 @@ export default class Kgl {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
       }
 
-      this.ticks.forEach(tick => tick(time))
+      this.ticks.forEach(tick => tick(this, time))
 
       this.requestID = requestAnimationFrame(render)
     }

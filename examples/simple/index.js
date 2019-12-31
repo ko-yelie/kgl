@@ -1,6 +1,6 @@
-import Kgl from '../src/index.js'
+import Kgl from '../../src/index.js'
 
-const gl = new Kgl({
+new Kgl({
   programs: {
     main: {
       fragmentShaderId: 'fs',
@@ -9,7 +9,7 @@ const gl = new Kgl({
       },
     }
   },
-  tick (time) {
+  tick (gl, time) {
     gl.programs.main.draw({
       time
     })
