@@ -2,8 +2,8 @@ import Kgl from '../../src/index.js'
 
 // const width = window.innerWidth
 const width = window.innerHeight
-const widthHalf = width / 2
 const height = window.innerHeight
+const widthHalf = width / 2
 const heightHalf = height / 2
 
 new Kgl({
@@ -38,10 +38,18 @@ new Kgl({
     }
   },
   onResize (gl) {
-    gl.programs.main.use()
+    // const width = window.innerWidth
     const width = window.innerHeight
     const height = window.innerHeight
+    const widthHalf = width / 2
+    const heightHalf = height / 2
     gl.programs.main.uniforms.resolution = [width, height]
+    gl.programs.main.updateAttributeAll('position', [
+      -widthHalf, heightHalf, 0,
+      -widthHalf, -heightHalf, 0,
+      widthHalf, heightHalf, 0,
+      widthHalf, -heightHalf, 0,
+    ])
   },
   tick (gl, time) {
     // gl.cameraPosition[2] = (Math.sin(time) * 0.5 + 0.5) * 1000

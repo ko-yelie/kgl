@@ -177,6 +177,17 @@ export default class Program {
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(data))
   }
 
+  updateAttributeAll (key, values) {
+    const { gl } = this.webgl
+    const { vbo, data } = this.attributes[key]
+
+    values.forEach((v, i) => {
+      data[i] = v
+    })
+    gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(data))
+  }
+
   createWholeAttribute () {
     this.createAttribute(noneAttribute)
   }
