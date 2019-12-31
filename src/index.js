@@ -339,11 +339,13 @@ export default class Kgl {
       const time = (timestamp - initialTimestamp) / 1000
 
       if (this.isClear) {
-        gl.clearColor(...this.clearedColor)
+        gl.clearColor(this.clearedColor[0], this.clearedColor[1], this.clearedColor[2], this.clearedColor[3])
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
       }
 
-      this.ticks.forEach(tick => tick(this, time))
+      for (let index = 0; index < this.ticks.length; index++) {
+        this.ticks[index](this, time)
+      }
 
       this.requestID = requestAnimationFrame(render)
     }

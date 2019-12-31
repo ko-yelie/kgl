@@ -331,7 +331,7 @@ export default class Program {
     this.use()
 
     if (this.isClear) {
-      gl.clearColor(...this.clearedColor)
+      gl.clearColor(this.clearedColor[0], this.clearedColor[1], this.clearedColor[2], this.clearedColor[3])
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
     }
 
@@ -352,14 +352,17 @@ export default class Program {
     else gl.disable(gl.DEPTH_TEST)
 
     if (uniforms) {
-      Object.keys(uniforms).forEach(key => {
+      const keys = Object.keys(uniforms)
+      for (let index = 0; index < keys.length; index++) {
+        const key = keys[index]
         this.uniforms[key] = uniforms[key]
-      })
+      }
     }
 
-    Object.keys(this.attributes).forEach(key => {
-      this.setAttribute(key)
-    })
+    const keys = Object.keys(this.attributes)
+    for (let index = 0; index < keys.length; index++) {
+      this.setAttribute(keys[index])
+    }
 
     if (this.isInstanced) {
       if (this.indicesCount) {
