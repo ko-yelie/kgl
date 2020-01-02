@@ -35,7 +35,7 @@ export default class Program {
 
     const defaultValue = isFloats ? false : true
     const {
-      isAutoResolution = uniforms.resolution ? false : defaultValue,
+      isAutoResolution = uniforms && uniforms.resolution ? false : defaultValue,
       hasCamera = defaultValue,
       hasLight = defaultValue,
       isClear = defaultValue
