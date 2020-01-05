@@ -1,7 +1,7 @@
 {
   "name": "@ko-yelie/kgl",
   "moduleName": "kgl",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "WebGL library",
   "main": "dist/index.esm.js",
   "unpkg": "dist/index.iife.min.js",
