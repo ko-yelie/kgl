@@ -25,7 +25,7 @@ WebGL library
 ### JS
 
 ```js
-const gl = new Kgl({
+new Kgl({
   programs: {
     main: {
       fragmentShaderId: 'fs',
@@ -34,8 +34,8 @@ const gl = new Kgl({
       },
     }
   },
-  tick (time) {
-    gl.programs.main.draw({
+  tick: (kgl, time) => {
+    kgl.programs.main.draw({
       time
     })
   },

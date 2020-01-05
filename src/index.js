@@ -52,7 +52,7 @@ export default class Kgl {
     this.eyeDirection = eyeDirection
     this.ambientColor = ambientColor
 
-    this.addTick(tick)
+    if (typeof tick === 'function') this.addTick(tick)
     this.onResize = onResize
     this.isClear = isClear
     this.clearedColor = this.isClear ? clearedColor || [0, 0, 0, 0] : null
@@ -86,7 +86,7 @@ export default class Kgl {
       this.createFramebufferFloat(key, width, height)
     })
 
-    if (onBefore) onBefore()
+    if (typeof onBefore === 'function') onBefore(this)
 
     if (isAutoStart) this.start()
   }
@@ -244,7 +244,7 @@ export default class Kgl {
     this.updateCamera()
     this.updateLight()
 
-    if (this.onResize) this.onResize(this)
+    if (typeof this.onResize === 'function') this.onResize(this)
   }
 
   _initSize () {

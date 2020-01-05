@@ -37,24 +37,24 @@ new Kgl({
       },
     }
   },
-  onResize (gl) {
+  onResize (kgl) {
     // const width = window.innerWidth
     const width = window.innerHeight
     const height = window.innerHeight
     const widthHalf = width / 2
     const heightHalf = height / 2
-    gl.programs.main.uniforms.resolution = [width, height]
-    gl.programs.main.updateAttributeAll('position', [
+    kgl.programs.main.uniforms.resolution = [width, height]
+    kgl.programs.main.updateAttributeAll('position', [
       -widthHalf, heightHalf, 0,
       -widthHalf, -heightHalf, 0,
       widthHalf, heightHalf, 0,
       widthHalf, -heightHalf, 0,
     ])
   },
-  tick (gl, time) {
-    // gl.cameraPosition[2] = (Math.sin(time) * 0.5 + 0.5) * 1000
-    // gl.updateCamera()
-    gl.programs.main.draw({
+  tick: (kgl, time) => {
+    // kgl.cameraPosition[2] = (Math.sin(time) * 0.5 + 0.5) * 1000
+    // kgl.updateCamera()
+    kgl.programs.main.draw({
       time
     })
   },

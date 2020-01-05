@@ -12,7 +12,7 @@
     "build": "bili",
     "examples": "parcel examples/index.html -d examples-dist",
     "examples:prod": "parcel build examples/index.html --no-source-maps -d docs --public-url /kgl/",
-    "pages": "npm run examples:prod"
+    "pages": "rm -rf docs && npm run examples:prod"
   },
   "browserslist": {
     "ignoreUnknownVersions": "ios_saf 13.2"

@@ -9,8 +9,8 @@ new Kgl({
       },
     }
   },
-  tick (gl, time) {
-    gl.programs.main.draw({
+  tick: (kgl, time) => {
+    kgl.programs.main.draw({
       time
     })
   },
