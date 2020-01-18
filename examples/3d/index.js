@@ -44,7 +44,7 @@ new Kgl({
     const widthHalf = width / 2
     const heightHalf = height / 2
     kgl.programs.main.uniforms.resolution = [width, height]
-    kgl.programs.main.updateAttributeAll('position', [
+    kgl.programs.main.updateAttribute('position', [
       -widthHalf, heightHalf, 0,
       -widthHalf, -heightHalf, 0,
       widthHalf, heightHalf, 0,

@@ -129,7 +129,6 @@ export default class Program {
     const attribute = this.attributes[key] = {
       location,
       size,
-      data: value,
       isInstanced
     }
 
@@ -168,24 +167,11 @@ export default class Program {
     }
   }
 
-  updateAttribute (key, index, value) {
+  updateAttribute (key, values, offset = 0) {
     const { gl } = this.webgl
-    const { vbo, data } = this.attributes[key]
 
-    data[index] = value
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
-    gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(data))
-  }
-
-  updateAttributeAll (key, values) {
-    const { gl } = this.webgl
-    const { vbo, data } = this.attributes[key]
-
-    values.forEach((v, i) => {
-      data[i] = v
-    })
-    gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
-    gl.bufferSubData(gl.ARRAY_BUFFER, 0, new Float32Array(data))
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes[key].vbo)
+    gl.bufferSubData(gl.ARRAY_BUFFER, offset, new Float32Array(values))
   }
 
   createWholeAttribute () {
