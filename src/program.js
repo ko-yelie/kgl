@@ -269,25 +269,32 @@ export default class Program {
       case 'image':
         set = textureKey => {
           this.webgl.gl[type](location, this.textureIndexes[textureKey])
+          uniformValue = textureKey
         }
         break
       case 'framebuffer':
         set = framebufferKey => {
           this.webgl.gl[type](location, this.webgl.framebuffers[framebufferKey].textureIndex)
+          uniformValue = framebufferKey
         }
         break
       case 'matrix':
         set = newValue => {
           this.webgl.gl[type](location, false, newValue)
+          uniformValue = newValue
         }
         break
       default:
         set = newValue => {
           this.webgl.gl[type](location, newValue)
+          uniformValue = newValue
         }
     }
 
-    Object.defineProperty(this.uniforms, key, { set })
+    Object.defineProperty(this.uniforms, key, {
+      get: () => uniformValue,
+      set
+    })
 
     if (typeof uniformValue !== 'undefined') this.uniforms[key] = uniformValue
   }
