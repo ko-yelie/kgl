@@ -53,7 +53,9 @@ class Specular extends Program {
       uniforms: {
         texture: 'framebuffer',
         threshold
-      }
+      },
+      hasCamera: false,
+      hasLight: false
     }
 
     super(webgl, programOption)
@@ -95,6 +97,8 @@ export class Bloom extends Program {
         specular: 'framebuffer'
       },
       isAdditive: true,
+      hasCamera: false,
+      hasLight: false,
       isClear: false
     }
     super(webgl, option)
