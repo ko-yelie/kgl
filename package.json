@@ -9,10 +9,7 @@
     "dist/"
   ],
   "scripts": {
-    "build": "bili",
-    "examples": "parcel examples/index.html -d examples-dist",
-    "examples:prod": "parcel build examples/index.html --no-source-maps -d docs --public-url /kgl/",
-    "pages": "rm -rf docs && npm run examples:prod"
+    "build": "bili"
   },
   "browserslist": {
     "ignoreUnknownVersions": "ios_saf 13.2"
@@ -30,11 +27,8 @@
   },
   "homepage": "https://github.com/ko-yelie/kgl#readme",
   "devDependencies": {
-    "@babel/core": "^7.10.3",
-    "@babel/plugin-transform-runtime": "^7.10.3",
     "banner-package": "^0.1.0",
     "bili": "^4.8.1",
-    "parcel-bundler": "^1.12.4",
     "rollup-plugin-glslify": "^1.2.0"
   },
   "dependencies": {
