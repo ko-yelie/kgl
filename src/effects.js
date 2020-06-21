@@ -42,7 +42,7 @@ export class Blur extends Program {
   }
 }
 
-class Specular extends Program {
+export class Specular extends Program {
   constructor (webgl, option = {}) {
     const {
       threshold = 0.5
