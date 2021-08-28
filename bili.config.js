@@ -9,6 +9,7 @@ module.exports = {
     sourceMap: false,
   },
   plugins: {
+    replace: { preventAssignment: true },
     glslify: true,
   },
 }

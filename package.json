@@ -28,7 +28,7 @@
   "homepage": "https://github.com/ko-yelie/kgl#readme",
   "devDependencies": {
     "banner-package": "^0.1.0",
-    "bili": "^4.8.1",
+    "bili": "^5.0.5",
     "rollup-plugin-glslify": "^1.2.0"
   },
   "dependencies": {
