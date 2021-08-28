@@ -3,7 +3,7 @@ import Program from './program'
 import * as effects from './effects'
 
 export default class Kgl {
-  constructor (option) {
+  constructor(option) {
     this.programs = {}
     this.effects = {}
     this.framebuffers = {}
@@ -35,7 +35,7 @@ export default class Kgl {
       tick,
       onBefore,
       onResize,
-      isAutoStart = true
+      isAutoStart = true,
     } = option
 
     this._initWebgl(canvas)
@@ -46,7 +46,8 @@ export default class Kgl {
     this.cameraPosition = cameraPosition
     this.cameraRotation = cameraRotation
 
-    this.isAutoUpdateCameraPositionZ = typeof option.cameraPosition === 'undefined'
+    this.isAutoUpdateCameraPositionZ =
+      typeof option.cameraPosition === 'undefined'
 
     this.lightDirection = lightDirection
     this.eyeDirection = eyeDirection
@@ -57,11 +58,11 @@ export default class Kgl {
     this.isClear = isClear
     this.clearedColor = this.isClear ? clearedColor || [0, 0, 0, 0] : null
 
-    Object.keys(programs).forEach(key => {
+    Object.keys(programs).forEach((key) => {
       this.createProgram(key, programs[key])
     })
 
-    effects.forEach(key => {
+    effects.forEach((key) => {
       this.createEffect(key)
     })
 
@@ -69,19 +70,19 @@ export default class Kgl {
 
     switch (framebuffers.constructor.name) {
       case 'Array':
-        framebuffers.forEach(key => {
+        framebuffers.forEach((key) => {
           this.createFramebuffer(key)
         })
         break
       case 'Object':
-        Object.keys(framebuffers).forEach(key => {
+        Object.keys(framebuffers).forEach((key) => {
           const { width, height } = framebuffers[key]
           this.createFramebuffer(key, width, height)
         })
         break
     }
 
-    Object.keys(framebufferFloats).forEach(key => {
+    Object.keys(framebufferFloats).forEach((key) => {
       const { width, height } = framebufferFloats[key]
       this.createFramebufferFloat(key, width, height)
     })
@@ -91,10 +92,13 @@ export default class Kgl {
     if (isAutoStart) this.start()
   }
 
-  _initWebgl (canvas) {
+  _initWebgl(canvas) {
     if (typeof canvas === 'string') {
       this.canvas = document.querySelector(canvas)
-    } else if (typeof canvas === 'object' && canvas.constructor.name === 'HTMLCanvasElement') {
+    } else if (
+      typeof canvas === 'object' &&
+      canvas.constructor.name === 'HTMLCanvasElement'
+    ) {
       this.canvas = canvas
     } else {
       this.canvas = document.createElement('canvas')
@@ -104,21 +108,27 @@ export default class Kgl {
       document.body.appendChild(this.canvas)
     }
 
-    const gl = this.gl = this.canvas.getContext('webgl') || this.canvas.getContext('experimental-webgl')
+    const gl = (this.gl =
+      this.canvas.getContext('webgl') ||
+      this.canvas.getContext('experimental-webgl'))
 
     gl.depthFunc(gl.LEQUAL)
   }
 
-  createProgram (key, option) {
+  createProgram(key, option) {
     this.programs[key] = new Program(this, option)
   }
 
-  createEffect (key) {
+  createEffect(key) {
     const classKey = key.charAt(0).toUpperCase() + key.slice(1)
     this.effects[key] = new effects[classKey](this)
   }
 
-  createFramebuffer (key, width = this.canvas.width, height = this.canvas.height) {
+  createFramebuffer(
+    key,
+    width = this.canvas.width,
+    height = this.canvas.height
+  ) {
     const { gl } = this
 
     const framebuffer = gl.createFramebuffer()
@@ -126,46 +136,82 @@ export default class Kgl {
     const depthRenderBuffer = gl.createRenderbuffer()
     gl.bindRenderbuffer(gl.RENDERBUFFER, depthRenderBuffer)
     gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height)
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthRenderBuffer)
+    gl.framebufferRenderbuffer(
+      gl.FRAMEBUFFER,
+      gl.DEPTH_ATTACHMENT,
+      gl.RENDERBUFFER,
+      depthRenderBuffer
+    )
     const texture = gl.createTexture()
     const textureIndex = ++this.textureIndex
     gl.activeTexture(gl[`TEXTURE${textureIndex}`])
     gl.bindTexture(gl.TEXTURE_2D, texture)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      width,
+      height,
+      0,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      null
+    )
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0)
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0,
+      gl.TEXTURE_2D,
+      texture,
+      0
+    )
     gl.bindRenderbuffer(gl.RENDERBUFFER, null)
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 
     this.framebuffers[key] = {
       framebuffer,
       textureIndex,
-      depthRenderBuffer
+      depthRenderBuffer,
     }
   }
 
-  resizeFramebuffer (key, width = this.canvas.width, height = this.canvas.height) {
+  resizeFramebuffer(
+    key,
+    width = this.canvas.width,
+    height = this.canvas.height
+  ) {
     const { gl } = this
-    const {
-      framebuffer,
-      textureIndex,
-      depthRenderBuffer,
-      isFloat
-    } = this.framebuffers[key]
+    const { framebuffer, textureIndex, depthRenderBuffer, isFloat } =
+      this.framebuffers[key]
     if (isFloat) return
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
     gl.bindRenderbuffer(gl.RENDERBUFFER, depthRenderBuffer)
     gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height)
-    gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depthRenderBuffer)
+    gl.framebufferRenderbuffer(
+      gl.FRAMEBUFFER,
+      gl.DEPTH_ATTACHMENT,
+      gl.RENDERBUFFER,
+      depthRenderBuffer
+    )
     gl.activeTexture(gl[`TEXTURE${textureIndex}`])
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, null)
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      width,
+      height,
+      0,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      null
+    )
   }
 
-  createFramebufferFloat (key, width, height = width) {
+  createFramebufferFloat(key, width, height = width) {
     const { gl } = this
     const textureFloat = gl.getExtension('OES_texture_float')
     const textureHalfFloat = gl.getExtension('OES_texture_half_float')
@@ -183,34 +229,53 @@ export default class Kgl {
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
     gl.activeTexture(gl[`TEXTURE${textureIndex}`])
     gl.bindTexture(gl.TEXTURE_2D, texture)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, width, height, 0, gl.RGBA, flg, null)
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      width,
+      height,
+      0,
+      gl.RGBA,
+      flg,
+      null
+    )
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture, 0)
+    gl.framebufferTexture2D(
+      gl.FRAMEBUFFER,
+      gl.COLOR_ATTACHMENT0,
+      gl.TEXTURE_2D,
+      texture,
+      0
+    )
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
 
     this.framebuffers[key] = {
       framebuffer,
       textureIndex,
-      isFloat: true
+      isFloat: true,
     }
   }
 
-  bindFramebuffer (key) {
+  bindFramebuffer(key) {
     const { gl } = this
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, key ? this.framebuffers[key].framebuffer : null)
+    gl.bindFramebuffer(
+      gl.FRAMEBUFFER,
+      key ? this.framebuffers[key].framebuffer : null
+    )
   }
 
-  unbindFramebuffer () {
+  unbindFramebuffer() {
     const { gl } = this
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   }
 
-  setSize () {
+  setSize() {
     const { gl } = this
     const width = this.canvas.clientWidth
     const height = this.canvas.clientHeight
@@ -221,7 +286,7 @@ export default class Kgl {
 
     gl.viewport(0, 0, width, height)
 
-    Object.keys(this.programs).forEach(key => {
+    Object.keys(this.programs).forEach((key) => {
       const program = this.programs[key]
       if (program.isAutoResolution) {
         program.use()
@@ -229,7 +294,7 @@ export default class Kgl {
       }
     })
 
-    Object.keys(this.effects).forEach(key => {
+    Object.keys(this.effects).forEach((key) => {
       const program = this.effects[key]
       if (program.isAutoResolution) {
         program.use()
@@ -237,7 +302,7 @@ export default class Kgl {
       }
     })
 
-    Object.keys(this.framebuffers).forEach(key => {
+    Object.keys(this.framebuffers).forEach((key) => {
       this.resizeFramebuffer(key)
     })
 
@@ -247,13 +312,15 @@ export default class Kgl {
     if (typeof this.onResize === 'function') this.onResize(this)
   }
 
-  _initSize () {
+  _initSize() {
     this.setSize()
-    this._setSize = () => { this.setSize() }
+    this._setSize = () => {
+      this.setSize()
+    }
     window.addEventListener('resize', this._setSize)
   }
 
-  updateCamera () {
+  updateCamera() {
     const {
       fov,
       near,
@@ -265,14 +332,17 @@ export default class Kgl {
       pMatrix,
       vpMatrix,
       mvpMatrix,
-      invMatrix
+      invMatrix,
     } = this
     const cameraPositionRate = 0.3
 
     // cameraPosition[0] += (pointer.x * cameraPositionRate - cameraPosition[0]) * 0.1
     // cameraPosition[1] += (pointer.y * cameraPositionRate - cameraPosition[1]) * 0.1
     if (this.isAutoUpdateCameraPositionZ) {
-      cameraPosition[2] = Math.min(this.canvas.width, this.canvas.height) / 2 / Math.tan((this.fov / 2) * (Math.PI / 180))
+      cameraPosition[2] =
+        Math.min(this.canvas.width, this.canvas.height) /
+        2 /
+        Math.tan((this.fov / 2) * (Math.PI / 180))
     } else {
       // cameraPosition[2] += (settings.zPosition - cameraPosition[2]) * 0.1
     }
@@ -295,7 +365,7 @@ export default class Kgl {
     matIV.multiply(vpMatrix, mMatrix, mvpMatrix)
     matIV.inverse(mMatrix, invMatrix)
 
-    Object.keys(this.programs).forEach(key => {
+    Object.keys(this.programs).forEach((key) => {
       const program = this.programs[key]
       if (program.hasCamera) {
         program.use()
@@ -305,14 +375,10 @@ export default class Kgl {
     })
   }
 
-  updateLight () {
-    const {
-      lightDirection,
-      eyeDirection,
-      ambientColor
-    } = this
+  updateLight() {
+    const { lightDirection, eyeDirection, ambientColor } = this
 
-    Object.keys(this.programs).forEach(key => {
+    Object.keys(this.programs).forEach((key) => {
       const program = this.programs[key]
       if (program.hasLight) {
         program.use()
@@ -323,23 +389,28 @@ export default class Kgl {
     })
   }
 
-  addTick (tick) {
+  addTick(tick) {
     this.ticks.push(tick)
   }
 
-  start () {
+  start() {
     const { gl } = this
     let initialTimestamp
 
-    requestAnimationFrame(timestamp => {
+    requestAnimationFrame((timestamp) => {
       initialTimestamp = timestamp
     })
 
-    const render = timestamp => {
+    const render = (timestamp) => {
       const time = (timestamp - initialTimestamp) / 1000
 
       if (this.isClear) {
-        gl.clearColor(this.clearedColor[0], this.clearedColor[1], this.clearedColor[2], this.clearedColor[3])
+        gl.clearColor(
+          this.clearedColor[0],
+          this.clearedColor[1],
+          this.clearedColor[2],
+          this.clearedColor[3]
+        )
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
       }
 
@@ -352,7 +423,7 @@ export default class Kgl {
     this.requestID = requestAnimationFrame(render)
   }
 
-  stop () {
+  stop() {
     if (!this.requestID) return
 
     cancelAnimationFrame(this.requestID)

@@ -1,14 +1,14 @@
 module.exports = {
   babel: {
-    minimal: true
+    minimal: true,
   },
   banner: require('banner-package'),
   output: {
     moduleName: 'Kgl',
     format: ['es', 'iife', 'iife-min'],
-    sourceMap: false
+    sourceMap: false,
   },
   plugins: {
-    glslify: true
-  }
+    glslify: true,
+  },
 }

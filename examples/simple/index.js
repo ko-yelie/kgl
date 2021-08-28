@@ -5,13 +5,13 @@ new Kgl({
     main: {
       fragmentShaderId: 'fs',
       uniforms: {
-        time: 0
+        time: 0,
       },
-    }
+    },
   },
   tick: (kgl, time) => {
     kgl.programs.main.draw({
-      time
+      time,
     })
   },
 })

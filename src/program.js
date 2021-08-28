@@ -1,13 +1,14 @@
-const noneVert = 'attribute vec2 position;void main(){gl_Position=vec4(position,0.,1.);}'
+const noneVert =
+  'attribute vec2 position;void main(){gl_Position=vec4(position,0.,1.);}'
 const noneAttribute = {
   position: {
     value: [-1, 1, -1, -1, 1, 1, 1, -1],
-    size: 2
-  }
+    size: 2,
+  },
 }
 
 export default class Program {
-  constructor (webgl, option) {
+  constructor(webgl, option) {
     this.attributes = {}
     this.uniforms = {}
     this.textureIndexes = {}
@@ -17,7 +18,9 @@ export default class Program {
 
     const {
       vertexShaderId,
-      vertexShader = vertexShaderId ? document.getElementById(vertexShaderId).textContent : noneVert,
+      vertexShader = vertexShaderId
+        ? document.getElementById(vertexShaderId).textContent
+        : noneVert,
       fragmentShaderId,
       fragmentShader = document.getElementById(fragmentShaderId).textContent,
       attributes,
@@ -30,7 +33,7 @@ export default class Program {
       isFloats = false,
       isCulling = true,
       isDepth = false,
-      clearedColor
+      clearedColor,
     } = option
 
     const defaultValue = isFloats ? false : true
@@ -38,7 +41,7 @@ export default class Program {
       isAutoResolution = uniforms && uniforms.resolution ? false : defaultValue,
       hasCamera = defaultValue,
       hasLight = defaultValue,
-      isClear = defaultValue
+      isClear = defaultValue,
     } = option
 
     const isWhole = !(option.vertexShaderId || option.vertexShader)
@@ -79,12 +82,15 @@ export default class Program {
     if (uniforms) this.createUniform(uniforms)
   }
 
-  createProgram (vertexShader, fragmentShader) {
+  createProgram(vertexShader, fragmentShader) {
     const { gl } = this.webgl
 
     const program = gl.createProgram()
     gl.attachShader(program, this.createShader('VERTEX_SHADER', vertexShader))
-    gl.attachShader(program, this.createShader('FRAGMENT_SHADER', fragmentShader))
+    gl.attachShader(
+      program,
+      this.createShader('FRAGMENT_SHADER', fragmentShader)
+    )
     gl.linkProgram(program)
 
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
@@ -100,7 +106,7 @@ export default class Program {
     this.program = program
   }
 
-  createShader (type, content) {
+  createShader(type, content) {
     const { gl } = this.webgl
     const shader = gl.createShader(gl[type])
 
@@ -115,27 +121,31 @@ export default class Program {
     return shader
   }
 
-  createAttribute (data, isInstanced) {
-    Object.keys(data).forEach(key => {
+  createAttribute(data, isInstanced) {
+    Object.keys(data).forEach((key) => {
       const { value, size, isIndices } = data[key]
 
       this.addAttribute(key, value, size, isIndices, isInstanced)
     })
   }
 
-  addAttribute (key, value, size, isIndices, isInstanced) {
+  addAttribute(key, value, size, isIndices, isInstanced) {
     const { gl } = this.webgl
     const location = gl.getAttribLocation(this.program, key)
-    const attribute = this.attributes[key] = {
+    const attribute = (this.attributes[key] = {
       location,
       size,
-      isInstanced
-    }
+      isInstanced,
+    })
 
     if (isIndices) {
       const ibo = gl.createBuffer()
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo)
-      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(value), gl[this.drawType])
+      gl.bufferData(
+        gl.ELEMENT_ARRAY_BUFFER,
+        new Int16Array(value),
+        gl[this.drawType]
+      )
       attribute.ibo = ibo
 
       this.indicesCount = this.indicesCount || value.length
@@ -153,7 +163,7 @@ export default class Program {
     }
   }
 
-  setAttribute (key) {
+  setAttribute(key) {
     const { gl } = this.webgl
     const { location, size, vbo, ibo, isInstanced } = this.attributes[key]
 
@@ -163,25 +173,27 @@ export default class Program {
       gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
       gl.enableVertexAttribArray(location)
       gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0)
-      if (isInstanced) this.instancedArraysExt.vertexAttribDivisorANGLE(location, 1)
+      if (isInstanced)
+        this.instancedArraysExt.vertexAttribDivisorANGLE(location, 1)
     }
   }
 
-  updateAttribute (key, values, offset = 0) {
+  updateAttribute(key, values, offset = 0) {
     const { gl } = this.webgl
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes[key].vbo)
     gl.bufferSubData(gl.ARRAY_BUFFER, offset, new Float32Array(values))
   }
 
-  createWholeAttribute () {
+  createWholeAttribute() {
     this.createAttribute(noneAttribute)
   }
 
-  createUniform (data) {
+  createUniform(data) {
     const mergedData = Object.assign({}, data)
 
-    if (this.isAutoResolution && !mergedData.resolution) mergedData.resolution = [1, 1]
+    if (this.isAutoResolution && !mergedData.resolution)
+      mergedData.resolution = [1, 1]
     if (this.hasCamera) {
       mergedData.mvpMatrix = new Float32Array(16)
       mergedData.invMatrix = new Float32Array(16)
@@ -192,12 +204,12 @@ export default class Program {
       if (!mergedData.ambientColor) mergedData.ambientColor = [0.1, 0.1, 0.1]
     }
 
-    Object.keys(mergedData).forEach(key => {
+    Object.keys(mergedData).forEach((key) => {
       this.addUniform(key, mergedData[key])
     })
   }
 
-  addUniform (key, value) {
+  addUniform(key, value) {
     let originalType
     let uniformType
     let uniformValue = value
@@ -267,25 +279,28 @@ export default class Program {
     let set
     switch (originalType) {
       case 'image':
-        set = textureKey => {
+        set = (textureKey) => {
           this.webgl.gl[type](location, this.textureIndexes[textureKey])
           uniformValue = textureKey
         }
         break
       case 'framebuffer':
-        set = framebufferKey => {
-          this.webgl.gl[type](location, this.webgl.framebuffers[framebufferKey].textureIndex)
+        set = (framebufferKey) => {
+          this.webgl.gl[type](
+            location,
+            this.webgl.framebuffers[framebufferKey].textureIndex
+          )
           uniformValue = framebufferKey
         }
         break
       case 'matrix':
-        set = newValue => {
+        set = (newValue) => {
           this.webgl.gl[type](location, false, newValue)
           uniformValue = newValue
         }
         break
       default:
-        set = newValue => {
+        set = (newValue) => {
           this.webgl.gl[type](location, newValue)
           uniformValue = newValue
         }
@@ -293,18 +308,18 @@ export default class Program {
 
     Object.defineProperty(this.uniforms, key, {
       get: () => uniformValue,
-      set
+      set,
     })
 
     if (typeof uniformValue !== 'undefined') this.uniforms[key] = uniformValue
   }
 
-  createTexture (key, el) {
+  createTexture(key, el) {
     if (!el) return
 
     const { gl } = this.webgl
     const texture = gl.createTexture()
-    const textureIndex = this.textureIndexes[key] = ++this.webgl.textureIndex
+    const textureIndex = (this.textureIndexes[key] = ++this.webgl.textureIndex)
 
     gl.activeTexture(gl[`TEXTURE${textureIndex}`])
     gl.bindTexture(gl.TEXTURE_2D, texture)
@@ -318,24 +333,29 @@ export default class Program {
     return textureIndex
   }
 
-  updateTexture (key, el) {
+  updateTexture(key, el) {
     const { gl } = this.webgl
 
     gl.activeTexture(gl[`TEXTURE${this.textureIndexes[key]}`])
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, el)
   }
 
-  use () {
+  use() {
     this.webgl.gl.useProgram(this.program)
   }
 
-  draw (uniforms) {
+  draw(uniforms) {
     const { gl } = this.webgl
 
     this.use()
 
     if (this.isClear) {
-      gl.clearColor(this.clearedColor[0], this.clearedColor[1], this.clearedColor[2], this.clearedColor[3])
+      gl.clearColor(
+        this.clearedColor[0],
+        this.clearedColor[1],
+        this.clearedColor[2],
+        this.clearedColor[3]
+      )
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
     }
 
@@ -370,9 +390,20 @@ export default class Program {
 
     if (this.isInstanced) {
       if (this.indicesCount) {
-        this.instancedArraysExt.drawElementsInstancedANGLE(this.glMode, this.indicesCount, gl.UNSIGNED_SHORT, 0, this.instanceCount)
+        this.instancedArraysExt.drawElementsInstancedANGLE(
+          this.glMode,
+          this.indicesCount,
+          gl.UNSIGNED_SHORT,
+          0,
+          this.instanceCount
+        )
       } else {
-        this.instancedArraysExt.drawArraysInstancedANGLE(this.glMode, 0, this.count, this.instanceCount)
+        this.instancedArraysExt.drawArraysInstancedANGLE(
+          this.glMode,
+          0,
+          this.count,
+          this.instanceCount
+        )
       }
     } else {
       if (this.indicesCount) {
