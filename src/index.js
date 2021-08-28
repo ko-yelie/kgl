@@ -9,12 +9,9 @@ export default class Kgl {
     this.framebuffers = {}
     this.textureIndex = -1
     this.ticks = []
-    this.mMatrix = matIV.identity(matIV.create())
     this.vMatrix = matIV.identity(matIV.create())
     this.pMatrix = matIV.identity(matIV.create())
     this.vpMatrix = matIV.identity(matIV.create())
-    this.mvpMatrix = matIV.identity(matIV.create())
-    this.invMatrix = matIV.identity(matIV.create())
 
     const {
       canvas,
@@ -327,12 +324,9 @@ export default class Kgl {
       far,
       cameraPosition,
       cameraRotation,
-      mMatrix,
       vMatrix,
       pMatrix,
       vpMatrix,
-      mvpMatrix,
-      invMatrix,
     } = this
     const cameraPositionRate = 0.3
 
@@ -348,7 +342,6 @@ export default class Kgl {
     }
     this.eyeDirection = cameraPosition
 
-    matIV.identity(mMatrix)
     matIV.lookAt(
       cameraPosition,
       [cameraPosition[0], cameraPosition[1], 0],
@@ -356,21 +349,18 @@ export default class Kgl {
       vMatrix
     )
     matIV.perspective(fov, this.aspect, near, far, pMatrix)
-    matIV.multiply(pMatrix, vMatrix, vpMatrix)
 
     cameraRotation[0] = cameraRotation[0] % (Math.PI * 2)
     cameraRotation[1] = cameraRotation[1] % (Math.PI * 2)
-    matIV.rotate(mMatrix, cameraRotation[0], [0, 1, 0], mMatrix)
-    matIV.rotate(mMatrix, cameraRotation[1], [-1, 0, 0], mMatrix)
-    matIV.multiply(vpMatrix, mMatrix, mvpMatrix)
-    matIV.inverse(mMatrix, invMatrix)
+    matIV.rotate(vMatrix, cameraRotation[0], [0, 1, 0], vMatrix)
+    matIV.rotate(vMatrix, cameraRotation[1], [-1, 0, 0], vMatrix)
+
+    matIV.multiply(pMatrix, vMatrix, vpMatrix)
 
     Object.keys(this.programs).forEach((key) => {
       const program = this.programs[key]
       if (program.hasCamera) {
-        program.use()
-        program.uniforms.mvpMatrix = mvpMatrix
-        program.uniforms.invMatrix = invMatrix
+        program.updateMatrix()
       }
     })
   }

@@ -9,7 +9,7 @@ new Kgl({
       },
     },
   },
-  tick: (kgl, time) => {
+  tick(kgl, time) {
     kgl.programs.main.draw({
       time,
     })

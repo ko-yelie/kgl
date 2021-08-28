@@ -1,26 +1,80 @@
-const noneVert =
-  'attribute vec2 position;void main(){gl_Position=vec4(position,0.,1.);}'
-const noneAttribute = {
-  position: {
+import matIV from './minMatrix.js'
+
+const vertexShaderShape = {
+  none: 'attribute vec2 aPosition;void main(){gl_Position=vec4(aPosition,0.,1.);}',
+  plane: `
+    attribute vec3 aPosition;
+    attribute vec2 aUv;
+    uniform mat4 mvpMatrix;
+    varying vec2 vUv;
+    void main() {
+      vUv = aUv;
+      gl_Position = mvpMatrix * vec4(aPosition, 1.);
+    }
+  `,
+}
+
+const attributeNone = {
+  aPosition: {
     value: [-1, 1, -1, -1, 1, 1, 1, -1],
     size: 2,
   },
 }
 
-export default class Program {
-  constructor(webgl, option) {
-    this.attributes = {}
-    this.uniforms = {}
-    this.textureIndexes = {}
+function getAttributePlane(width = 1, height = 1) {
+  const widthHalf = width / 2
+  const heightHalf = height / 2
 
+  return {
+    aPosition: {
+      value: [
+        -widthHalf,
+        heightHalf,
+        0,
+        -widthHalf,
+        -heightHalf,
+        0,
+        widthHalf,
+        heightHalf,
+        0,
+        widthHalf,
+        -heightHalf,
+        0,
+      ],
+      size: 3,
+    },
+    aUv: {
+      value: [0, 1, 0, 0, 1, 1, 1, 0],
+      size: 2,
+    },
+  }
+}
+
+export default class Program {
+  attributes = {}
+  uniforms = {}
+  textureIndexes = {}
+  mMatrix = matIV.identity(matIV.create())
+  mvpMatrix = matIV.identity(matIV.create())
+  invMatrix = matIV.identity(matIV.create())
+  scaleValue = [1, 1, 1]
+  rotateValue = [0, 0, 0]
+  widthValue = 1
+  heightValue = 1
+  isUpdateMatrixUniform = false
+
+  constructor(webgl, option) {
     const { gl } = webgl
     this.webgl = webgl
 
     const {
+      shape,
       vertexShaderId,
       vertexShader = vertexShaderId
         ? document.getElementById(vertexShaderId).textContent
-        : noneVert,
+        : shape
+        ? vertexShaderShape[shape]
+        : vertexShaderShape['none'],
       fragmentShaderId,
       fragmentShader = document.getElementById(fragmentShaderId).textContent,
       attributes,
@@ -44,7 +98,11 @@ export default class Program {
       isClear = defaultValue,
     } = option
 
-    const isWhole = !(option.vertexShaderId || option.vertexShader)
+    const isWhole = !(
+      option.shape ||
+      option.vertexShaderId ||
+      option.vertexShader
+    )
 
     this.mode = mode
     this.glMode = gl[mode || 'TRIANGLE_STRIP']
@@ -65,7 +123,16 @@ export default class Program {
     this.use()
 
     if (isWhole) {
-      this.createWholeAttribute()
+      this.createAttribute(attributeNone)
+    } else if (shape) {
+      switch (shape) {
+        case 'plane':
+          this.width = option.width
+          this.height = option.height
+          this.createAttribute(getAttributePlane())
+          // this.scale()
+          break
+      }
     } else if (attributes) {
       this.createAttribute(attributes)
 
@@ -79,7 +146,9 @@ export default class Program {
       }
     }
 
-    if (uniforms) this.createUniform(uniforms)
+    if (uniforms) {
+      this.createUniform(uniforms)
+    }
   }
 
   createProgram(vertexShader, fragmentShader) {
@@ -185,15 +254,80 @@ export default class Program {
     gl.bufferSubData(gl.ARRAY_BUFFER, offset, new Float32Array(values))
   }
 
-  createWholeAttribute() {
-    this.createAttribute(noneAttribute)
+  scale(x, y, z) {
+    if (typeof x !== 'undefined') {
+      this.scaleValue[0] = x
+    }
+    if (typeof y !== 'undefined') {
+      this.scaleValue[1] = y
+    }
+    if (typeof z !== 'undefined') {
+      this.scaleValue[2] = z
+    }
+    this.updateMatrix()
+  }
+
+  rotateX(radian) {
+    this.rotateValue[0] = radian
+    this.updateMatrix()
+  }
+
+  rotateY(radian) {
+    this.rotateValue[1] = radian
+    this.updateMatrix()
+  }
+
+  updateMatrix() {
+    this.isUpdateMatrixUniform = true
+  }
+
+  updateMatrixUniform() {
+    matIV.identity(this.mMatrix)
+
+    matIV.rotate(this.mMatrix, this.rotateValue[0], [1, 0, 0], this.mMatrix)
+    matIV.rotate(this.mMatrix, this.rotateValue[1], [0, 1, 0], this.mMatrix)
+
+    matIV.scale(
+      this.mMatrix,
+      [
+        this.width * this.scaleValue[0],
+        this.height * this.scaleValue[1],
+        this.scaleValue[2],
+      ],
+      this.mMatrix
+    )
+
+    matIV.multiply(this.webgl.vpMatrix, this.mMatrix, this.mvpMatrix)
+    matIV.inverse(this.mMatrix, this.invMatrix)
+
+    this.uniforms.mvpMatrix = this.mvpMatrix
+    this.uniforms.invMatrix = this.invMatrix
+  }
+
+  get width() {
+    return this.widthValue
+  }
+
+  set width(value) {
+    this.widthValue = value
+    this.scale()
+  }
+
+  get height() {
+    return this.heightValue
+  }
+
+  set height(value) {
+    this.heightValue = value
+    this.scale()
   }
 
   createUniform(data) {
     const mergedData = Object.assign({}, data)
 
-    if (this.isAutoResolution && !mergedData.resolution)
+    if (this.isAutoResolution && !mergedData.resolution) {
       mergedData.resolution = [1, 1]
+    }
     if (this.hasCamera) {
       mergedData.mvpMatrix = new Float32Array(16)
       mergedData.invMatrix = new Float32Array(16)
@@ -381,6 +515,11 @@ export default class Program {
         const key = keys[index]
         this.uniforms[key] = uniforms[key]
       }
+    }
+
+    if (this.isUpdateMatrixUniform) {
+      this.updateMatrixUniform()
+      this.isUpdateMatrixUniform = false
     }
 
     const keys = Object.keys(this.attributes)

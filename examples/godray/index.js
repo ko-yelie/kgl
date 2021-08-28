@@ -27,11 +27,6 @@ function mix(x, y, a) {
   return x * (1 - a) + y * a
 }
 
-// https://gist.github.com/gre/1650294
-function easeInOutQuint(t) {
-  return t < 0.5 ? 16 * t * t * t * t * t : 1 + 16 * --t * t * t * t * t
-}
-
 /**
  * main
  */
@@ -57,7 +52,7 @@ function easeInOutQuint(t) {
     },
     effects: ['godray'],
     framebuffers: ['mask', 'cache', 'output'],
-    tick: (kgl, time) => {
+    tick(kgl, time) {
       const cTime = Math.sin(time * speed) * 0.5 + 0.5
       const halfTime = -Math.abs(cTime * 2 - 1) + 1
 
