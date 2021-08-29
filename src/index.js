@@ -23,7 +23,7 @@ export default class Kgl {
       lightDirection = [-1, 1, 1],
       eyeDirection = cameraPosition,
       ambientColor = [0.1, 0.1, 0.1],
-      isClear = true,
+      isClear = false,
       clearedColor,
       programs = {},
       effects = [],
@@ -86,7 +86,7 @@ export default class Kgl {
 
     if (typeof onBefore === 'function') onBefore(this)
 
-    if (isAutoStart) this.start()
+    if (isAutoStart && tick) this.start()
   }
 
   _initWebgl(canvas) {
@@ -379,12 +379,32 @@ export default class Kgl {
     })
   }
 
+  clear() {
+    if (!this.isClear) return
+
+    const { gl } = this
+    gl.clearColor(
+      this.clearedColor[0],
+      this.clearedColor[1],
+      this.clearedColor[2],
+      this.clearedColor[3]
+    )
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
+  }
+
+  drawAll() {
+    this.clear()
+
+    Object.keys(this.programs).forEach((key) => {
+      this.programs[key].draw()
+    })
+  }
+
   addTick(tick) {
     this.ticks.push(tick)
   }
 
   start() {
-    const { gl } = this
     let initialTimestamp
 
     requestAnimationFrame((timestamp) => {
@@ -394,15 +414,7 @@ export default class Kgl {
     const render = (timestamp) => {
       const time = (timestamp - initialTimestamp) / 1000
 
-      if (this.isClear) {
-        gl.clearColor(
-          this.clearedColor[0],
-          this.clearedColor[1],
-          this.clearedColor[2],
-          this.clearedColor[3]
-        )
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-      }
+      this.clear()
 
       for (let index = 0; index < this.ticks.length; index++) {
         this.ticks[index](this, time)

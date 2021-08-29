@@ -448,6 +448,14 @@ export default class Program {
     if (typeof uniformValue !== 'undefined') this.uniforms[key] = uniformValue
   }
 
+  updateUniforms(uniforms) {
+    const keys = Object.keys(uniforms)
+    for (let index = 0; index < keys.length; index++) {
+      const key = keys[index]
+      this.uniforms[key] = uniforms[key]
+    }
+  }
+
   createTexture(key, el) {
     if (!el) return
 
@@ -478,7 +486,7 @@ export default class Program {
     this.webgl.gl.useProgram(this.program)
   }
 
-  draw(uniforms) {
+  draw() {
     const { gl } = this.webgl
 
     this.use()
@@ -508,14 +516,6 @@ export default class Program {
 
     if (this.isDepth) gl.enable(gl.DEPTH_TEST)
     else gl.disable(gl.DEPTH_TEST)
-
-    if (uniforms) {
-      const keys = Object.keys(uniforms)
-      for (let index = 0; index < keys.length; index++) {
-        const key = keys[index]
-        this.uniforms[key] = uniforms[key]
-      }
-    }
 
     if (this.isUpdateMatrixUniform) {
       this.updateMatrixUniform()

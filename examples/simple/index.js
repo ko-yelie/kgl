@@ -10,8 +10,7 @@ new Kgl({
     },
   },
   tick(kgl, time) {
-    kgl.programs.main.draw({
-      time,
-    })
+    kgl.programs.main.uniforms.time = time
+    kgl.drawAll()
   },
 })
