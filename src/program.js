@@ -57,6 +57,7 @@ export default class Program {
   mMatrix = matIV.identity(matIV.create())
   mvpMatrix = matIV.identity(matIV.create())
   invMatrix = matIV.identity(matIV.create())
+  translateValue = [0, 0, 0]
   scaleValue = [1, 1, 1]
   rotateValue = [0, 0, 0]
   widthValue = 1
@@ -130,7 +131,6 @@ export default class Program {
           this.width = option.width
           this.height = option.height
           this.createAttribute(getAttributePlane())
-          // this.scale()
           break
       }
     } else if (attributes) {
@@ -254,25 +254,65 @@ export default class Program {
     gl.bufferSubData(gl.ARRAY_BUFFER, offset, new Float32Array(values))
   }
 
-  scale(x, y, z) {
-    if (typeof x !== 'undefined') {
-      this.scaleValue[0] = x
-    }
-    if (typeof y !== 'undefined') {
-      this.scaleValue[1] = y
-    }
-    if (typeof z !== 'undefined') {
-      this.scaleValue[2] = z
-    }
+  get width() {
+    return this.widthValue
+  }
+
+  set width(value) {
+    this.widthValue = value
     this.updateMatrix()
   }
 
-  rotateX(radian) {
+  get height() {
+    return this.heightValue
+  }
+
+  set height(value) {
+    this.heightValue = value
+    this.updateMatrix()
+  }
+
+  set x(value) {
+    this.translateValue[0] = value
+    this.updateMatrix()
+  }
+
+  set y(value) {
+    this.translateValue[1] = value
+    this.updateMatrix()
+  }
+
+  set z(value) {
+    this.translateValue[2] = value
+    this.updateMatrix()
+  }
+
+  set scale(value) {
+    this.scaleValue[0] = this.scaleValue[1] = this.scaleValue[2] = value
+    this.updateMatrix()
+  }
+
+  set scaleX(value) {
+    this.scaleValue[0] = value
+    this.updateMatrix()
+  }
+
+  set scaleY(value) {
+    this.scaleValue[1] = value
+    this.updateMatrix()
+  }
+
+  set scaleZ(value) {
+    this.scaleValue[2] = value
+    this.updateMatrix()
+  }
+
+  set rotateX(radian) {
     this.rotateValue[0] = radian
     this.updateMatrix()
   }
 
-  rotateY(radian) {
+  set rotateY(radian) {
     this.rotateValue[1] = radian
     this.updateMatrix()
   }
@@ -283,6 +323,8 @@ export default class Program {
 
   updateMatrixUniform() {
     matIV.identity(this.mMatrix)
+
+    matIV.translate(this.mMatrix, this.translateValue, this.mMatrix)
 
     matIV.rotate(this.mMatrix, this.rotateValue[0], [1, 0, 0], this.mMatrix)
     matIV.rotate(this.mMatrix, this.rotateValue[1], [0, 1, 0], this.mMatrix)
@@ -302,24 +344,6 @@ export default class Program {
 
     this.uniforms.mvpMatrix = this.mvpMatrix
     this.uniforms.invMatrix = this.invMatrix
-  }
-
-  get width() {
-    return this.widthValue
-  }
-
-  set width(value) {
-    this.widthValue = value
-    this.scale()
-  }
-
-  get height() {
-    return this.heightValue
-  }
-
-  set height(value) {
-    this.heightValue = value
-    this.scale()
   }
 
   createUniform(data) {

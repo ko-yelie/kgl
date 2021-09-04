@@ -26,8 +26,9 @@ function tick(time) {
   // kgl.updateCamera()
 
   const scale = 1 - ((Math.sin(time * 2) + 1) / 2) * 0.5
-  kgl.programs.main.scale(scale, scale, 1)
-  kgl.programs.main.rotateY(Math.sin(time * 1) * 1)
+  kgl.programs.main.x = Math.sin(time * 1) * 300
+  kgl.programs.main.scale = scale
+  kgl.programs.main.rotateY = Math.sin(time * 1) * 1
   kgl.programs.main.updateUniforms({
     time,
   })
