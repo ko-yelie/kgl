@@ -2,7 +2,7 @@ import Kgl from '../../src/index.js'
 
 const kgl = new Kgl({
   programs: {
-    main: {
+    plane: {
       shape: 'plane',
       width: window.innerHeight,
       height: window.innerHeight,
@@ -12,12 +12,23 @@ const kgl = new Kgl({
       },
     },
   },
-  onResize(kgl) {
-    kgl.programs.main.width = window.innerHeight
-    kgl.programs.main.height = window.innerHeight
-  },
 })
+const { plane } = kgl.programs
 
+/**
+ * resize
+ */
+function resize() {
+  kgl.resize()
+  plane.width = window.innerHeight
+  plane.height = window.innerHeight
+}
+resize()
+window.addEventListener('resize', resize)
+
+/**
+ * tick
+ */
 function tick(time) {
   time *= 0.001
 
@@ -26,10 +37,10 @@ function tick(time) {
   // kgl.updateCamera()
 
   const scale = 1 - ((Math.sin(time * 2) + 1) / 2) * 0.5
-  kgl.programs.main.x = Math.sin(time * 1) * 300
-  kgl.programs.main.scale = scale
-  kgl.programs.main.rotateY = Math.sin(time * 1) * 1
-  kgl.programs.main.updateUniforms({
+  plane.x = Math.sin(time * 1) * 300
+  plane.scale = scale
+  plane.rotateY = Math.sin(time * 1) * 1
+  plane.updateUniforms({
     time,
   })
 

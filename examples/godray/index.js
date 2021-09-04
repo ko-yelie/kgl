@@ -69,5 +69,7 @@ function mix(x, y, a) {
         true
       )
     },
+    isAutoResize: true,
+    isAutoStart: true,
   })
 })()

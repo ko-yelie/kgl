@@ -13,4 +13,6 @@ new Kgl({
     kgl.programs.main.uniforms.time = time
     kgl.drawAll()
   },
+  isAutoResize: true,
+  isAutoStart: true,
 })

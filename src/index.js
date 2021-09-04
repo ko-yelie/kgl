@@ -32,7 +32,8 @@ export default class Kgl {
       tick,
       onBefore,
       onResize,
-      isAutoStart = true,
+      isAutoResize = false,
+      isAutoStart = false,
     } = option
 
     this._initWebgl(canvas)
@@ -63,7 +64,9 @@ export default class Kgl {
       this.createEffect(key)
     })
 
-    this._initSize()
+    if (isAutoResize) {
+      this._initResize()
+    }
 
     switch (framebuffers.constructor.name) {
       case 'Array':
@@ -86,7 +89,7 @@ export default class Kgl {
 
     if (typeof onBefore === 'function') onBefore(this)
 
-    if (isAutoStart && tick) this.start()
+    if (isAutoStart) this.start()
   }
 
   _initWebgl(canvas) {
@@ -272,7 +275,7 @@ export default class Kgl {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   }
 
-  setSize() {
+  resize() {
     const { gl } = this
     const width = this.canvas.clientWidth
     const height = this.canvas.clientHeight
@@ -309,12 +312,10 @@ export default class Kgl {
     if (typeof this.onResize === 'function') this.onResize(this)
   }
 
-  _initSize() {
-    this.setSize()
-    this._setSize = () => {
-      this.setSize()
-    }
-    window.addEventListener('resize', this._setSize)
+  _initResize() {
+    this.resize()
+    this._resize = this.resize.bind(this)
+    window.addEventListener('resize', this._resize)
   }
 
   updateCamera() {
@@ -434,6 +435,6 @@ export default class Kgl {
 
   destroy() {
     this.stop()
-    window.removeEventListener('resize', this._setSize)
+    window.removeEventListener('resize', this._resize)
   }
 }
