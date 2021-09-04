@@ -1,19 +1,16 @@
 import Kgl from '../../src/index.js'
 
-const kgl = new Kgl({
-  programs: {
-    plane: {
-      shape: 'plane',
-      width: window.innerHeight,
-      height: window.innerHeight,
-      fragmentShaderId: 'fs',
-      uniforms: {
-        time: 0,
-      },
-    },
+const kgl = new Kgl()
+
+const plane = kgl.createProgram({
+  shape: 'plane',
+  width: window.innerHeight,
+  height: window.innerHeight,
+  fragmentShaderId: 'fs',
+  uniforms: {
+    time: 0,
   },
 })
-const { plane } = kgl.programs
 
 /**
  * resize
@@ -41,9 +38,7 @@ function tick(time) {
   plane.x = Math.sin(time * 1) * 300
   plane.scale = scale
   plane.rotateY = Math.sin(time * 1) * 1
-  plane.updateUniforms({
-    time,
-  })
+  plane.uniforms.time = time
 
   kgl.drawAll()
 

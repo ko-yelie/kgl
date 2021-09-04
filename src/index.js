@@ -3,8 +3,9 @@ import Program from './program'
 import * as effects from './effects'
 
 export default class Kgl {
-  constructor(option) {
+  constructor(option = {}) {
     this.programs = {}
+    this.programId = -1
     this.effects = {}
     this.framebuffers = {}
     this.textureIndex = -1
@@ -57,7 +58,11 @@ export default class Kgl {
     this.clearedColor = this.isClear ? clearedColor || [0, 0, 0, 0] : null
 
     Object.keys(programs).forEach((key) => {
-      this.createProgram(key, programs[key])
+      const program = programs[key]
+      if (!('name' in program)) {
+        program.name = key
+      }
+      this.createProgram(program)
     })
 
     effects.forEach((key) => {
@@ -115,8 +120,9 @@ export default class Kgl {
     gl.depthFunc(gl.LEQUAL)
   }
 
-  createProgram(key, option) {
-    this.programs[key] = new Program(this, option)
+  createProgram(option) {
+    option.name = option.name || ++this.programId
+    return (this.programs[option.name] = new Program(this, option))
   }
 
   createEffect(key) {

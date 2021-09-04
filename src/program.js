@@ -51,12 +51,10 @@ function getAttributePlane(width = 1, height = 1) {
 }
 
 export default class Program {
-  constructor(kgl, option) {
+  constructor(kgl, option = {}) {
     this.attributes = {}
     this.uniforms = {}
     this.textures = {}
-    vertexShader
-    fragmentShader
     this.mMatrix = matIV.identity(matIV.create())
     this.mvpMatrix = matIV.identity(matIV.create())
     this.invMatrix = matIV.identity(matIV.create())
