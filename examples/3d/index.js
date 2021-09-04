@@ -29,6 +29,7 @@ window.addEventListener('resize', resize)
 /**
  * tick
  */
+let requestID
 function tick(time) {
   time *= 0.001
 
@@ -46,6 +47,13 @@ function tick(time) {
 
   kgl.drawAll()
 
-  requestAnimationFrame(tick)
+  requestID = requestAnimationFrame(tick)
 }
-requestAnimationFrame(tick)
+requestID = requestAnimationFrame(tick)
+
+// setTimeout(() => {
+//   if (requestID) {
+//     cancelAnimationFrame(requestID)
+//   }
+//   kgl.destroy()
+// }, 3000)

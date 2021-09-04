@@ -6,7 +6,7 @@ import bloomFrag from './shaders/postprocessing/bloom.frag'
 import zoomblurFrag from './shaders/postprocessing/zoomblur.frag'
 
 export class Blur extends Program {
-  constructor(webgl) {
+  constructor(kgl) {
     const option = {
       fragmentShader: blurFrag,
       uniforms: {
@@ -18,7 +18,7 @@ export class Blur extends Program {
       hasLight: false,
     }
 
-    super(webgl, option)
+    super(kgl, option)
 
     this.radius = 0.5
   }
@@ -28,7 +28,7 @@ export class Blur extends Program {
 
     const iterations = 8
     for (let i = 0; i < iterations; i++) {
-      this.webgl.bindFramebuffer(
+      this.kgl.bindFramebuffer(
         isOnscreen && i >= iterations - 1 ? null : cacheFramebufferKey
       )
       this.uniforms.texture = readFramebufferKey
@@ -47,7 +47,7 @@ export class Blur extends Program {
 }
 
 export class Specular extends Program {
-  constructor(webgl, option = {}) {
+  constructor(kgl, option = {}) {
     const { threshold = 0.5 } = option
 
     const programOption = {
@@ -60,11 +60,11 @@ export class Specular extends Program {
       hasLight: false,
     }
 
-    super(webgl, programOption)
+    super(kgl, programOption)
   }
 
   draw(readFramebufferKey, outFramebufferKey, threshold) {
-    this.webgl.bindFramebuffer(outFramebufferKey)
+    this.kgl.bindFramebuffer(outFramebufferKey)
     this.use()
     this.uniforms.texture = readFramebufferKey
     if (typeof threshold !== 'undefined') this.uniforms.threshold = threshold
@@ -73,19 +73,19 @@ export class Specular extends Program {
 }
 
 export class Bloom extends Program {
-  constructor(webgl) {
-    if (!webgl.effects['bloomSpecular']) {
-      webgl.effects['bloomSpecular'] = new Specular(webgl, {
+  constructor(kgl) {
+    if (!kgl.effects['bloomSpecular']) {
+      kgl.effects['bloomSpecular'] = new Specular(kgl, {
         threshold: 0.3,
       })
     }
 
-    if (!webgl.effects['bloomBlur']) {
-      webgl.effects['bloomBlur'] = new Blur(webgl)
+    if (!kgl.effects['bloomBlur']) {
+      kgl.effects['bloomBlur'] = new Blur(kgl)
     }
 
-    if (!webgl.effects['bloomBase']) {
-      webgl.effects['bloomBase'] = new Program(webgl, {
+    if (!kgl.effects['bloomBase']) {
+      kgl.effects['bloomBase'] = new Program(kgl, {
         fragmentShader: textureFrag,
         uniforms: {
           texture: 'framebuffer',
@@ -103,7 +103,7 @@ export class Bloom extends Program {
       hasLight: false,
       isClear: false,
     }
-    super(webgl, option)
+    super(kgl, option)
 
     this.radius = 0.4
   }
@@ -115,21 +115,21 @@ export class Bloom extends Program {
     radius,
     isOnscreen
   ) {
-    this.webgl.effects['bloomSpecular'].draw(
+    this.kgl.effects['bloomSpecular'].draw(
       readFramebufferKey,
       cacheFramebufferKey
     )
 
-    this.webgl.effects['bloomBlur'].draw(
+    this.kgl.effects['bloomBlur'].draw(
       cacheFramebufferKey,
       outFramebufferKey,
       typeof radius !== 'undefined' ? radius : this.radius
     )
 
-    this.webgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
+    this.kgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
 
     {
-      const program = this.webgl.effects['bloomBase']
+      const program = this.kgl.effects['bloomBase']
       program.use()
       program.uniforms.texture = readFramebufferKey
       program.draw()
@@ -142,20 +142,20 @@ export class Bloom extends Program {
 }
 
 export class Zoomblur extends Program {
-  constructor(webgl) {
+  constructor(kgl) {
     const option = {
       fragmentShader: zoomblurFrag,
       uniforms: {
         texture: 'framebuffer',
         strength: 5,
-        center: [webgl.canvas.width / 2, webgl.canvas.height / 2],
+        center: [kgl.canvas.width / 2, kgl.canvas.height / 2],
       },
     }
-    super(webgl, option)
+    super(kgl, option)
   }
 
   draw(readFramebufferKey, outFramebufferKey, strength, center, isOnscreen) {
-    this.webgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
+    this.kgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
     this.use()
     this.uniforms.texture = readFramebufferKey
     if (typeof strength !== 'undefined') this.uniforms.strength = strength
@@ -165,23 +165,23 @@ export class Zoomblur extends Program {
 }
 
 export class Godray extends Program {
-  constructor(webgl) {
-    if (!webgl.effects['godraySpecular']) {
-      webgl.effects['godraySpecular'] = new Specular(webgl, {
+  constructor(kgl) {
+    if (!kgl.effects['godraySpecular']) {
+      kgl.effects['godraySpecular'] = new Specular(kgl, {
         threshold: 0.75,
       })
     }
 
-    if (!webgl.effects['godrayZoomblur']) {
-      webgl.effects['godrayZoomblur'] = new Zoomblur(webgl)
+    if (!kgl.effects['godrayZoomblur']) {
+      kgl.effects['godrayZoomblur'] = new Zoomblur(kgl)
     }
 
-    if (!webgl.effects['godrayBlur']) {
-      webgl.effects['godrayBlur'] = new Blur(webgl)
+    if (!kgl.effects['godrayBlur']) {
+      kgl.effects['godrayBlur'] = new Blur(kgl)
     }
 
-    if (!webgl.effects['godrayBase']) {
-      webgl.effects['godrayBase'] = new Program(webgl, {
+    if (!kgl.effects['godrayBase']) {
+      kgl.effects['godrayBase'] = new Program(kgl, {
         fragmentShader: textureFrag,
         uniforms: {
           texture: 'framebuffer',
@@ -197,7 +197,7 @@ export class Godray extends Program {
       isAdditive: true,
       isClear: false,
     }
-    super(webgl, option)
+    super(kgl, option)
 
     this.radius = 0.02
   }
@@ -211,28 +211,28 @@ export class Godray extends Program {
     radius,
     isOnscreen
   ) {
-    this.webgl.effects['godraySpecular'].draw(
+    this.kgl.effects['godraySpecular'].draw(
       readFramebufferKey,
       outFramebufferKey
     )
 
-    this.webgl.effects['godrayZoomblur'].draw(
+    this.kgl.effects['godrayZoomblur'].draw(
       outFramebufferKey,
       cacheFramebufferKey,
       strength,
       center
     )
 
-    this.webgl.effects['godrayBlur'].draw(
+    this.kgl.effects['godrayBlur'].draw(
       cacheFramebufferKey,
       outFramebufferKey,
       typeof radius !== 'undefined' ? radius : this.radius
     )
 
-    this.webgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
+    this.kgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
 
     {
-      const program = this.webgl.effects['godrayBase']
+      const program = this.kgl.effects['godrayBase']
       program.use()
       program.uniforms.texture = readFramebufferKey
       program.draw()
@@ -245,19 +245,19 @@ export class Godray extends Program {
 }
 
 export class GodrayLight extends Program {
-  constructor(webgl) {
-    if (!webgl.effects['godraySpecular']) {
-      webgl.effects['godraySpecular'] = new Specular(webgl, {
+  constructor(kgl) {
+    if (!kgl.effects['godraySpecular']) {
+      kgl.effects['godraySpecular'] = new Specular(kgl, {
         threshold: 0.75,
       })
     }
 
-    if (!webgl.effects['godrayZoomblur']) {
-      webgl.effects['godrayZoomblur'] = new Zoomblur(webgl)
+    if (!kgl.effects['godrayZoomblur']) {
+      kgl.effects['godrayZoomblur'] = new Zoomblur(kgl)
     }
 
-    if (!webgl.effects['godrayBlur']) {
-      webgl.effects['godrayBlur'] = new Blur(webgl)
+    if (!kgl.effects['godrayBlur']) {
+      kgl.effects['godrayBlur'] = new Blur(kgl)
     }
 
     const option = {
@@ -268,7 +268,7 @@ export class GodrayLight extends Program {
       isAdditive: true,
       isClear: false,
     }
-    super(webgl, option)
+    super(kgl, option)
 
     this.radius = 0.02
   }
@@ -282,25 +282,25 @@ export class GodrayLight extends Program {
     radius,
     isOnscreen
   ) {
-    this.webgl.effects['godraySpecular'].draw(
+    this.kgl.effects['godraySpecular'].draw(
       readFramebufferKey,
       outFramebufferKey
     )
 
-    this.webgl.effects['godrayZoomblur'].draw(
+    this.kgl.effects['godrayZoomblur'].draw(
       outFramebufferKey,
       cacheFramebufferKey,
       strength,
       center
     )
 
-    this.webgl.effects['godrayBlur'].draw(
+    this.kgl.effects['godrayBlur'].draw(
       cacheFramebufferKey,
       outFramebufferKey,
       typeof radius !== 'undefined' ? radius : this.radius
     )
 
-    this.webgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
+    this.kgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
 
     this.use()
     this.uniforms.texture = cacheFramebufferKey

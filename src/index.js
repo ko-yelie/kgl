@@ -3,16 +3,16 @@ import Program from './program'
 import * as effects from './effects'
 
 export default class Kgl {
-  constructor(option) {
-    this.programs = {}
-    this.effects = {}
-    this.framebuffers = {}
-    this.textureIndex = -1
-    this.ticks = []
-    this.vMatrix = matIV.identity(matIV.create())
-    this.pMatrix = matIV.identity(matIV.create())
-    this.vpMatrix = matIV.identity(matIV.create())
+  programs = {}
+  effects = {}
+  framebuffers = {}
+  textureIndex = -1
+  ticks = []
+  vMatrix = matIV.identity(matIV.create())
+  pMatrix = matIV.identity(matIV.create())
+  vpMatrix = matIV.identity(matIV.create())
 
+  constructor(option) {
     const {
       canvas,
       fov = 50,
@@ -174,6 +174,7 @@ export default class Kgl {
     this.framebuffers[key] = {
       framebuffer,
       textureIndex,
+      texture,
       depthRenderBuffer,
     }
   }
@@ -256,6 +257,7 @@ export default class Kgl {
     this.framebuffers[key] = {
       framebuffer,
       textureIndex,
+      texture,
       isFloat: true,
     }
   }
@@ -434,7 +436,25 @@ export default class Kgl {
   }
 
   destroy() {
+    const { gl } = this
+
     this.stop()
     window.removeEventListener('resize', this._resize)
+
+    Object.keys(this.framebuffers).forEach((key) => {
+      const { framebuffer, texture, depthRenderBuffer } = this.framebuffers[key]
+      gl.deleteFramebuffer(framebuffer)
+      gl.deleteTexture(texture)
+      if (depthRenderBuffer) {
+        gl.deleteRenderbuffer(depthRenderBuffer)
+      }
+    })
+
+    Object.keys(this.programs).forEach((key) => {
+      const program = this.programs[key]
+      program.destroy()
+    })
+
+    gl.getExtension('WEBGL_lose_context')?.loseContext()
   }
 }

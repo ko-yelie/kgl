@@ -53,7 +53,9 @@ function getAttributePlane(width = 1, height = 1) {
 export default class Program {
   attributes = {}
   uniforms = {}
-  textureIndexes = {}
+  textures = {}
+  vertexShader
+  fragmentShader
   mMatrix = matIV.identity(matIV.create())
   mvpMatrix = matIV.identity(matIV.create())
   invMatrix = matIV.identity(matIV.create())
@@ -64,9 +66,10 @@ export default class Program {
   heightValue = 1
   isUpdateMatrixUniform = false
 
-  constructor(webgl, option) {
-    const { gl } = webgl
-    this.webgl = webgl
+  constructor(kgl, option) {
+    const { gl } = kgl
+    this.kgl = kgl
+    this.gl = gl
 
     const {
       shape,
@@ -152,13 +155,19 @@ export default class Program {
   }
 
   createProgram(vertexShader, fragmentShader) {
-    const { gl } = this.webgl
+    const { gl } = this
 
     const program = gl.createProgram()
-    gl.attachShader(program, this.createShader('VERTEX_SHADER', vertexShader))
     gl.attachShader(
       program,
-      this.createShader('FRAGMENT_SHADER', fragmentShader)
+      (this.vertexShader = this.createShader('VERTEX_SHADER', vertexShader))
+    )
+    gl.attachShader(
+      program,
+      (this.fragmentShader = this.createShader(
+        'FRAGMENT_SHADER',
+        fragmentShader
+      ))
     )
     gl.linkProgram(program)
 
@@ -176,7 +185,7 @@ export default class Program {
   }
 
   createShader(type, content) {
-    const { gl } = this.webgl
+    const { gl } = this
     const shader = gl.createShader(gl[type])
 
     gl.shaderSource(shader, content)
@@ -199,7 +208,7 @@ export default class Program {
   }
 
   addAttribute(key, value, size, isIndices, isInstanced) {
-    const { gl } = this.webgl
+    const { gl } = this
     const location = gl.getAttribLocation(this.program, key)
     const attribute = (this.attributes[key] = {
       location,
@@ -233,7 +242,7 @@ export default class Program {
   }
 
   setAttribute(key) {
-    const { gl } = this.webgl
+    const { gl } = this
     const { location, size, vbo, ibo, isInstanced } = this.attributes[key]
 
     if (ibo) {
@@ -248,7 +257,7 @@ export default class Program {
   }
 
   updateAttribute(key, values, offset = 0) {
-    const { gl } = this.webgl
+    const { gl } = this
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes[key].vbo)
     gl.bufferSubData(gl.ARRAY_BUFFER, offset, new Float32Array(values))
@@ -339,7 +348,7 @@ export default class Program {
       this.mMatrix
     )
 
-    matIV.multiply(this.webgl.vpMatrix, this.mMatrix, this.mvpMatrix)
+    matIV.multiply(this.kgl.vpMatrix, this.mMatrix, this.mvpMatrix)
     matIV.inverse(this.mMatrix, this.invMatrix)
 
     this.uniforms.mvpMatrix = this.mvpMatrix
@@ -431,35 +440,35 @@ export default class Program {
       return
     }
 
-    const location = this.webgl.gl.getUniformLocation(this.program, key)
+    const location = this.gl.getUniformLocation(this.program, key)
     const type = `uniform${uniformType}`
 
     let set
     switch (originalType) {
       case 'image':
         set = (textureKey) => {
-          this.webgl.gl[type](location, this.textureIndexes[textureKey])
+          this.gl[type](location, this.textures[textureKey].textureIndex)
           uniformValue = textureKey
         }
         break
       case 'framebuffer':
         set = (framebufferKey) => {
-          this.webgl.gl[type](
+          this.gl[type](
             location,
-            this.webgl.framebuffers[framebufferKey].textureIndex
+            this.kgl.framebuffers[framebufferKey].textureIndex
           )
           uniformValue = framebufferKey
         }
         break
       case 'matrix':
         set = (newValue) => {
-          this.webgl.gl[type](location, false, newValue)
+          this.gl[type](location, false, newValue)
           uniformValue = newValue
         }
         break
       default:
         set = (newValue) => {
-          this.webgl.gl[type](location, newValue)
+          this.gl[type](location, newValue)
           uniformValue = newValue
         }
     }
@@ -474,8 +483,8 @@ export default class Program {
 
   updateUniforms(uniforms) {
     const keys = Object.keys(uniforms)
-    for (let index = 0; index < keys.length; index++) {
-      const key = keys[index]
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i]
       this.uniforms[key] = uniforms[key]
     }
   }
@@ -483,9 +492,13 @@ export default class Program {
   createTexture(key, el) {
     if (!el) return
 
-    const { gl } = this.webgl
+    const { gl } = this
     const texture = gl.createTexture()
-    const textureIndex = (this.textureIndexes[key] = ++this.webgl.textureIndex)
+    const textureIndex = ++this.kgl.textureIndex
+    this.textures[key] = {
+      texture,
+      textureIndex,
+    }
 
     gl.activeTexture(gl[`TEXTURE${textureIndex}`])
     gl.bindTexture(gl.TEXTURE_2D, texture)
@@ -500,18 +513,18 @@ export default class Program {
   }
 
   updateTexture(key, el) {
-    const { gl } = this.webgl
+    const { gl } = this
 
-    gl.activeTexture(gl[`TEXTURE${this.textureIndexes[key]}`])
+    gl.activeTexture(gl[`TEXTURE${this.textures[key].textureIndex}`])
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, el)
   }
 
   use() {
-    this.webgl.gl.useProgram(this.program)
+    this.gl.useProgram(this.program)
   }
 
   draw() {
-    const { gl } = this.webgl
+    const { gl } = this
 
     this.use()
 
@@ -547,8 +560,8 @@ export default class Program {
     }
 
     const keys = Object.keys(this.attributes)
-    for (let index = 0; index < keys.length; index++) {
-      this.setAttribute(keys[index])
+    for (let i = 0; i < keys.length; i++) {
+      this.setAttribute(keys[i])
     }
 
     if (this.isInstanced) {
@@ -575,5 +588,24 @@ export default class Program {
         gl.drawArrays(this.glMode, 0, this.count)
       }
     }
+  }
+
+  destroy() {
+    const { gl } = this
+
+    gl.deleteShader(this.vertexShader)
+    gl.deleteShader(this.fragmentShader)
+
+    Object.keys(this.attributes).forEach((key) => {
+      const { vbo, ibo } = this.attributes[key]
+      gl.deleteBuffer(vbo || ibo)
+    })
+
+    Object.keys(this.textures).forEach((key) => {
+      const { texture } = this.textures[key]
+      gl.deleteTexture(texture)
+    })
+
+    gl.deleteProgram(this.program)
   }
 }
