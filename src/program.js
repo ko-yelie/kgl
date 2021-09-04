@@ -51,22 +51,22 @@ function getAttributePlane(width = 1, height = 1) {
 }
 
 export default class Program {
-  attributes = {}
-  uniforms = {}
-  textures = {}
-  vertexShader
-  fragmentShader
-  mMatrix = matIV.identity(matIV.create())
-  mvpMatrix = matIV.identity(matIV.create())
-  invMatrix = matIV.identity(matIV.create())
-  translateValue = [0, 0, 0]
-  scaleValue = [1, 1, 1]
-  rotateValue = [0, 0, 0]
-  widthValue = 1
-  heightValue = 1
-  isUpdateMatrixUniform = false
-
   constructor(kgl, option) {
+    this.attributes = {}
+    this.uniforms = {}
+    this.textures = {}
+    vertexShader
+    fragmentShader
+    this.mMatrix = matIV.identity(matIV.create())
+    this.mvpMatrix = matIV.identity(matIV.create())
+    this.invMatrix = matIV.identity(matIV.create())
+    this.translateValue = [0, 0, 0]
+    this.scaleValue = [1, 1, 1]
+    this.rotateValue = [0, 0, 0]
+    this.widthValue = 1
+    this.heightValue = 1
+    this.isUpdateMatrixUniform = false
+
     const { gl } = kgl
     this.kgl = kgl
     this.gl = gl

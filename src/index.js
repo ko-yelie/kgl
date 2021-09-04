@@ -3,16 +3,16 @@ import Program from './program'
 import * as effects from './effects'
 
 export default class Kgl {
-  programs = {}
-  effects = {}
-  framebuffers = {}
-  textureIndex = -1
-  ticks = []
-  vMatrix = matIV.identity(matIV.create())
-  pMatrix = matIV.identity(matIV.create())
-  vpMatrix = matIV.identity(matIV.create())
-
   constructor(option) {
+    this.programs = {}
+    this.effects = {}
+    this.framebuffers = {}
+    this.textureIndex = -1
+    this.ticks = []
+    this.vMatrix = matIV.identity(matIV.create())
+    this.pMatrix = matIV.identity(matIV.create())
+    this.vpMatrix = matIV.identity(matIV.create())
+
     const {
       canvas,
       fov = 50,
