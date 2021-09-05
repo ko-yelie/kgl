@@ -1,36 +1,7 @@
 import Kgl from '../../src/index.js'
+import { loadImage, mix } from '../utils.js'
 
-/**
- * utils
- */
-function loadImage(srcs, isCrossOrigin) {
-  if (!(typeof srcs === 'object' && srcs.constructor.name === 'Array')) {
-    srcs = [srcs]
-  }
-  const promises = []
-  srcs.forEach((src) => {
-    const img = document.createElement('img')
-    promises.push(
-      new Promise((resolve) => {
-        img.addEventListener('load', () => {
-          resolve(img)
-        })
-      })
-    )
-    if (isCrossOrigin) img.crossOrigin = 'anonymous'
-    img.src = src
-  })
-  return Promise.all(promises)
-}
-
-function mix(x, y, a) {
-  return x * (1 - a) + y * a
-}
-
-/**
- * main
- */
-;(async function main() {
+async function main() {
   const image =
     'https://images.unsplash.com/photo-1551467013-ebce6eacb3ed?ixlib=rb-1.2.1&q=80&fm=jpg&crop=entropy&cs=tinysrgb&w=800&fit=max&ixid=eyJhcHBfaWQiOjE0NTg5fQ' // https://unsplash.com/photos/2-yebrH4SKM
   const speed = 1.5
@@ -72,4 +43,5 @@ function mix(x, y, a) {
     isAutoResize: true,
     isAutoStart: true,
   })
-})()
+}
+main()
