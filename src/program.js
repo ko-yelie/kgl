@@ -5,11 +5,11 @@ const vertexShaderShape = {
   plane: `
     attribute vec3 aPosition;
     attribute vec2 aUv;
-    uniform mat4 mvpMatrix;
+    uniform mat4 uMvpMatrix;
     varying vec2 vUv;
     void main() {
       vUv = aUv;
-      gl_Position = mvpMatrix * vec4(aPosition, 1.);
+      gl_Position = uMvpMatrix * vec4(aPosition, 1.);
     }
   `,
 }
@@ -94,7 +94,9 @@ export default class Program {
 
     const defaultValue = isFloats ? false : true
     const {
-      isAutoResolution = uniforms && uniforms.resolution ? false : defaultValue,
+      isAutoResolution = uniforms && uniforms.uResolution
+        ? false
+        : defaultValue,
       hasCamera = defaultValue,
       hasLight = defaultValue,
       isClear = defaultValue,
@@ -349,24 +351,24 @@ export default class Program {
     matIV.multiply(this.kgl.vpMatrix, this.mMatrix, this.mvpMatrix)
     matIV.inverse(this.mMatrix, this.invMatrix)
 
-    this.uniforms.mvpMatrix = this.mvpMatrix
-    this.uniforms.invMatrix = this.invMatrix
+    this.uniforms.uMvpMatrix = this.mvpMatrix
+    this.uniforms.uInvMatrix = this.invMatrix
   }
 
   createUniform(data) {
     const mergedData = Object.assign({}, data)
 
-    if (this.isAutoResolution && !mergedData.resolution) {
-      mergedData.resolution = [1, 1]
+    if (this.isAutoResolution && !mergedData.uResolution) {
+      mergedData.uResolution = [1, 1]
     }
     if (this.hasCamera) {
-      mergedData.mvpMatrix = new Float32Array(16)
-      mergedData.invMatrix = new Float32Array(16)
+      mergedData.uMvpMatrix = new Float32Array(16)
+      mergedData.uInvMatrix = new Float32Array(16)
     }
     if (this.hasLight) {
-      if (!mergedData.lightDirection) mergedData.lightDirection = [0, 0, 0]
-      if (!mergedData.eyeDirection) mergedData.eyeDirection = [0, 0, 0]
-      if (!mergedData.ambientColor) mergedData.ambientColor = [0.1, 0.1, 0.1]
+      if (!mergedData.uLightDirection) mergedData.uLightDirection = [0, 0, 0]
+      if (!mergedData.uEyeDirection) mergedData.uEyeDirection = [0, 0, 0]
+      if (!mergedData.uAmbientColor) mergedData.uAmbientColor = [0.1, 0.1, 0.1]
     }
 
     Object.keys(mergedData).forEach((key) => {

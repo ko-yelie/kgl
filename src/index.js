@@ -298,7 +298,7 @@ export default class Kgl {
       const program = this.programs[key]
       if (program.isAutoResolution) {
         program.use()
-        program.uniforms.resolution = [width, height]
+        program.uniforms.uResolution = [width, height]
       }
     })
 
@@ -306,7 +306,7 @@ export default class Kgl {
       const program = this.effects[key]
       if (program.isAutoResolution) {
         program.use()
-        program.uniforms.resolution = [width, height]
+        program.uniforms.uResolution = [width, height]
       }
     })
 
@@ -381,9 +381,9 @@ export default class Kgl {
       const program = this.programs[key]
       if (program.hasLight) {
         program.use()
-        program.uniforms.lightDirection = lightDirection
-        program.uniforms.eyeDirection = eyeDirection
-        program.uniforms.ambientColor = ambientColor
+        program.uniforms.uLightDirection = lightDirection
+        program.uniforms.uEyeDirection = eyeDirection
+        program.uniforms.uAmbientColor = ambientColor
       }
     })
   }
@@ -425,8 +425,8 @@ export default class Kgl {
 
       this.clear()
 
-      for (let index = 0; index < this.ticks.length; index++) {
-        this.ticks[index](this, time)
+      for (let i = 0; i < this.ticks.length; i++) {
+        this.ticks[i](this, time)
       }
 
       this.requestID = requestAnimationFrame(render)

@@ -11,11 +11,11 @@
   <script id="fs" type="x-shader/x-fragment">
     precision highp float;
 
-    uniform vec2 resolution; // window size (auto added)
-    uniform float time;
+    uniform vec2 uResolution; // window size (auto added)
+    uniform float uTime;
 
     void main() {
-      gl_FragColor = vec4(vec3(length(gl_FragCoord.xy / resolution) * (sin(time) * 0.5 + 0.5)), 1.);
+      gl_FragColor = vec4(vec3(length(gl_FragCoord.xy / uResolution) * (sin(uTime) * 0.5 + 0.5)), 1.);
     }
   </script>
   <script src="index.js"></script>

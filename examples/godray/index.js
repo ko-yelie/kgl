@@ -45,14 +45,14 @@ function mix(x, y, a) {
       mask: {
         fragmentShaderId: 'mask',
         uniforms: {
-          image: img,
-          imageResolution: [img.width, img.height],
+          uImage: img,
+          uImageResolution: [img.width, img.height],
         },
       },
     },
     effects: ['godray'],
     framebuffers: ['mask', 'cache', 'output'],
-    tick(kgl, time) {
+    tick: (kgl, time) => {
       const cTime = Math.sin(time * speed) * 0.5 + 0.5
       const halfTime = -Math.abs(cTime * 2 - 1) + 1
 

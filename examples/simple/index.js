@@ -5,12 +5,12 @@ new Kgl({
     main: {
       fragmentShaderId: 'fs',
       uniforms: {
-        time: 0,
+        uTime: 0,
       },
     },
   },
-  tick(kgl, time) {
-    kgl.programs.main.uniforms.time = time
+  tick: (kgl, time) => {
+    kgl.programs.main.uniforms.uTime = time
     kgl.drawAll()
   },
   isAutoResize: true,

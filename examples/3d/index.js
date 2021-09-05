@@ -8,7 +8,7 @@ const plane = kgl.createProgram({
   height: window.innerHeight,
   fragmentShaderId: 'fs',
   uniforms: {
-    time: 0,
+    uTime: 0,
   },
 })
 
@@ -38,7 +38,7 @@ function tick(time) {
   plane.x = Math.sin(time * 1) * 300
   plane.scale = scale
   plane.rotateY = Math.sin(time * 1) * 1
-  plane.uniforms.time = time
+  plane.uniforms.uTime = time
 
   kgl.drawAll()
 

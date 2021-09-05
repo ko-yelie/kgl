@@ -10,9 +10,9 @@ export class Blur extends Program {
     const option = {
       fragmentShader: blurFrag,
       uniforms: {
-        texture: 'framebuffer',
-        radius: 0,
-        isHorizontal: false,
+        uTexture: 'framebuffer',
+        uRadius: 0,
+        uIsHorizontal: false,
       },
       hasCamera: false,
       hasLight: false,
@@ -31,11 +31,11 @@ export class Blur extends Program {
       this.kgl.bindFramebuffer(
         isOnscreen && i >= iterations - 1 ? null : cacheFramebufferKey
       )
-      this.uniforms.texture = readFramebufferKey
-      this.uniforms.radius =
+      this.uniforms.uTexture = readFramebufferKey
+      this.uniforms.uRadius =
         (iterations - 1 - i) *
         (typeof radius !== 'undefined' ? radius : this.radius)
-      this.uniforms.isHorizontal = i % 2 === 0
+      this.uniforms.uIsHorizontal = i % 2 === 0
       super.draw()
 
       const t = cacheFramebufferKey
@@ -53,8 +53,8 @@ export class Specular extends Program {
     const programOption = {
       fragmentShader: specularFrag,
       uniforms: {
-        texture: 'framebuffer',
-        threshold,
+        uTexture: 'framebuffer',
+        uThreshold: threshold,
       },
       hasCamera: false,
       hasLight: false,
@@ -66,8 +66,8 @@ export class Specular extends Program {
   draw(readFramebufferKey, outFramebufferKey, threshold) {
     this.kgl.bindFramebuffer(outFramebufferKey)
     this.use()
-    this.uniforms.texture = readFramebufferKey
-    if (typeof threshold !== 'undefined') this.uniforms.threshold = threshold
+    this.uniforms.uTexture = readFramebufferKey
+    if (typeof threshold !== 'undefined') this.uniforms.uThreshold = threshold
     super.draw()
   }
 }
@@ -88,7 +88,7 @@ export class Bloom extends Program {
       kgl.effects['bloomBase'] = new Program(kgl, {
         fragmentShader: textureFrag,
         uniforms: {
-          texture: 'framebuffer',
+          uTexture: 'framebuffer',
         },
       })
     }
@@ -96,7 +96,7 @@ export class Bloom extends Program {
     const option = {
       fragmentShader: bloomFrag,
       uniforms: {
-        specular: 'framebuffer',
+        uSpecular: 'framebuffer',
       },
       isAdditive: true,
       hasCamera: false,
@@ -131,12 +131,12 @@ export class Bloom extends Program {
     {
       const program = this.kgl.effects['bloomBase']
       program.use()
-      program.uniforms.texture = readFramebufferKey
+      program.uniforms.uTexture = readFramebufferKey
       program.draw()
     }
 
     this.use()
-    this.uniforms.specular = cacheFramebufferKey
+    this.uniforms.uSpecular = cacheFramebufferKey
     super.draw()
   }
 }
@@ -146,9 +146,9 @@ export class Zoomblur extends Program {
     const option = {
       fragmentShader: zoomblurFrag,
       uniforms: {
-        texture: 'framebuffer',
-        strength: 5,
-        center: [kgl.canvas.width / 2, kgl.canvas.height / 2],
+        uTexture: 'framebuffer',
+        uStrength: 5,
+        uCenter: [kgl.canvas.width / 2, kgl.canvas.height / 2],
       },
     }
     super(kgl, option)
@@ -157,9 +157,9 @@ export class Zoomblur extends Program {
   draw(readFramebufferKey, outFramebufferKey, strength, center, isOnscreen) {
     this.kgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
     this.use()
-    this.uniforms.texture = readFramebufferKey
-    if (typeof strength !== 'undefined') this.uniforms.strength = strength
-    if (typeof center !== 'undefined') this.uniforms.center = center
+    this.uniforms.uTexture = readFramebufferKey
+    if (typeof strength !== 'undefined') this.uniforms.uStrength = strength
+    if (typeof center !== 'undefined') this.uniforms.uCenter = center
     super.draw()
   }
 }
@@ -184,7 +184,7 @@ export class Godray extends Program {
       kgl.effects['godrayBase'] = new Program(kgl, {
         fragmentShader: textureFrag,
         uniforms: {
-          texture: 'framebuffer',
+          uTexture: 'framebuffer',
         },
       })
     }
@@ -192,7 +192,7 @@ export class Godray extends Program {
     const option = {
       fragmentShader: textureFrag,
       uniforms: {
-        texture: 'framebuffer',
+        uTexture: 'framebuffer',
       },
       isAdditive: true,
       isClear: false,
@@ -234,12 +234,12 @@ export class Godray extends Program {
     {
       const program = this.kgl.effects['godrayBase']
       program.use()
-      program.uniforms.texture = readFramebufferKey
+      program.uniforms.uTexture = readFramebufferKey
       program.draw()
     }
 
     this.use()
-    this.uniforms.texture = cacheFramebufferKey
+    this.uniforms.uTexture = cacheFramebufferKey
     super.draw()
   }
 }
@@ -263,7 +263,7 @@ export class GodrayLight extends Program {
     const option = {
       fragmentShader: textureFrag,
       uniforms: {
-        texture: 'framebuffer',
+        uTexture: 'framebuffer',
       },
       isAdditive: true,
       isClear: false,
@@ -303,7 +303,7 @@ export class GodrayLight extends Program {
     this.kgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
 
     this.use()
-    this.uniforms.texture = cacheFramebufferKey
+    this.uniforms.uTexture = cacheFramebufferKey
     super.draw()
   }
 }

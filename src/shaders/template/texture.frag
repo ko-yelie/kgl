@@ -1,8 +1,8 @@
 precision highp float;
 
-uniform vec2 resolution;
-uniform sampler2D texture;
+uniform vec2 uResolution;
+uniform sampler2D uTexture;
 
 void main() {
-  gl_FragColor = texture2D(texture, gl_FragCoord.st / resolution);
+  gl_FragColor = texture2D(uTexture, gl_FragCoord.st / uResolution);
 }
