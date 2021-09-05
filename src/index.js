@@ -337,7 +337,7 @@ export default class Kgl {
       pMatrix,
       vpMatrix,
     } = this
-    const cameraPositionRate = 0.3
+    // const cameraPositionRate = 0.3
 
     // cameraPosition[0] += (pointer.x * cameraPositionRate - cameraPosition[0]) * 0.1
     // cameraPosition[1] += (pointer.y * cameraPositionRate - cameraPosition[1]) * 0.1

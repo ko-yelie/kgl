@@ -7,7 +7,7 @@ function loadImage(srcs, isCrossOrigin) {
   if (!(typeof srcs === 'object' && srcs.constructor.name === 'Array')) {
     srcs = [srcs]
   }
-  let promises = []
+  const promises = []
   srcs.forEach((src) => {
     const img = document.createElement('img')
     promises.push(
@@ -57,9 +57,9 @@ function mix(x, y, a) {
       const halfTime = -Math.abs(cTime * 2 - 1) + 1
 
       kgl.bindFramebuffer('mask')
-      kgl.programs['mask'].draw()
+      kgl.programs.mask.draw()
 
-      kgl.effects['godray'].draw(
+      kgl.effects.godray.draw(
         'mask',
         'cache',
         'output',

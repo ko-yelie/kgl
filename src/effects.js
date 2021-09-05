@@ -74,18 +74,18 @@ export class Specular extends Program {
 
 export class Bloom extends Program {
   constructor(kgl) {
-    if (!kgl.effects['bloomSpecular']) {
-      kgl.effects['bloomSpecular'] = new Specular(kgl, {
+    if (!kgl.effects.bloomSpecular) {
+      kgl.effects.bloomSpecular = new Specular(kgl, {
         threshold: 0.3,
       })
     }
 
-    if (!kgl.effects['bloomBlur']) {
-      kgl.effects['bloomBlur'] = new Blur(kgl)
+    if (!kgl.effects.bloomBlur) {
+      kgl.effects.bloomBlur = new Blur(kgl)
     }
 
-    if (!kgl.effects['bloomBase']) {
-      kgl.effects['bloomBase'] = new Program(kgl, {
+    if (!kgl.effects.bloomBase) {
+      kgl.effects.bloomBase = new Program(kgl, {
         fragmentShader: textureFrag,
         uniforms: {
           uTexture: 'framebuffer',
@@ -115,12 +115,9 @@ export class Bloom extends Program {
     radius,
     isOnscreen
   ) {
-    this.kgl.effects['bloomSpecular'].draw(
-      readFramebufferKey,
-      cacheFramebufferKey
-    )
+    this.kgl.effects.bloomSpecular.draw(readFramebufferKey, cacheFramebufferKey)
 
-    this.kgl.effects['bloomBlur'].draw(
+    this.kgl.effects.bloomBlur.draw(
       cacheFramebufferKey,
       outFramebufferKey,
       typeof radius !== 'undefined' ? radius : this.radius
@@ -129,7 +126,7 @@ export class Bloom extends Program {
     this.kgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
 
     {
-      const program = this.kgl.effects['bloomBase']
+      const program = this.kgl.effects.bloomBase
       program.use()
       program.uniforms.uTexture = readFramebufferKey
       program.draw()
@@ -166,22 +163,22 @@ export class Zoomblur extends Program {
 
 export class Godray extends Program {
   constructor(kgl) {
-    if (!kgl.effects['godraySpecular']) {
-      kgl.effects['godraySpecular'] = new Specular(kgl, {
+    if (!kgl.effects.godraySpecular) {
+      kgl.effects.godraySpecular = new Specular(kgl, {
         threshold: 0.75,
       })
     }
 
-    if (!kgl.effects['godrayZoomblur']) {
-      kgl.effects['godrayZoomblur'] = new Zoomblur(kgl)
+    if (!kgl.effects.godrayZoomblur) {
+      kgl.effects.godrayZoomblur = new Zoomblur(kgl)
     }
 
-    if (!kgl.effects['godrayBlur']) {
-      kgl.effects['godrayBlur'] = new Blur(kgl)
+    if (!kgl.effects.godrayBlur) {
+      kgl.effects.godrayBlur = new Blur(kgl)
     }
 
-    if (!kgl.effects['godrayBase']) {
-      kgl.effects['godrayBase'] = new Program(kgl, {
+    if (!kgl.effects.godrayBase) {
+      kgl.effects.godrayBase = new Program(kgl, {
         fragmentShader: textureFrag,
         uniforms: {
           uTexture: 'framebuffer',
@@ -211,19 +208,16 @@ export class Godray extends Program {
     radius,
     isOnscreen
   ) {
-    this.kgl.effects['godraySpecular'].draw(
-      readFramebufferKey,
-      outFramebufferKey
-    )
+    this.kgl.effects.godraySpecular.draw(readFramebufferKey, outFramebufferKey)
 
-    this.kgl.effects['godrayZoomblur'].draw(
+    this.kgl.effects.godrayZoomblur.draw(
       outFramebufferKey,
       cacheFramebufferKey,
       strength,
       center
     )
 
-    this.kgl.effects['godrayBlur'].draw(
+    this.kgl.effects.godrayBlur.draw(
       cacheFramebufferKey,
       outFramebufferKey,
       typeof radius !== 'undefined' ? radius : this.radius
@@ -232,7 +226,7 @@ export class Godray extends Program {
     this.kgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
 
     {
-      const program = this.kgl.effects['godrayBase']
+      const program = this.kgl.effects.godrayBase
       program.use()
       program.uniforms.uTexture = readFramebufferKey
       program.draw()
@@ -246,18 +240,18 @@ export class Godray extends Program {
 
 export class GodrayLight extends Program {
   constructor(kgl) {
-    if (!kgl.effects['godraySpecular']) {
-      kgl.effects['godraySpecular'] = new Specular(kgl, {
+    if (!kgl.effects.godraySpecular) {
+      kgl.effects.godraySpecular = new Specular(kgl, {
         threshold: 0.75,
       })
     }
 
-    if (!kgl.effects['godrayZoomblur']) {
-      kgl.effects['godrayZoomblur'] = new Zoomblur(kgl)
+    if (!kgl.effects.godrayZoomblur) {
+      kgl.effects.godrayZoomblur = new Zoomblur(kgl)
     }
 
-    if (!kgl.effects['godrayBlur']) {
-      kgl.effects['godrayBlur'] = new Blur(kgl)
+    if (!kgl.effects.godrayBlur) {
+      kgl.effects.godrayBlur = new Blur(kgl)
     }
 
     const option = {
@@ -282,19 +276,16 @@ export class GodrayLight extends Program {
     radius,
     isOnscreen
   ) {
-    this.kgl.effects['godraySpecular'].draw(
-      readFramebufferKey,
-      outFramebufferKey
-    )
+    this.kgl.effects.godraySpecular.draw(readFramebufferKey, outFramebufferKey)
 
-    this.kgl.effects['godrayZoomblur'].draw(
+    this.kgl.effects.godrayZoomblur.draw(
       outFramebufferKey,
       cacheFramebufferKey,
       strength,
       center
     )
 
-    this.kgl.effects['godrayBlur'].draw(
+    this.kgl.effects.godrayBlur.draw(
       cacheFramebufferKey,
       outFramebufferKey,
       typeof radius !== 'undefined' ? radius : this.radius

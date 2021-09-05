@@ -29,38 +29,38 @@ function MatIV() {
     return dest
   }
   this.multiply = function (mat1, mat2, dest) {
-    var a = mat1[0],
-      b = mat1[1],
-      c = mat1[2],
-      d = mat1[3],
-      e = mat1[4],
-      f = mat1[5],
-      g = mat1[6],
-      h = mat1[7],
-      i = mat1[8],
-      j = mat1[9],
-      k = mat1[10],
-      l = mat1[11],
-      m = mat1[12],
-      n = mat1[13],
-      o = mat1[14],
-      p = mat1[15],
-      A = mat2[0],
-      B = mat2[1],
-      C = mat2[2],
-      D = mat2[3],
-      E = mat2[4],
-      F = mat2[5],
-      G = mat2[6],
-      H = mat2[7],
-      I = mat2[8],
-      J = mat2[9],
-      K = mat2[10],
-      L = mat2[11],
-      M = mat2[12],
-      N = mat2[13],
-      O = mat2[14],
-      P = mat2[15]
+    const a = mat1[0]
+    const b = mat1[1]
+    const c = mat1[2]
+    const d = mat1[3]
+    const e = mat1[4]
+    const f = mat1[5]
+    const g = mat1[6]
+    const h = mat1[7]
+    const i = mat1[8]
+    const j = mat1[9]
+    const k = mat1[10]
+    const l = mat1[11]
+    const m = mat1[12]
+    const n = mat1[13]
+    const o = mat1[14]
+    const p = mat1[15]
+    const A = mat2[0]
+    const B = mat2[1]
+    const C = mat2[2]
+    const D = mat2[3]
+    const E = mat2[4]
+    const F = mat2[5]
+    const G = mat2[6]
+    const H = mat2[7]
+    const I = mat2[8]
+    const J = mat2[9]
+    const K = mat2[10]
+    const L = mat2[11]
+    const M = mat2[12]
+    const N = mat2[13]
+    const O = mat2[14]
+    const P = mat2[15]
     dest[0] = A * a + B * e + C * i + D * m
     dest[1] = A * b + B * f + C * j + D * n
     dest[2] = A * c + B * g + C * k + D * o
@@ -118,47 +118,47 @@ function MatIV() {
     return dest
   }
   this.rotate = function (mat, angle, axis, dest) {
-    var sq = Math.sqrt(
+    let sq = Math.sqrt(
       axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]
     )
     if (!sq) {
       return null
     }
-    var a = axis[0],
-      b = axis[1],
-      c = axis[2]
-    if (sq != 1) {
+    let a = axis[0]
+    let b = axis[1]
+    let c = axis[2]
+    if (sq !== 1) {
       sq = 1 / sq
       a *= sq
       b *= sq
       c *= sq
     }
-    var d = Math.sin(angle),
-      e = Math.cos(angle),
-      f = 1 - e,
-      g = mat[0],
-      h = mat[1],
-      i = mat[2],
-      j = mat[3],
-      k = mat[4],
-      l = mat[5],
-      m = mat[6],
-      n = mat[7],
-      o = mat[8],
-      p = mat[9],
-      q = mat[10],
-      r = mat[11],
-      s = a * a * f + e,
-      t = b * a * f + c * d,
-      u = c * a * f - b * d,
-      v = a * b * f - c * d,
-      w = b * b * f + e,
-      x = c * b * f + a * d,
-      y = a * c * f + b * d,
-      z = b * c * f - a * d,
-      A = c * c * f + e
+    const d = Math.sin(angle)
+    const e = Math.cos(angle)
+    const f = 1 - e
+    const g = mat[0]
+    const h = mat[1]
+    const i = mat[2]
+    const j = mat[3]
+    const k = mat[4]
+    const l = mat[5]
+    const m = mat[6]
+    const n = mat[7]
+    const o = mat[8]
+    const p = mat[9]
+    const q = mat[10]
+    const r = mat[11]
+    const s = a * a * f + e
+    const t = b * a * f + c * d
+    const u = c * a * f - b * d
+    const v = a * b * f - c * d
+    const w = b * b * f + e
+    const x = c * b * f + a * d
+    const y = a * c * f + b * d
+    const z = b * c * f - a * d
+    const A = c * c * f + e
     if (angle) {
-      if (mat != dest) {
+      if (mat !== dest) {
         dest[12] = mat[12]
         dest[13] = mat[13]
         dest[14] = mat[14]
@@ -182,19 +182,19 @@ function MatIV() {
     return dest
   }
   this.lookAt = function (eye, center, up, dest) {
-    var eyeX = eye[0],
-      eyeY = eye[1],
-      eyeZ = eye[2],
-      upX = up[0],
-      upY = up[1],
-      upZ = up[2],
-      centerX = center[0],
-      centerY = center[1],
-      centerZ = center[2]
-    if (eyeX == centerX && eyeY == centerY && eyeZ == centerZ) {
+    const eyeX = eye[0]
+    const eyeY = eye[1]
+    const eyeZ = eye[2]
+    const upX = up[0]
+    const upY = up[1]
+    const upZ = up[2]
+    const centerX = center[0]
+    const centerY = center[1]
+    const centerZ = center[2]
+    if (eyeX === centerX && eyeY === centerY && eyeZ === centerZ) {
       return this.identity(dest)
     }
-    var x0, x1, x2, y0, y1, y2, z0, z1, z2, l
+    let x0, x1, x2, y0, y1, y2, z0, z1, z2, l
     z0 = eyeX - center[0]
     z1 = eyeY - center[1]
     z2 = eyeZ - center[2]
@@ -249,11 +249,11 @@ function MatIV() {
     return dest
   }
   this.perspective = function (fovy, aspect, near, far, dest) {
-    var t = near * Math.tan((fovy * Math.PI) / 360)
-    var r = t * aspect
-    var a = r * 2,
-      b = t * 2,
-      c = far - near
+    const t = near * Math.tan((fovy * Math.PI) / 360)
+    const r = t * aspect
+    const a = r * 2
+    const b = t * 2
+    const c = far - near
     dest[0] = (near * 2) / a
     dest[1] = 0
     dest[2] = 0
@@ -273,9 +273,9 @@ function MatIV() {
     return dest
   }
   this.ortho = function (left, right, top, bottom, near, far, dest) {
-    var h = right - left
-    var v = top - bottom
-    var d = far - near
+    const h = right - left
+    const v = top - bottom
+    const d = far - near
     dest[0] = 2 / h
     dest[1] = 0
     dest[2] = 0
@@ -314,35 +314,35 @@ function MatIV() {
     return dest
   }
   this.inverse = function (mat, dest) {
-    var a = mat[0],
-      b = mat[1],
-      c = mat[2],
-      d = mat[3],
-      e = mat[4],
-      f = mat[5],
-      g = mat[6],
-      h = mat[7],
-      i = mat[8],
-      j = mat[9],
-      k = mat[10],
-      l = mat[11],
-      m = mat[12],
-      n = mat[13],
-      o = mat[14],
-      p = mat[15],
-      q = a * f - b * e,
-      r = a * g - c * e,
-      s = a * h - d * e,
-      t = b * g - c * f,
-      u = b * h - d * f,
-      v = c * h - d * g,
-      w = i * n - j * m,
-      x = i * o - k * m,
-      y = i * p - l * m,
-      z = j * o - k * n,
-      A = j * p - l * n,
-      B = k * p - l * o,
-      ivd = 1 / (q * B - r * A + s * z + t * y - u * x + v * w)
+    const a = mat[0]
+    const b = mat[1]
+    const c = mat[2]
+    const d = mat[3]
+    const e = mat[4]
+    const f = mat[5]
+    const g = mat[6]
+    const h = mat[7]
+    const i = mat[8]
+    const j = mat[9]
+    const k = mat[10]
+    const l = mat[11]
+    const m = mat[12]
+    const n = mat[13]
+    const o = mat[14]
+    const p = mat[15]
+    const q = a * f - b * e
+    const r = a * g - c * e
+    const s = a * h - d * e
+    const t = b * g - c * f
+    const u = b * h - d * f
+    const v = c * h - d * g
+    const w = i * n - j * m
+    const x = i * o - k * m
+    const y = i * p - l * m
+    const z = j * o - k * n
+    const A = j * p - l * n
+    const B = k * p - l * o
+    const ivd = 1 / (q * B - r * A + s * z + t * y - u * x + v * w)
     dest[0] = (f * B - g * A + h * z) * ivd
     dest[1] = (-b * B + c * A - d * z) * ivd
     dest[2] = (n * v - o * u + p * t) * ivd
@@ -359,166 +359,6 @@ function MatIV() {
     dest[13] = (a * z - b * x + c * w) * ivd
     dest[14] = (-m * t + n * r - o * q) * ivd
     dest[15] = (i * t - j * r + k * q) * ivd
-    return dest
-  }
-}
-
-export function qtnIV() {
-  this.create = function () {
-    return new Float32Array(4)
-  }
-  this.identity = function (dest) {
-    dest[0] = 0
-    dest[1] = 0
-    dest[2] = 0
-    dest[3] = 1
-    return dest
-  }
-  this.inverse = function (qtn, dest) {
-    dest[0] = -qtn[0]
-    dest[1] = -qtn[1]
-    dest[2] = -qtn[2]
-    dest[3] = qtn[3]
-    return dest
-  }
-  this.normalize = function (dest) {
-    var x = dest[0],
-      y = dest[1],
-      z = dest[2],
-      w = dest[3]
-    var l = Math.sqrt(x * x + y * y + z * z + w * w)
-    if (l === 0) {
-      dest[0] = 0
-      dest[1] = 0
-      dest[2] = 0
-      dest[3] = 0
-    } else {
-      l = 1 / l
-      dest[0] = x * l
-      dest[1] = y * l
-      dest[2] = z * l
-      dest[3] = w * l
-    }
-    return dest
-  }
-  this.multiply = function (qtn1, qtn2, dest) {
-    var ax = qtn1[0],
-      ay = qtn1[1],
-      az = qtn1[2],
-      aw = qtn1[3]
-    var bx = qtn2[0],
-      by = qtn2[1],
-      bz = qtn2[2],
-      bw = qtn2[3]
-    dest[0] = ax * bw + aw * bx + ay * bz - az * by
-    dest[1] = ay * bw + aw * by + az * bx - ax * bz
-    dest[2] = az * bw + aw * bz + ax * by - ay * bx
-    dest[3] = aw * bw - ax * bx - ay * by - az * bz
-    return dest
-  }
-  this.rotate = function (angle, axis, dest) {
-    var sq = Math.sqrt(
-      axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2]
-    )
-    if (!sq) {
-      return null
-    }
-    var a = axis[0],
-      b = axis[1],
-      c = axis[2]
-    if (sq != 1) {
-      sq = 1 / sq
-      a *= sq
-      b *= sq
-      c *= sq
-    }
-    var s = Math.sin(angle * 0.5)
-    dest[0] = a * s
-    dest[1] = b * s
-    dest[2] = c * s
-    dest[3] = Math.cos(angle * 0.5)
-    return dest
-  }
-  this.toVecIII = function (vec, qtn, dest) {
-    var qp = this.create()
-    var qq = this.create()
-    var qr = this.create()
-    this.inverse(qtn, qr)
-    qp[0] = vec[0]
-    qp[1] = vec[1]
-    qp[2] = vec[2]
-    this.multiply(qr, qp, qq)
-    this.multiply(qq, qtn, qr)
-    dest[0] = qr[0]
-    dest[1] = qr[1]
-    dest[2] = qr[2]
-    return dest
-  }
-  this.toMatIV = function (qtn, dest) {
-    var x = qtn[0],
-      y = qtn[1],
-      z = qtn[2],
-      w = qtn[3]
-    var x2 = x + x,
-      y2 = y + y,
-      z2 = z + z
-    var xx = x * x2,
-      xy = x * y2,
-      xz = x * z2
-    var yy = y * y2,
-      yz = y * z2,
-      zz = z * z2
-    var wx = w * x2,
-      wy = w * y2,
-      wz = w * z2
-    dest[0] = 1 - (yy + zz)
-    dest[1] = xy - wz
-    dest[2] = xz + wy
-    dest[3] = 0
-    dest[4] = xy + wz
-    dest[5] = 1 - (xx + zz)
-    dest[6] = yz - wx
-    dest[7] = 0
-    dest[8] = xz - wy
-    dest[9] = yz + wx
-    dest[10] = 1 - (xx + yy)
-    dest[11] = 0
-    dest[12] = 0
-    dest[13] = 0
-    dest[14] = 0
-    dest[15] = 1
-    return dest
-  }
-  this.slerp = function (qtn1, qtn2, time, dest) {
-    var ht =
-      qtn1[0] * qtn2[0] +
-      qtn1[1] * qtn2[1] +
-      qtn1[2] * qtn2[2] +
-      qtn1[3] * qtn2[3]
-    var hs = 1.0 - ht * ht
-    if (hs <= 0.0) {
-      dest[0] = qtn1[0]
-      dest[1] = qtn1[1]
-      dest[2] = qtn1[2]
-      dest[3] = qtn1[3]
-    } else {
-      hs = Math.sqrt(hs)
-      if (Math.abs(hs) < 0.0001) {
-        dest[0] = qtn1[0] * 0.5 + qtn2[0] * 0.5
-        dest[1] = qtn1[1] * 0.5 + qtn2[1] * 0.5
-        dest[2] = qtn1[2] * 0.5 + qtn2[2] * 0.5
-        dest[3] = qtn1[3] * 0.5 + qtn2[3] * 0.5
-      } else {
-        var ph = Math.acos(ht)
-        var pt = ph * time
-        var t0 = Math.sin(ph - pt) / hs
-        var t1 = Math.sin(pt) / hs
-        dest[0] = qtn1[0] * t0 + qtn2[0] * t1
-        dest[1] = qtn1[1] * t0 + qtn2[1] * t1
-        dest[2] = qtn1[2] * t0 + qtn2[2] * t1
-        dest[3] = qtn1[3] * t0 + qtn2[3] * t1
-      }
-    }
     return dest
   }
 }

@@ -70,13 +70,14 @@ export default class Program {
     this.gl = gl
 
     const {
+      name,
       shape,
       vertexShaderId,
       vertexShader = vertexShaderId
         ? document.getElementById(vertexShaderId).textContent
         : shape
         ? vertexShaderShape[shape]
-        : vertexShaderShape['none'],
+        : vertexShaderShape.none,
       fragmentShaderId,
       fragmentShader = document.getElementById(fragmentShaderId).textContent,
       attributes,
@@ -92,7 +93,7 @@ export default class Program {
       clearedColor,
     } = option
 
-    const defaultValue = isFloats ? false : true
+    const defaultValue = !isFloats
     const {
       isAutoResolution = uniforms && uniforms.uResolution
         ? false
@@ -108,6 +109,7 @@ export default class Program {
       option.vertexShader
     )
 
+    this.name = name
     this.mode = mode
     this.glMode = gl[mode || 'TRIANGLE_STRIP']
     this.drawType = drawType
@@ -177,7 +179,7 @@ export default class Program {
     }
 
     if (!program) {
-      console.error(`Failed to create program "${key}".`)
+      console.error(`Failed to create program "${this.name}".`)
       return
     }
 
@@ -281,9 +283,17 @@ export default class Program {
     this.updateMatrix()
   }
 
+  get x() {
+    return this.translateValue[0]
+  }
+
   set x(value) {
     this.translateValue[0] = value
     this.updateMatrix()
+  }
+
+  get y() {
+    return this.translateValue[1]
   }
 
   set y(value) {
@@ -291,9 +301,19 @@ export default class Program {
     this.updateMatrix()
   }
 
+  get z() {
+    return this.translateValue[2]
+  }
+
   set z(value) {
     this.translateValue[2] = value
     this.updateMatrix()
+  }
+
+  get scale() {
+    return (this.scaleValue[0] === this.scaleValue[1]) === this.scaleValue[2]
+      ? this.scaleValue[0]
+      : null
   }
 
   set scale(value) {
@@ -301,9 +321,17 @@ export default class Program {
     this.updateMatrix()
   }
 
+  get scaleX() {
+    return this.scaleValue[0]
+  }
+
   set scaleX(value) {
     this.scaleValue[0] = value
     this.updateMatrix()
+  }
+
+  get scaleY() {
+    return this.scaleValue[1]
   }
 
   set scaleY(value) {
@@ -311,14 +339,26 @@ export default class Program {
     this.updateMatrix()
   }
 
+  get scaleZ() {
+    return this.scaleValue[2]
+  }
+
   set scaleZ(value) {
     this.scaleValue[2] = value
     this.updateMatrix()
   }
 
+  get rotateX() {
+    return this.rotateValue[0]
+  }
+
   set rotateX(radian) {
     this.rotateValue[0] = radian
     this.updateMatrix()
+  }
+
+  get rotateY() {
+    return this.rotateValue[1]
   }
 
   set rotateY(radian) {
