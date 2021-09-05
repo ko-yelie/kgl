@@ -1,4 +1,12 @@
-import matIV from './minMatrix.js'
+import {
+  createMatrix,
+  identity,
+  inverse,
+  multiply,
+  rotate,
+  scale,
+  translate,
+} from './minMatrix.js'
 
 const vertexShaderShape = {
   none: 'attribute vec2 aPosition;void main(){gl_Position=vec4(aPosition,0.,1.);}',
@@ -55,9 +63,9 @@ export default class Program {
     this.attributes = {}
     this.uniforms = {}
     this.textures = {}
-    this.mMatrix = matIV.identity(matIV.create())
-    this.mvpMatrix = matIV.identity(matIV.create())
-    this.invMatrix = matIV.identity(matIV.create())
+    this.mMatrix = createMatrix()
+    this.mvpMatrix = createMatrix()
+    this.invMatrix = createMatrix()
     this.translateValue = [0, 0, 0]
     this.scaleValue = [1, 1, 1]
     this.rotateValue = [0, 0, 0]
@@ -371,14 +379,14 @@ export default class Program {
   }
 
   updateMatrixUniform() {
-    matIV.identity(this.mMatrix)
+    identity(this.mMatrix)
 
-    matIV.translate(this.mMatrix, this.translateValue, this.mMatrix)
+    translate(this.mMatrix, this.translateValue, this.mMatrix)
 
-    matIV.rotate(this.mMatrix, this.rotateValue[0], [1, 0, 0], this.mMatrix)
-    matIV.rotate(this.mMatrix, this.rotateValue[1], [0, 1, 0], this.mMatrix)
+    rotate(this.mMatrix, this.rotateValue[0], [1, 0, 0], this.mMatrix)
+    rotate(this.mMatrix, this.rotateValue[1], [0, 1, 0], this.mMatrix)
 
-    matIV.scale(
+    scale(
       this.mMatrix,
       [
         this.width * this.scaleValue[0],
@@ -388,8 +396,8 @@ export default class Program {
       this.mMatrix
     )
 
-    matIV.multiply(this.kgl.vpMatrix, this.mMatrix, this.mvpMatrix)
-    matIV.inverse(this.mMatrix, this.invMatrix)
+    multiply(this.kgl.vpMatrix, this.mMatrix, this.mvpMatrix)
+    inverse(this.mMatrix, this.invMatrix)
 
     this.uniforms.uMvpMatrix = this.mvpMatrix
     this.uniforms.uInvMatrix = this.invMatrix

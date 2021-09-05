@@ -1,4 +1,10 @@
-import matIV from './minMatrix.js'
+import {
+  createMatrix,
+  lookAt,
+  multiply,
+  perspective,
+  rotate,
+} from './minMatrix.js'
 import Program from './program'
 import * as effects from './effects'
 
@@ -10,9 +16,9 @@ export default class Kgl {
     this.framebuffers = {}
     this.textureIndex = -1
     this.ticks = []
-    this.vMatrix = matIV.identity(matIV.create())
-    this.pMatrix = matIV.identity(matIV.create())
-    this.vpMatrix = matIV.identity(matIV.create())
+    this.vMatrix = createMatrix()
+    this.pMatrix = createMatrix()
+    this.vpMatrix = createMatrix()
 
     const {
       canvas,
@@ -351,20 +357,20 @@ export default class Kgl {
     }
     this.eyeDirection = cameraPosition
 
-    matIV.lookAt(
+    lookAt(
       cameraPosition,
       [cameraPosition[0], cameraPosition[1], 0],
       [0, 1, 0],
       vMatrix
     )
-    matIV.perspective(fov, this.aspect, near, far, pMatrix)
+    perspective(fov, this.aspect, near, far, pMatrix)
 
     cameraRotation[0] = cameraRotation[0] % (Math.PI * 2)
     cameraRotation[1] = cameraRotation[1] % (Math.PI * 2)
-    matIV.rotate(vMatrix, cameraRotation[0], [0, 1, 0], vMatrix)
-    matIV.rotate(vMatrix, cameraRotation[1], [-1, 0, 0], vMatrix)
+    rotate(vMatrix, cameraRotation[0], [0, 1, 0], vMatrix)
+    rotate(vMatrix, cameraRotation[1], [-1, 0, 0], vMatrix)
 
-    matIV.multiply(pMatrix, vMatrix, vpMatrix)
+    multiply(pMatrix, vMatrix, vpMatrix)
 
     Object.keys(this.programs).forEach((key) => {
       const program = this.programs[key]
