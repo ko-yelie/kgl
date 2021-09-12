@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <title>KGL Library Demo - Simple</title>
+  <title>KGL Library Demo - Group</title>
   <link rel="stylesheet" href="index.css">
 </head>
 
@@ -11,12 +11,20 @@
   <script id="fs" type="x-shader/x-fragment">
     precision highp float;
 
-    uniform vec2 uResolution; // window size (auto added)
     uniform float uTime;
 
+    varying vec2 vUv;
+
     void main() {
-      float alpha = 1. - length(gl_FragCoord.xy / uResolution) * (sin(uTime) * 0.5 + 0.5);
+      float alpha = 1. - min(max(1. / length(vUv * 2. - 1.) * (sin(uTime) * 0.5 + 0.5), 0.), 1.);
       gl_FragColor = vec4(vec3(0.), alpha);
+    }
+  </script>
+  <script id="fs-red" type="x-shader/x-fragment">
+    precision highp float;
+
+    void main() {
+      gl_FragColor = vec4(1., 0., 0., 1.);
     }
   </script>
   <script src="index.js"></script>

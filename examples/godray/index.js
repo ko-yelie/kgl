@@ -1,4 +1,4 @@
-import Kgl from '../../src/index.js'
+import { KglAuto } from '../../src/index.js'
 import { loadImage, mix } from '../utils.js'
 
 async function main() {
@@ -11,7 +11,7 @@ async function main() {
 
   const [img] = await loadImage(image, true)
 
-  new Kgl({
+  new KglAuto({
     programs: {
       mask: {
         fragmentShaderId: 'mask',
@@ -40,8 +40,6 @@ async function main() {
         true
       )
     },
-    isAutoResize: true,
-    isAutoStart: true,
   })
 }
 main()

@@ -1,6 +1,6 @@
-import Kgl from '../../src/index.js'
+import { KglAuto } from '../../src/index.js'
 
-new Kgl({
+new KglAuto({
   programs: {
     main: {
       fragmentShaderId: 'fs',
@@ -11,8 +11,6 @@ new Kgl({
   },
   tick: (kgl, time) => {
     kgl.programs.main.uniforms.uTime = time
-    kgl.drawAll()
+    kgl.draw()
   },
-  isAutoResize: true,
-  isAutoStart: true,
 })

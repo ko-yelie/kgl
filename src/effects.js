@@ -24,8 +24,6 @@ export class Blur extends Program {
   }
 
   draw(readFramebufferKey, cacheFramebufferKey, radius, isOnscreen) {
-    this.use()
-
     const iterations = 8
     for (let i = 0; i < iterations; i++) {
       this.kgl.bindFramebuffer(
@@ -36,6 +34,7 @@ export class Blur extends Program {
         (iterations - 1 - i) *
         (typeof radius !== 'undefined' ? radius : this.radius)
       this.uniforms.uIsHorizontal = i % 2 === 0
+      this.kgl.clear()
       super.draw()
 
       const t = cacheFramebufferKey
@@ -65,9 +64,9 @@ export class Specular extends Program {
 
   draw(readFramebufferKey, outFramebufferKey, threshold) {
     this.kgl.bindFramebuffer(outFramebufferKey)
-    this.use()
     this.uniforms.uTexture = readFramebufferKey
     if (typeof threshold !== 'undefined') this.uniforms.uThreshold = threshold
+    this.kgl.clear()
     super.draw()
   }
 }
@@ -101,7 +100,6 @@ export class Bloom extends Program {
       isAdditive: true,
       hasCamera: false,
       hasLight: false,
-      isClear: false,
     }
     super(kgl, option)
 
@@ -127,12 +125,10 @@ export class Bloom extends Program {
 
     {
       const program = this.kgl.effects.bloomBase
-      program.use()
       program.uniforms.uTexture = readFramebufferKey
       program.draw()
     }
 
-    this.use()
     this.uniforms.uSpecular = cacheFramebufferKey
     super.draw()
   }
@@ -153,10 +149,10 @@ export class Zoomblur extends Program {
 
   draw(readFramebufferKey, outFramebufferKey, strength, center, isOnscreen) {
     this.kgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
-    this.use()
     this.uniforms.uTexture = readFramebufferKey
     if (typeof strength !== 'undefined') this.uniforms.uStrength = strength
     if (typeof center !== 'undefined') this.uniforms.uCenter = center
+    this.kgl.clear()
     super.draw()
   }
 }
@@ -192,7 +188,6 @@ export class Godray extends Program {
         uTexture: 'framebuffer',
       },
       isAdditive: true,
-      isClear: false,
     }
     super(kgl, option)
 
@@ -227,12 +222,10 @@ export class Godray extends Program {
 
     {
       const program = this.kgl.effects.godrayBase
-      program.use()
       program.uniforms.uTexture = readFramebufferKey
       program.draw()
     }
 
-    this.use()
     this.uniforms.uTexture = cacheFramebufferKey
     super.draw()
   }
@@ -260,7 +253,6 @@ export class GodrayLight extends Program {
         uTexture: 'framebuffer',
       },
       isAdditive: true,
-      isClear: false,
     }
     super(kgl, option)
 
@@ -293,7 +285,6 @@ export class GodrayLight extends Program {
 
     this.kgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
 
-    this.use()
     this.uniforms.uTexture = cacheFramebufferKey
     super.draw()
   }

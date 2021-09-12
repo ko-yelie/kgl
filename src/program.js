@@ -1,12 +1,5 @@
-import {
-  createMatrix,
-  identity,
-  inverse,
-  multiply,
-  rotate,
-  scale,
-  translate,
-} from './minMatrix.js'
+import ObjectGl from './object'
+import { createMatrix, inverse } from './minMatrix.js'
 
 const vertexShaderShape = {
   none: 'attribute vec2 aPosition;void main(){gl_Position=vec4(aPosition,0.,1.);}',
@@ -58,27 +51,19 @@ function getAttributePlane(width = 1, height = 1) {
   }
 }
 
-export default class Program {
+export default class Program extends ObjectGl {
   constructor(kgl, option = {}) {
+    super(kgl, option)
+
+    this.isProgram = true
     this.attributes = {}
     this.uniforms = {}
     this.textures = {}
-    this.mMatrix = createMatrix()
-    this.mvpMatrix = createMatrix()
-    this.invMatrix = createMatrix()
-    this.translateValue = [0, 0, 0]
-    this.scaleValue = [1, 1, 1]
-    this.rotateValue = [0, 0, 0]
-    this.widthValue = 1
-    this.heightValue = 1
-    this.isUpdateMatrixUniform = false
 
     const { gl } = kgl
-    this.kgl = kgl
     this.gl = gl
 
     const {
-      name,
       shape,
       vertexShaderId,
       vertexShader = vertexShaderId
@@ -98,18 +83,17 @@ export default class Program {
       isFloats = false,
       isCulling = true,
       isDepth = false,
-      clearedColor,
+      isAutoResolution = !isFloats && !(uniforms && uniforms.uResolution),
+      hasCamera = kgl.hasCamera,
+      hasLight = kgl.hasLight,
     } = option
 
-    const defaultValue = !isFloats
-    const {
-      isAutoResolution = uniforms && uniforms.uResolution
-        ? false
-        : defaultValue,
-      hasCamera = defaultValue,
-      hasLight = defaultValue,
-      isClear = defaultValue,
-    } = option
+    kgl.indexProgram = kgl.indexProgram + 1
+    this.id = kgl.indexProgram
+
+    if (hasLight) {
+      this.invMatrix = createMatrix()
+    }
 
     const isWhole = !(
       option.shape ||
@@ -117,7 +101,6 @@ export default class Program {
       option.vertexShader
     )
 
-    this.name = name
     this.mode = mode
     this.glMode = gl[mode || 'TRIANGLE_STRIP']
     this.drawType = drawType
@@ -126,11 +109,9 @@ export default class Program {
     this.isAutoResolution = isAutoResolution
     this.hasCamera = hasCamera
     this.hasLight = hasLight
-    this.isClear = isClear
     this.isCulling = isCulling
     this.isDepth = isDepth
     this.isInstanced = instancedAttributes
-    this.clearedColor = clearedColor || [0, 0, 0, 0]
 
     this.createProgram(vertexShader, fragmentShader)
 
@@ -141,8 +122,6 @@ export default class Program {
     } else if (shape) {
       switch (shape) {
         case 'plane':
-          this.width = option.width
-          this.height = option.height
           this.createAttribute(getAttributePlane())
           break
       }
@@ -159,9 +138,7 @@ export default class Program {
       }
     }
 
-    if (uniforms) {
-      this.createUniform(uniforms)
-    }
+    this.createUniform(uniforms)
   }
 
   createProgram(vertexShader, fragmentShader) {
@@ -187,7 +164,7 @@ export default class Program {
     }
 
     if (!program) {
-      console.error(`Failed to create program "${this.name}".`)
+      console.error('Failed to create program.')
       return
     }
 
@@ -273,134 +250,17 @@ export default class Program {
     gl.bufferSubData(gl.ARRAY_BUFFER, offset, new Float32Array(values))
   }
 
-  get width() {
-    return this.widthValue
-  }
+  updateMatrix(vpMatrix) {
+    super.updateMatrix(vpMatrix)
 
-  set width(value) {
-    this.widthValue = value
-    this.updateMatrix()
-  }
+    if (this.hasCamera) {
+      this.uniforms.uMvpMatrix = this.mvpMatrix
+    }
 
-  get height() {
-    return this.heightValue
-  }
-
-  set height(value) {
-    this.heightValue = value
-    this.updateMatrix()
-  }
-
-  get x() {
-    return this.translateValue[0]
-  }
-
-  set x(value) {
-    this.translateValue[0] = value
-    this.updateMatrix()
-  }
-
-  get y() {
-    return this.translateValue[1]
-  }
-
-  set y(value) {
-    this.translateValue[1] = value
-    this.updateMatrix()
-  }
-
-  get z() {
-    return this.translateValue[2]
-  }
-
-  set z(value) {
-    this.translateValue[2] = value
-    this.updateMatrix()
-  }
-
-  get scale() {
-    return (this.scaleValue[0] === this.scaleValue[1]) === this.scaleValue[2]
-      ? this.scaleValue[0]
-      : null
-  }
-
-  set scale(value) {
-    this.scaleValue[0] = this.scaleValue[1] = this.scaleValue[2] = value
-    this.updateMatrix()
-  }
-
-  get scaleX() {
-    return this.scaleValue[0]
-  }
-
-  set scaleX(value) {
-    this.scaleValue[0] = value
-    this.updateMatrix()
-  }
-
-  get scaleY() {
-    return this.scaleValue[1]
-  }
-
-  set scaleY(value) {
-    this.scaleValue[1] = value
-    this.updateMatrix()
-  }
-
-  get scaleZ() {
-    return this.scaleValue[2]
-  }
-
-  set scaleZ(value) {
-    this.scaleValue[2] = value
-    this.updateMatrix()
-  }
-
-  get rotateX() {
-    return this.rotateValue[0]
-  }
-
-  set rotateX(radian) {
-    this.rotateValue[0] = radian
-    this.updateMatrix()
-  }
-
-  get rotateY() {
-    return this.rotateValue[1]
-  }
-
-  set rotateY(radian) {
-    this.rotateValue[1] = radian
-    this.updateMatrix()
-  }
-
-  updateMatrix() {
-    this.isUpdateMatrixUniform = true
-  }
-
-  updateMatrixUniform() {
-    identity(this.mMatrix)
-
-    translate(this.mMatrix, this.translateValue, this.mMatrix)
-
-    rotate(this.mMatrix, this.rotateValue[0], [1, 0, 0], this.mMatrix)
-    rotate(this.mMatrix, this.rotateValue[1], [0, 1, 0], this.mMatrix)
-
-    scale(
-      this.mMatrix,
-      [
-        this.width * this.scaleValue[0],
-        this.height * this.scaleValue[1],
-        this.scaleValue[2],
-      ],
-      this.mMatrix
-    )
-
-    multiply(this.kgl.vpMatrix, this.mMatrix, this.mvpMatrix)
-    inverse(this.mMatrix, this.invMatrix)
-
-    this.uniforms.uMvpMatrix = this.mvpMatrix
-    this.uniforms.uInvMatrix = this.invMatrix
+    if (this.hasLight) {
+      inverse(this.mMatrix, this.invMatrix)
+      this.uniforms.uInvMatrix = this.invMatrix
+    }
   }
 
   createUniform(data) {
@@ -411,9 +271,9 @@ export default class Program {
     }
     if (this.hasCamera) {
       mergedData.uMvpMatrix = new Float32Array(16)
-      mergedData.uInvMatrix = new Float32Array(16)
     }
     if (this.hasLight) {
+      mergedData.uInvMatrix = new Float32Array(16)
       if (!mergedData.uLightDirection) mergedData.uLightDirection = [0, 0, 0]
       if (!mergedData.uEyeDirection) mergedData.uEyeDirection = [0, 0, 0]
       if (!mergedData.uAmbientColor) mergedData.uAmbientColor = [0.1, 0.1, 0.1]
@@ -495,12 +355,14 @@ export default class Program {
     switch (originalType) {
       case 'image':
         set = (textureKey) => {
+          this.use()
           this.gl[type](location, this.textures[textureKey].textureIndex)
           uniformValue = textureKey
         }
         break
       case 'framebuffer':
         set = (framebufferKey) => {
+          this.use()
           this.gl[type](
             location,
             this.kgl.framebuffers[framebufferKey].textureIndex
@@ -510,12 +372,14 @@ export default class Program {
         break
       case 'matrix':
         set = (newValue) => {
+          this.use()
           this.gl[type](location, false, newValue)
           uniformValue = newValue
         }
         break
       default:
         set = (newValue) => {
+          this.use()
           this.gl[type](location, newValue)
           uniformValue = newValue
         }
@@ -568,23 +432,16 @@ export default class Program {
   }
 
   use() {
+    if (this.id === this.kgl.currentProgramId) return
+
     this.gl.useProgram(this.program)
+    this.kgl.currentProgramId = this.id
   }
 
   draw() {
     const { gl } = this
 
     this.use()
-
-    if (this.isClear) {
-      gl.clearColor(
-        this.clearedColor[0],
-        this.clearedColor[1],
-        this.clearedColor[2],
-        this.clearedColor[3]
-      )
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-    }
 
     if (this.isTransparent) {
       gl.enable(gl.BLEND)
@@ -601,11 +458,6 @@ export default class Program {
 
     if (this.isDepth) gl.enable(gl.DEPTH_TEST)
     else gl.disable(gl.DEPTH_TEST)
-
-    if (this.isUpdateMatrixUniform) {
-      this.updateMatrixUniform()
-      this.isUpdateMatrixUniform = false
-    }
 
     const keys = Object.keys(this.attributes)
     for (let i = 0; i < keys.length; i++) {
