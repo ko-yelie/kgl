@@ -1,4 +1,5 @@
 import Kgl from './kgl.js'
+import * as Effects from './effects/index.js'
 
 export default class KglAuto extends Kgl {
   constructor(option = {}) {
@@ -29,7 +30,8 @@ export default class KglAuto extends Kgl {
     })
 
     effects.forEach((key) => {
-      this.createEffect(key)
+      const classKey = key.charAt(0).toUpperCase() + key.slice(1)
+      this.effects[key] = this.createEffect(Effects[classKey])
     })
 
     if (isAutoResize) {

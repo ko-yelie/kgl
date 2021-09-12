@@ -1,4 +1,4 @@
-import ObjectGl from './object'
+import ObjectGl from './object.js'
 import { createMatrix, inverse } from './minMatrix.js'
 
 const vertexShaderShape = {

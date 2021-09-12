@@ -6,8 +6,7 @@ import {
   rotate,
 } from './minMatrix.js'
 import ObjectGl from './object.js'
-import Program from './program'
-import * as effects from './effects'
+import Program from './program.js'
 
 export default class Kgl {
   constructor(option = {}) {
@@ -18,7 +17,7 @@ export default class Kgl {
     this.pMatrix = createMatrix()
     this.vpMatrix = createMatrix()
     this.isUpdateMatrix = false
-    this.effects = {}
+    this.effectList = []
     this.framebuffers = {}
     this.textureIndex = -1
 
@@ -115,9 +114,10 @@ export default class Kgl {
     return group
   }
 
-  createEffect(key) {
-    const classKey = key.charAt(0).toUpperCase() + key.slice(1)
-    this.effects[key] = new effects[classKey](this)
+  createEffect(EffectClass, option) {
+    const effect = new EffectClass(this, option)
+    this.effectList.push(effect)
+    return effect
   }
 
   createFramebuffer(
@@ -289,8 +289,7 @@ export default class Kgl {
       }
     })
 
-    Object.keys(this.effects).forEach((key) => {
-      const program = this.effects[key]
+    this.effectList.forEach((program) => {
       if (program.isAutoResolution) {
         program.uniforms.uResolution = [width, height]
       }
