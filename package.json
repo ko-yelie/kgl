@@ -2,7 +2,7 @@
   "name": "@ko-yelie/kgl",
   "moduleName": "kgl",
   "version": "0.3.5",
-  "description": "WebGL library",
+  "description": "Minimal WebGL library",
   "main": "dist/index.es.js",
   "unpkg": "dist/index.iife.min.js",
   "files": [
