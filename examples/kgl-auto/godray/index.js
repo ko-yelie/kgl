@@ -1,5 +1,5 @@
-import { KglAuto } from '../../src/index.js'
-import { loadImage, mix } from '../utils.js'
+import { KglAuto } from '../../../src/index.js'
+import { loadImage, mix } from '../../utils.js'
 
 async function main() {
   const image =

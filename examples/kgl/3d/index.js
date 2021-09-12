@@ -1,4 +1,4 @@
-import Kgl from '../../src/index.js'
+import Kgl from '../../../src/index.js'
 
 const kgl = new Kgl({
   hasCamera: true,
