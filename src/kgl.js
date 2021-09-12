@@ -108,7 +108,7 @@ export default class Kgl {
   }
 
   createGroup(option = {}) {
-    const group = new ObjectGl(this)
+    const group = new ObjectGl(this, option)
     if (option.isAutoAdd) {
       this.add(group)
     }
