@@ -1,23 +1,76 @@
-const noneVert = 'attribute vec2 position;void main(){gl_Position=vec4(position,0.,1.);}'
-const noneAttribute = {
-  position: {
+import ObjectGl from './object.js'
+import { createMatrix, inverse } from './minMatrix.js'
+
+const vertexShaderShape = {
+  none: 'attribute vec2 aPosition;void main(){gl_Position=vec4(aPosition,0.,1.);}',
+  plane: `
+    attribute vec3 aPosition;
+    attribute vec2 aUv;
+    uniform mat4 uMvpMatrix;
+    varying vec2 vUv;
+    void main() {
+      vUv = aUv;
+      gl_Position = uMvpMatrix * vec4(aPosition, 1.);
+    }
+  `,
+}
+
+const attributeNone = {
+  aPosition: {
     value: [-1, 1, -1, -1, 1, 1, 1, -1],
-    size: 2
+    size: 2,
+  },
+}
+
+function getAttributePlane(width = 1, height = 1) {
+  const widthHalf = width / 2
+  const heightHalf = height / 2
+
+  return {
+    aPosition: {
+      value: [
+        -widthHalf,
+        heightHalf,
+        0,
+        -widthHalf,
+        -heightHalf,
+        0,
+        widthHalf,
+        heightHalf,
+        0,
+        widthHalf,
+        -heightHalf,
+        0,
+      ],
+      size: 3,
+    },
+    aUv: {
+      value: [0, 1, 0, 0, 1, 1, 1, 0],
+      size: 2,
+    },
   }
 }
 
-export default class Program {
-  constructor (webgl, option) {
+export default class Program extends ObjectGl {
+  constructor(kgl, option = {}) {
+    super(kgl, option)
+
+    this.isProgram = true
     this.attributes = {}
     this.uniforms = {}
-    this.textureIndexes = {}
+    this.textures = {}
 
-    const { gl } = webgl
-    this.webgl = webgl
+    const { gl } = kgl
+    this.gl = gl
 
     const {
+      shape,
       vertexShaderId,
-      vertexShader = vertexShaderId ? document.getElementById(vertexShaderId).textContent : noneVert,
+      vertexShader = vertexShaderId
+        ? document.getElementById(vertexShaderId).textContent
+        : shape
+        ? vertexShaderShape[shape]
+        : vertexShaderShape.none,
       fragmentShaderId,
       fragmentShader = document.getElementById(fragmentShaderId).textContent,
       attributes,
@@ -30,18 +83,23 @@ export default class Program {
       isFloats = false,
       isCulling = true,
       isDepth = false,
-      clearedColor
+      isAutoResolution = !isFloats && !(uniforms && uniforms.uResolution),
+      hasCamera = kgl.hasCamera,
+      hasLight = kgl.hasLight,
     } = option
 
-    const defaultValue = isFloats ? false : true
-    const {
-      isAutoResolution = uniforms && uniforms.resolution ? false : defaultValue,
-      hasCamera = defaultValue,
-      hasLight = defaultValue,
-      isClear = defaultValue
-    } = option
+    kgl.indexProgram = kgl.indexProgram + 1
+    this.id = kgl.indexProgram
 
-    const isWhole = !(option.vertexShaderId || option.vertexShader)
+    if (hasLight) {
+      this.invMatrix = createMatrix()
+    }
+
+    const isWhole = !(
+      option.shape ||
+      option.vertexShaderId ||
+      option.vertexShader
+    )
 
     this.mode = mode
     this.glMode = gl[mode || 'TRIANGLE_STRIP']
@@ -51,18 +109,22 @@ export default class Program {
     this.isAutoResolution = isAutoResolution
     this.hasCamera = hasCamera
     this.hasLight = hasLight
-    this.isClear = isClear
     this.isCulling = isCulling
     this.isDepth = isDepth
     this.isInstanced = instancedAttributes
-    this.clearedColor = clearedColor || [0, 0, 0, 0]
 
     this.createProgram(vertexShader, fragmentShader)
 
     this.use()
 
     if (isWhole) {
-      this.createWholeAttribute()
+      this.createAttribute(attributeNone)
+    } else if (shape) {
+      switch (shape) {
+        case 'plane':
+          this.createAttribute(getAttributePlane())
+          break
+      }
     } else if (attributes) {
       this.createAttribute(attributes)
 
@@ -76,15 +138,24 @@ export default class Program {
       }
     }
 
-    if (uniforms) this.createUniform(uniforms)
+    this.createUniform(uniforms)
   }
 
-  createProgram (vertexShader, fragmentShader) {
-    const { gl } = this.webgl
+  createProgram(vertexShader, fragmentShader) {
+    const { gl } = this
 
     const program = gl.createProgram()
-    gl.attachShader(program, this.createShader('VERTEX_SHADER', vertexShader))
-    gl.attachShader(program, this.createShader('FRAGMENT_SHADER', fragmentShader))
+    gl.attachShader(
+      program,
+      (this.vertexShader = this.createShader('VERTEX_SHADER', vertexShader))
+    )
+    gl.attachShader(
+      program,
+      (this.fragmentShader = this.createShader(
+        'FRAGMENT_SHADER',
+        fragmentShader
+      ))
+    )
     gl.linkProgram(program)
 
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
@@ -93,15 +164,15 @@ export default class Program {
     }
 
     if (!program) {
-      console.error(`Failed to create program "${key}".`)
+      console.error('Failed to create program.')
       return
     }
 
     this.program = program
   }
 
-  createShader (type, content) {
-    const { gl } = this.webgl
+  createShader(type, content) {
+    const { gl } = this
     const shader = gl.createShader(gl[type])
 
     gl.shaderSource(shader, content)
@@ -115,27 +186,31 @@ export default class Program {
     return shader
   }
 
-  createAttribute (data, isInstanced) {
-    Object.keys(data).forEach(key => {
+  createAttribute(data, isInstanced) {
+    Object.keys(data).forEach((key) => {
       const { value, size, isIndices } = data[key]
 
       this.addAttribute(key, value, size, isIndices, isInstanced)
     })
   }
 
-  addAttribute (key, value, size, isIndices, isInstanced) {
-    const { gl } = this.webgl
+  addAttribute(key, value, size, isIndices, isInstanced) {
+    const { gl } = this
     const location = gl.getAttribLocation(this.program, key)
-    const attribute = this.attributes[key] = {
+    const attribute = (this.attributes[key] = {
       location,
       size,
-      isInstanced
-    }
+      isInstanced,
+    })
 
     if (isIndices) {
       const ibo = gl.createBuffer()
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo)
-      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Int16Array(value), gl[this.drawType])
+      gl.bufferData(
+        gl.ELEMENT_ARRAY_BUFFER,
+        new Int16Array(value),
+        gl[this.drawType]
+      )
       attribute.ibo = ibo
 
       this.indicesCount = this.indicesCount || value.length
@@ -153,8 +228,8 @@ export default class Program {
     }
   }
 
-  setAttribute (key) {
-    const { gl } = this.webgl
+  setAttribute(key) {
+    const { gl } = this
     const { location, size, vbo, ibo, isInstanced } = this.attributes[key]
 
     if (ibo) {
@@ -163,41 +238,53 @@ export default class Program {
       gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
       gl.enableVertexAttribArray(location)
       gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0)
-      if (isInstanced) this.instancedArraysExt.vertexAttribDivisorANGLE(location, 1)
+      if (isInstanced)
+        this.instancedArraysExt.vertexAttribDivisorANGLE(location, 1)
     }
   }
 
-  updateAttribute (key, values, offset = 0) {
-    const { gl } = this.webgl
+  updateAttribute(key, values, offset = 0) {
+    const { gl } = this
 
     gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes[key].vbo)
     gl.bufferSubData(gl.ARRAY_BUFFER, offset, new Float32Array(values))
   }
 
-  createWholeAttribute () {
-    this.createAttribute(noneAttribute)
+  updateMatrix(vpMatrix) {
+    super.updateMatrix(vpMatrix)
+
+    if (this.hasCamera) {
+      this.uniforms.uMvpMatrix = this.mvpMatrix
+    }
+
+    if (this.hasLight) {
+      inverse(this.mMatrix, this.invMatrix)
+      this.uniforms.uInvMatrix = this.invMatrix
+    }
   }
 
-  createUniform (data) {
+  createUniform(data) {
     const mergedData = Object.assign({}, data)
 
-    if (this.isAutoResolution && !mergedData.resolution) mergedData.resolution = [1, 1]
+    if (this.isAutoResolution && !mergedData.uResolution) {
+      mergedData.uResolution = [1, 1]
+    }
     if (this.hasCamera) {
-      mergedData.mvpMatrix = new Float32Array(16)
-      mergedData.invMatrix = new Float32Array(16)
+      mergedData.uMvpMatrix = new Float32Array(16)
     }
     if (this.hasLight) {
-      if (!mergedData.lightDirection) mergedData.lightDirection = [0, 0, 0]
-      if (!mergedData.eyeDirection) mergedData.eyeDirection = [0, 0, 0]
-      if (!mergedData.ambientColor) mergedData.ambientColor = [0.1, 0.1, 0.1]
+      mergedData.uInvMatrix = new Float32Array(16)
+      if (!mergedData.uLightDirection) mergedData.uLightDirection = [0, 0, 0]
+      if (!mergedData.uEyeDirection) mergedData.uEyeDirection = [0, 0, 0]
+      if (!mergedData.uAmbientColor) mergedData.uAmbientColor = [0.1, 0.1, 0.1]
     }
 
-    Object.keys(mergedData).forEach(key => {
+    Object.keys(mergedData).forEach((key) => {
       this.addUniform(key, mergedData[key])
     })
   }
 
-  addUniform (key, value) {
+  addUniform(key, value) {
     let originalType
     let uniformType
     let uniformValue = value
@@ -261,50 +348,69 @@ export default class Program {
       return
     }
 
-    const location = this.webgl.gl.getUniformLocation(this.program, key)
+    const location = this.gl.getUniformLocation(this.program, key)
     const type = `uniform${uniformType}`
 
     let set
     switch (originalType) {
       case 'image':
-        set = textureKey => {
-          this.webgl.gl[type](location, this.textureIndexes[textureKey])
+        set = (textureKey) => {
+          this.use()
+          this.gl[type](location, this.textures[textureKey].textureIndex)
           uniformValue = textureKey
         }
         break
       case 'framebuffer':
-        set = framebufferKey => {
-          this.webgl.gl[type](location, this.webgl.framebuffers[framebufferKey].textureIndex)
+        set = (framebufferKey) => {
+          this.use()
+          this.gl[type](
+            location,
+            this.kgl.framebuffers[framebufferKey].textureIndex
+          )
           uniformValue = framebufferKey
         }
         break
       case 'matrix':
-        set = newValue => {
-          this.webgl.gl[type](location, false, newValue)
+        set = (newValue) => {
+          this.use()
+          this.gl[type](location, false, newValue)
           uniformValue = newValue
         }
         break
       default:
-        set = newValue => {
-          this.webgl.gl[type](location, newValue)
+        set = (newValue) => {
+          this.use()
+          this.gl[type](location, newValue)
           uniformValue = newValue
         }
     }
 
     Object.defineProperty(this.uniforms, key, {
       get: () => uniformValue,
-      set
+      set,
     })
 
     if (typeof uniformValue !== 'undefined') this.uniforms[key] = uniformValue
   }
 
-  createTexture (key, el) {
+  updateUniforms(uniforms) {
+    const keys = Object.keys(uniforms)
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i]
+      this.uniforms[key] = uniforms[key]
+    }
+  }
+
+  createTexture(key, el) {
     if (!el) return
 
-    const { gl } = this.webgl
+    const { gl } = this
     const texture = gl.createTexture()
-    const textureIndex = this.textureIndexes[key] = ++this.webgl.textureIndex
+    const textureIndex = ++this.kgl.textureIndex
+    this.textures[key] = {
+      texture,
+      textureIndex,
+    }
 
     gl.activeTexture(gl[`TEXTURE${textureIndex}`])
     gl.bindTexture(gl.TEXTURE_2D, texture)
@@ -318,26 +424,24 @@ export default class Program {
     return textureIndex
   }
 
-  updateTexture (key, el) {
-    const { gl } = this.webgl
+  updateTexture(key, el) {
+    const { gl } = this
 
-    gl.activeTexture(gl[`TEXTURE${this.textureIndexes[key]}`])
+    gl.activeTexture(gl[`TEXTURE${this.textures[key].textureIndex}`])
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, el)
   }
 
-  use () {
-    this.webgl.gl.useProgram(this.program)
+  use() {
+    if (this.id === this.kgl.currentProgramId) return
+
+    this.gl.useProgram(this.program)
+    this.kgl.currentProgramId = this.id
   }
 
-  draw (uniforms) {
-    const { gl } = this.webgl
+  draw() {
+    const { gl } = this
 
     this.use()
-
-    if (this.isClear) {
-      gl.clearColor(this.clearedColor[0], this.clearedColor[1], this.clearedColor[2], this.clearedColor[3])
-      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
-    }
 
     if (this.isTransparent) {
       gl.enable(gl.BLEND)
@@ -355,24 +459,27 @@ export default class Program {
     if (this.isDepth) gl.enable(gl.DEPTH_TEST)
     else gl.disable(gl.DEPTH_TEST)
 
-    if (uniforms) {
-      const keys = Object.keys(uniforms)
-      for (let index = 0; index < keys.length; index++) {
-        const key = keys[index]
-        this.uniforms[key] = uniforms[key]
-      }
-    }
-
     const keys = Object.keys(this.attributes)
-    for (let index = 0; index < keys.length; index++) {
-      this.setAttribute(keys[index])
+    for (let i = 0; i < keys.length; i++) {
+      this.setAttribute(keys[i])
     }
 
     if (this.isInstanced) {
       if (this.indicesCount) {
-        this.instancedArraysExt.drawElementsInstancedANGLE(this.glMode, this.indicesCount, gl.UNSIGNED_SHORT, 0, this.instanceCount)
+        this.instancedArraysExt.drawElementsInstancedANGLE(
+          this.glMode,
+          this.indicesCount,
+          gl.UNSIGNED_SHORT,
+          0,
+          this.instanceCount
+        )
       } else {
-        this.instancedArraysExt.drawArraysInstancedANGLE(this.glMode, 0, this.count, this.instanceCount)
+        this.instancedArraysExt.drawArraysInstancedANGLE(
+          this.glMode,
+          0,
+          this.count,
+          this.instanceCount
+        )
       }
     } else {
       if (this.indicesCount) {
@@ -381,5 +488,24 @@ export default class Program {
         gl.drawArrays(this.glMode, 0, this.count)
       }
     }
+  }
+
+  destroy() {
+    const { gl } = this
+
+    gl.deleteShader(this.vertexShader)
+    gl.deleteShader(this.fragmentShader)
+
+    Object.keys(this.attributes).forEach((key) => {
+      const { vbo, ibo } = this.attributes[key]
+      gl.deleteBuffer(vbo || ibo)
+    })
+
+    Object.keys(this.textures).forEach((key) => {
+      const { texture } = this.textures[key]
+      gl.deleteTexture(texture)
+    })
+
+    gl.deleteProgram(this.program)
   }
 }

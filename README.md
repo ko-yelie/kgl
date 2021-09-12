@@ -1,4 +1,5 @@
 # KGL
+
 WebGL library
 
 ## Example
@@ -13,11 +14,11 @@ WebGL library
 <script type="x-shader/x-fragment" id="fs">
   precision highp float;
 
-  uniform vec2 resolution; // window size (auto added)
-  uniform float time;
+  uniform vec2 uResolution; // window size (auto added)
+  uniform float uTime;
 
   void main() {
-    gl_FragColor = vec4(vec3(length(gl_FragCoord.xy / resolution) * (sin(time) * 0.5 + 0.5)), 1.);
+    gl_FragColor = vec4(vec3(length(gl_FragCoord.xy / uResolution) * (sin(uTime) * 0.5 + 0.5)), 1.);
   }
 </script>
 ```
@@ -30,14 +31,15 @@ new Kgl({
     main: {
       fragmentShaderId: 'fs',
       uniforms: {
-        time: 0
+        uTime: 0,
       },
-    }
+    },
   },
   tick: (kgl, time) => {
-    kgl.programs.main.draw({
-      time
-    })
+    kgl.programs.main.uniforms.uTime = time
+    kgl.draw()
   },
+  isAutoResize: true,
+  isAutoStart: true,
 })
 ```
