@@ -78,7 +78,7 @@ export default class KglAuto extends Kgl {
     })
 
     const render = (timestamp) => {
-      const time = (timestamp - initialTimestamp) / 1000
+      const time = (timestamp - initialTimestamp) * 0.001
 
       for (let i = 0; i < this.ticks.length; i++) {
         this.ticks[i](this, time)
