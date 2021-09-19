@@ -11,9 +11,9 @@ let elLinkCurrent
 
 const mapLink = [...document.querySelectorAll('nav a')].map((el) => {
   const { pathname } = new URL(el.href)
-  const [className, page] = pathname
-    .replace(/^\/?(.+?)\/index\.html/, '$1')
-    .split('/')
+  const [, className, page] = pathname.match(
+    /^\/?(?:kgl\/)?(.+?)\/(.+?)\/index\.html/
+  )
 
   el.addEventListener('click', (e) => {
     e.preventDefault()
