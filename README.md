@@ -2,17 +2,47 @@
 
 Minimal WebGL library
 
-## Example
+## Usage
+
+### Installation
+
+#### ES Modules
+
+[npm](https://www.npmjs.com/package/@ko-yelie/kgl)
+
+```sh
+npm i @ko-yelie/kgl
+```
+
+```js
+// Kgl
+import Kgl from '@ko-yelie/kgl'
+
+// KglAuto
+import { KglAuto } from '@ko-yelie/kgl'
+```
+
+#### CDN
+
+[unpkg](https://unpkg.com/@ko-yelie/kgl)
+
+```html
+<script src="https://unpkg.com/@ko-yelie/kgl"></script>
+```
+
+```js
+// Kgl
+Kgl.default
+
+// KglAuto
+const { KglAuto } = Kgl
+```
 
 ### `Kgl`
 
 #### HTML
 
 ```html
-<!-- Library -->
-<script src="https://unpkg.com/@ko-yelie/kgl"></script>
-
-<!-- Shader -->
 <script type="x-shader/x-fragment" id="fs">
   precision highp float;
 
@@ -29,10 +59,12 @@ Minimal WebGL library
 #### JS
 
 ```js
-const kgl = new Kgl.default()
+import Kgl from '@ko-yelie/kgl'
+
+const kgl = new Kgl()
 
 /**
- * objects
+ * program
  */
 const program = kgl.createProgram({
   fragmentShaderId: 'fs',
@@ -69,7 +101,7 @@ requestAnimationFrame(tick)
 #### JS
 
 ```js
-const { KglAuto } = Kgl
+import { KglAuto } from '@ko-yelie/kgl'
 
 new KglAuto({
   programs: {
@@ -87,7 +119,6 @@ new KglAuto({
 })
 ```
 
-## Demo
+## Examples
 
-- [Page](https://ko-yelie.github.io/kgl/)
-- [Code](https://github.com/ko-yelie/kgl/tree/master/examples)
+https://ko-yelie.github.io/kgl/

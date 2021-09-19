@@ -5,7 +5,7 @@ const kgl = new Kgl({
 })
 
 /**
- * objects
+ * program
  */
 const plane = kgl.createProgram({
   shape: 'plane',

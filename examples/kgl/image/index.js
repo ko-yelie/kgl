@@ -8,7 +8,7 @@ const kgl = new Kgl()
 
 async function main() {
   /**
-   * objects
+   * program
    */
   const [img] = await loadImage(image, true)
 
