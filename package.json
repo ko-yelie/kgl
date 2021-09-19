@@ -10,7 +10,8 @@
     "src/"
   ],
   "scripts": {
-    "build": "bili"
+    "build": "bili",
+    "publish": "npm run build && npm publish"
   },
   "browserslist": {
     "ignoreUnknownVersions": "ios_saf 13.2"
