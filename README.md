@@ -87,7 +87,7 @@ new KglAuto({
 })
 ```
 
-## Demo
+## Examples
 
 - [Page](https://ko-yelie.github.io/kgl/)
 - [Code](https://github.com/ko-yelie/kgl/tree/master/examples)
