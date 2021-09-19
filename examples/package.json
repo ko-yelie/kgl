@@ -2,9 +2,9 @@
   "name": "@ko-yelie/kgl-example",
   "private": true,
   "scripts": {
-    "examples": "parcel index.html -d ../examples-dist",
-    "examples:prod": "parcel build index.html --no-source-maps -d ../docs --public-url /kgl/",
-    "pages": "rm -rf ../docs && npm run examples:prod"
+    "dev": "parcel index.html",
+    "build": "parcel build index.html --no-source-maps -d ../docs --public-url /kgl/",
+    "pages": "rm -rf ../docs && npm run build"
   },
   "devDependencies": {
     "@babel/core": "^7.15.0",
