@@ -3,7 +3,7 @@ import Kgl from '../../../src/index.js'
 const kgl = new Kgl()
 
 /**
- * objects
+ * program
  */
 const program = kgl.createProgram({
   fragmentShaderId: 'fs',

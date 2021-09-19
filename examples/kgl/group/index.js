@@ -6,7 +6,7 @@ const kgl = new Kgl({
 const { root } = kgl // root group
 
 /**
- * objects
+ * program
  */
 
 /* group red */
