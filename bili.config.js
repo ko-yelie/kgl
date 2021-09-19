@@ -1,8 +1,19 @@
+const path = require('path')
+const pkg = require(path.resolve(process.cwd(), 'package.json'))
+
+const NAME = 'KGL'
+const banner = `/*!
+ * ${NAME || pkg.name} v${pkg.version}
+ * ${pkg.homepage}
+ * @license ${pkg.license}
+ * Copyright ${pkg.author}
+ */`
+
 module.exports = {
   babel: {
     minimal: true,
   },
-  banner: require('banner-package'),
+  banner,
   output: {
     moduleName: 'Kgl',
     format: ['es', 'iife', 'iife-min'],
