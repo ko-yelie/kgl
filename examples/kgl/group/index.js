@@ -1,4 +1,6 @@
 import Kgl from '../../../src/index.js'
+import fragmentShader from './index.frag'
+import fragmentShaderRed from './red.frag'
 
 const kgl = new Kgl({
   hasCamera: true,
@@ -19,7 +21,7 @@ const red1 = kgl.createProgram({
   shape: 'plane',
   width: 200,
   height: 50,
-  fragmentShaderId: 'fs-red',
+  fragmentShader: fragmentShaderRed,
 })
 groupRed.add(red1)
 
@@ -28,7 +30,7 @@ const red2 = kgl.createProgram({
   shape: 'plane',
   width: 50,
   height: 200,
-  fragmentShaderId: 'fs-red',
+  fragmentShader: fragmentShaderRed,
 })
 groupRed.add(red2)
 
@@ -38,7 +40,7 @@ const plane1 = kgl.createProgram({
   shape: 'plane',
   width: size,
   height: size,
-  fragmentShaderId: 'fs',
+  fragmentShader,
   uniforms: {
     uTime: 0,
   },
@@ -52,7 +54,7 @@ const plane2 = kgl.createProgram({
   shape: 'plane',
   width: size2,
   height: size2,
-  fragmentShaderId: 'fs',
+  fragmentShader,
   uniforms: {
     uTime: 0,
   },

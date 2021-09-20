@@ -1,4 +1,5 @@
 import Kgl from '../../../src/index.js'
+import fragmentShader from './index.frag'
 
 const kgl = new Kgl({
   hasCamera: true,
@@ -9,7 +10,7 @@ const kgl = new Kgl({
  */
 const plane = kgl.createProgram({
   shape: 'plane',
-  fragmentShaderId: 'fs',
+  fragmentShader,
   uniforms: {
     uTime: 0,
   },

@@ -5,21 +5,10 @@
   <meta charset="utf-8">
   <title>KGL Library Examples - Simple</title>
   <link rel="stylesheet" href="index.css">
+  <script src="index.js" defer></script>
 </head>
 
 <body>
-  <script id="fs" type="x-shader/x-fragment">
-    precision highp float;
-
-    uniform vec2 uResolution; // window size (auto added)
-    uniform float uTime;
-
-    void main() {
-      float alpha = 1. - length(gl_FragCoord.xy / uResolution) * (sin(uTime) * 0.5 + 0.5);
-      gl_FragColor = vec4(vec3(0.), alpha);
-    }
-  </script>
-  <script src="index.js"></script>
 </body>
 
 </html>
