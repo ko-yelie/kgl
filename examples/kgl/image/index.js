@@ -1,4 +1,5 @@
 import Kgl from '../../../src/index.js'
+import fragmentShader from './index.frag'
 import { loadImage } from '../../utils.js'
 
 const image =
@@ -13,7 +14,7 @@ async function main() {
   const [img] = await loadImage(image, true)
 
   const program = kgl.createProgram({
-    fragmentShaderId: 'fs',
+    fragmentShader,
     uniforms: {
       uImage: img,
       uImageResolution: [img.width, img.height],

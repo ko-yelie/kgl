@@ -1,4 +1,5 @@
 import Kgl, { Godray } from '../../../src/index.js'
+import fragmentShader from './mask.frag'
 import { loadImage, mix } from '../../utils.js'
 
 const image =
@@ -14,7 +15,7 @@ async function main() {
   const [img] = await loadImage(image, true)
 
   const mask = kgl.createProgram({
-    fragmentShaderId: 'mask',
+    fragmentShader,
     uniforms: {
       uImage: img,
       uImageResolution: [img.width, img.height],

@@ -1,4 +1,5 @@
 import Kgl from '../../../src/index.js'
+import fragmentShader from './index.frag'
 
 const kgl = new Kgl()
 
@@ -6,7 +7,7 @@ const kgl = new Kgl()
  * program
  */
 const program = kgl.createProgram({
-  fragmentShaderId: 'fs',
+  fragmentShader,
   uniforms: {
     uTime: 0,
   },
