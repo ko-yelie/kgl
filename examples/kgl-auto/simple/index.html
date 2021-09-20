@@ -3,12 +3,13 @@
 
 <head>
   <meta charset="utf-8">
-  <title>KGL Library Examples - Simple</title>
+  <title>KGL Library Examples - Simple (KglAuto)</title>
   <link rel="stylesheet" href="index.css">
+  <script src="index.js" defer></script>
 </head>
 
 <body>
-  <script id="fs" type="x-shader/x-fragment">
+  <script type="x-shader/x-fragment" id="fs">
     precision highp float;
 
     uniform vec2 uResolution; // window size (auto added)
@@ -19,7 +20,6 @@
       gl_FragColor = vec4(vec3(0.), alpha);
     }
   </script>
-  <script src="index.js"></script>
 </body>
 
 </html>
