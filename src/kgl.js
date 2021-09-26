@@ -13,9 +13,6 @@ export default class Kgl {
     this.root = new ObjectGl(this)
     this.indexProgram = -1
     this.currentProgramId = null
-    this.vMatrix = createMatrix()
-    this.pMatrix = createMatrix()
-    this.vpMatrix = createMatrix()
     this.isUpdateMatrix = false
     this.effectList = []
     this.framebuffers = {}
@@ -41,15 +38,21 @@ export default class Kgl {
         far = 2000,
         cameraPosition = [0, 0, 30],
         cameraRotation = [0, 0],
+        extraFar = 1,
       } = option
 
+      this.vMatrix = createMatrix()
+      this.pMatrix = createMatrix()
+      this.vpMatrix = createMatrix()
       this.fov = fov
       this.near = near
       this.far = far
       this.cameraPosition = cameraPosition
       this.cameraRotation = cameraRotation
-      this.isAutoUpdateCameraPositionZ =
-        typeof option.cameraPosition === 'undefined'
+      this.isAutoUpdateCameraPositionZ = !(
+        'cameraPosition' in option || 'far' in option
+      )
+      this.extraFar = extraFar
     }
 
     if (hasLight) {
@@ -310,6 +313,7 @@ export default class Kgl {
 
   setIsUpdateMatrix() {
     this.isUpdateMatrix = true
+    this.root.setIsUpdateMatrix()
   }
 
   updateCamera() {
@@ -320,6 +324,8 @@ export default class Kgl {
         Math.min(this.canvas.width, this.canvas.height) /
         2 /
         Math.tan((this.fov / 2) * (Math.PI / 180))
+
+      this.far = cameraPosition[2] + this.extraFar
     }
 
     if (this.hasLight) {
@@ -356,6 +362,13 @@ export default class Kgl {
     })
   }
 
+  updateMatrix() {
+    if (!this.isUpdateMatrix) return
+
+    this.root.updateMatrix(this.vpMatrix)
+    this.isUpdateMatrix = false
+  }
+
   clear() {
     const { gl } = this
     gl.clearColor(
@@ -370,11 +383,6 @@ export default class Kgl {
   draw() {
     if (this.isClear) {
       this.clear()
-    }
-
-    if (this.isUpdateMatrix) {
-      this.root.updateMatrix(this.vpMatrix)
-      this.isUpdateMatrix = false
     }
 
     this.root.forEachProgram((program) => {

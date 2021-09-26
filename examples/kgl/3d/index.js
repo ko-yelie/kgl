@@ -21,9 +21,11 @@ const plane = kgl.createProgram({
  * resize
  */
 function resize() {
+  const size = window.innerHeight
+
+  kgl.extraFar = size / 2
   kgl.resize()
 
-  const size = window.innerHeight
   plane.width = size
   plane.height = size
 }

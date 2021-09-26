@@ -26,7 +26,11 @@ export default class KglAuto extends Kgl {
     this.onResize = onResize
 
     Object.keys(programs).forEach((key) => {
-      this.add((this.programs[key] = this.createProgram(programs[key])))
+      const data = programs[key]
+      const program = (this.programs[key] = this.createProgram(data))
+      if (!data.isFloats) {
+        this.add(program)
+      }
     })
 
     effects.forEach((key) => {

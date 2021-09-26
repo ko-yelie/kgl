@@ -27,7 +27,7 @@ jobs:
             ${{ runner.os }}-node-
 
       - run: npm ci
-      - run: npm run pages --prefix examples
+      - run: npm run pages
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3

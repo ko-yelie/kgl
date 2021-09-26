@@ -66,6 +66,7 @@ kgl.add(plane2) // add to kgl.root
  * resize
  */
 function resize() {
+  kgl.extraFar = size / 2
   kgl.resize()
 }
 resize()
