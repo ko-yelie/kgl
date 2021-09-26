@@ -11,5 +11,10 @@
     "@babel/plugin-transform-runtime": "^7.15.0",
     "parcel-bundler": "^1.12.5",
     "stylus": "^0.55.0"
+  },
+  "dependencies": {
+    "glsl-curl-noise": "0.0.4",
+    "glsl-random": "0.0.5",
+    "glsl-y-rotate": "^3.0.0"
   }
 }
