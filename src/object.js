@@ -9,7 +9,13 @@ import {
 
 export default class ObjectGl {
   constructor(kgl, option = {}) {
+    this.isProgram = false
+    this.children = []
+
     this.kgl = kgl
+
+    this.hasMatrix = 'hasMatrix' in option ? option.hasMatrix : true
+    if (!this.hasMatrix) return
 
     this.mMatrix = createMatrix()
     this.mvpMatrix = createMatrix()
@@ -18,10 +24,7 @@ export default class ObjectGl {
     this.rotateValue = [0, 0, 0]
     this.widthValue = 1
     this.heightValue = 1
-    this.isUpdateMatrixUniform = false
-
-    this.isProgram = false
-    this.children = []
+    this.isUpdateMatrix = false
 
     if ('width' in option) {
       this.width = option.width
@@ -70,7 +73,7 @@ export default class ObjectGl {
 
   set width(value) {
     this.widthValue = value
-    this.setIsUpdateMatrix()
+    this.changeMatrix()
   }
 
   get height() {
@@ -79,7 +82,7 @@ export default class ObjectGl {
 
   set height(value) {
     this.heightValue = value
-    this.setIsUpdateMatrix()
+    this.changeMatrix()
   }
 
   get x() {
@@ -88,7 +91,7 @@ export default class ObjectGl {
 
   set x(value) {
     this.translateValue[0] = value
-    this.setIsUpdateMatrix()
+    this.changeMatrix()
   }
 
   get y() {
@@ -97,7 +100,7 @@ export default class ObjectGl {
 
   set y(value) {
     this.translateValue[1] = value
-    this.setIsUpdateMatrix()
+    this.changeMatrix()
   }
 
   get z() {
@@ -106,7 +109,7 @@ export default class ObjectGl {
 
   set z(value) {
     this.translateValue[2] = value
-    this.setIsUpdateMatrix()
+    this.changeMatrix()
   }
 
   get scale() {
@@ -117,7 +120,7 @@ export default class ObjectGl {
 
   set scale(value) {
     this.scaleValue[0] = this.scaleValue[1] = this.scaleValue[2] = value
-    this.setIsUpdateMatrix()
+    this.changeMatrix()
   }
 
   get scaleX() {
@@ -126,7 +129,7 @@ export default class ObjectGl {
 
   set scaleX(value) {
     this.scaleValue[0] = value
-    this.setIsUpdateMatrix()
+    this.changeMatrix()
   }
 
   get scaleY() {
@@ -135,7 +138,7 @@ export default class ObjectGl {
 
   set scaleY(value) {
     this.scaleValue[1] = value
-    this.setIsUpdateMatrix()
+    this.changeMatrix()
   }
 
   get scaleZ() {
@@ -144,7 +147,7 @@ export default class ObjectGl {
 
   set scaleZ(value) {
     this.scaleValue[2] = value
-    this.setIsUpdateMatrix()
+    this.changeMatrix()
   }
 
   get rotateX() {
@@ -153,7 +156,7 @@ export default class ObjectGl {
 
   set rotateX(radian) {
     this.rotateValue[0] = radian
-    this.setIsUpdateMatrix()
+    this.changeMatrix()
   }
 
   get rotateY() {
@@ -162,7 +165,7 @@ export default class ObjectGl {
 
   set rotateY(radian) {
     this.rotateValue[1] = radian
-    this.setIsUpdateMatrix()
+    this.changeMatrix()
   }
 
   get rotateZ() {
@@ -171,7 +174,7 @@ export default class ObjectGl {
 
   set rotateZ(radian) {
     this.rotateValue[2] = radian
-    this.setIsUpdateMatrix()
+    this.changeMatrix()
   }
 
   get rotate() {
@@ -182,36 +185,59 @@ export default class ObjectGl {
     this.rotateZ = radian
   }
 
-  setIsUpdateMatrix() {
+  changeMatrix() {
+    if (this.isUpdateMatrix) return
+
     this.kgl.setIsUpdateMatrix()
   }
 
-  updateMatrix(vpMatrix) {
-    identity(this.mMatrix)
-
-    translate(this.mMatrix, this.translateValue, this.mMatrix)
-
-    rotate(this.mMatrix, this.rotateValue[0], [1, 0, 0], this.mMatrix)
-    rotate(this.mMatrix, this.rotateValue[1], [0, 1, 0], this.mMatrix)
-    rotate(this.mMatrix, this.rotateValue[2], [0, 0, 1], this.mMatrix)
-
-    scale(
-      this.mMatrix,
-      [
-        this.width * this.scaleValue[0],
-        this.height * this.scaleValue[1],
-        this.scaleValue[2],
-      ],
-      this.mMatrix
-    )
-
-    multiply(vpMatrix, this.mMatrix, this.mvpMatrix)
+  setIsUpdateMatrix() {
+    if (!this.hasMatrix) return
+    this.isUpdateMatrix = true
 
     if (!this.isProgram && this.children.length > 0) {
       for (let i = 0; i < this.children.length; i = (i + 1) | 0) {
-        this.children[i].updateMatrix(this.mvpMatrix)
+        this.children[i].setIsUpdateMatrix()
       }
     }
+  }
+
+  updateMatrix(vpMatrix) {
+    if (!this.hasMatrix) return
+
+    const { isUpdateMatrix } = this
+
+    if (isUpdateMatrix) {
+      identity(this.mMatrix)
+
+      translate(this.mMatrix, this.translateValue, this.mMatrix)
+
+      rotate(this.mMatrix, this.rotateValue[0], [1, 0, 0], this.mMatrix)
+      rotate(this.mMatrix, this.rotateValue[1], [0, 1, 0], this.mMatrix)
+      rotate(this.mMatrix, this.rotateValue[2], [0, 0, 1], this.mMatrix)
+
+      scale(
+        this.mMatrix,
+        [
+          this.width * this.scaleValue[0],
+          this.height * this.scaleValue[1],
+          this.scaleValue[2],
+        ],
+        this.mMatrix
+      )
+
+      multiply(vpMatrix, this.mMatrix, this.mvpMatrix)
+
+      if (!this.isProgram && this.children.length > 0) {
+        for (let i = 0; i < this.children.length; i = (i + 1) | 0) {
+          this.children[i].updateMatrix(this.mvpMatrix)
+        }
+      }
+
+      this.isUpdateMatrix = false
+    }
+
+    return isUpdateMatrix
   }
 
   add(objectGl) {

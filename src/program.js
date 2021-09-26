@@ -53,16 +53,6 @@ function getAttributePlane(width = 1, height = 1) {
 
 export default class Program extends ObjectGl {
   constructor(kgl, option = {}) {
-    super(kgl, option)
-
-    this.isProgram = true
-    this.attributes = {}
-    this.uniforms = {}
-    this.textures = {}
-
-    const { gl } = kgl
-    this.gl = gl
-
     const {
       shape,
       vertexShaderId,
@@ -84,9 +74,21 @@ export default class Program extends ObjectGl {
       isCulling = true,
       isDepth = false,
       isAutoResolution = !isFloats && !(uniforms && uniforms.uResolution),
-      hasCamera = kgl.hasCamera,
-      hasLight = kgl.hasLight,
+      hasCamera = !isFloats && kgl.hasCamera,
+      hasLight = !isFloats && kgl.hasLight,
     } = option
+
+    option.hasMatrix = hasCamera
+
+    super(kgl, option)
+
+    this.isProgram = true
+    this.attributes = {}
+    this.uniforms = {}
+    this.textures = {}
+
+    const { gl } = kgl
+    this.gl = gl
 
     kgl.indexProgram = kgl.indexProgram + 1
     this.id = kgl.indexProgram
@@ -251,7 +253,10 @@ export default class Program extends ObjectGl {
   }
 
   updateMatrix(vpMatrix) {
-    super.updateMatrix(vpMatrix)
+    if (!this.hasMatrix) return
+
+    const isUpdateMatrix = super.updateMatrix(vpMatrix)
+    if (!isUpdateMatrix) return
 
     if (this.hasCamera) {
       this.uniforms.uMvpMatrix = this.mvpMatrix
@@ -441,6 +446,10 @@ export default class Program extends ObjectGl {
   draw() {
     const { gl } = this
 
+    if (this.isUpdateMatrix) {
+      this.kgl.updateMatrix()
+    }
+
     this.use()
 
     if (this.isTransparent) {
@@ -453,11 +462,17 @@ export default class Program extends ObjectGl {
       gl.disable(gl.BLEND)
     }
 
-    if (this.isCulling) gl.enable(gl.CULL_FACE)
-    else gl.disable(gl.CULL_FACE)
+    if (this.isCulling) {
+      gl.enable(gl.CULL_FACE)
+    } else {
+      gl.disable(gl.CULL_FACE)
+    }
 
-    if (this.isDepth) gl.enable(gl.DEPTH_TEST)
-    else gl.disable(gl.DEPTH_TEST)
+    if (this.isDepth) {
+      gl.enable(gl.DEPTH_TEST)
+    } else {
+      gl.disable(gl.DEPTH_TEST)
+    }
 
     const keys = Object.keys(this.attributes)
     for (let i = 0; i < keys.length; i++) {
