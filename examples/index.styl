@@ -18,19 +18,16 @@ a
 
 header
   overflow auto
-  pointer-events none
+  box-sizing border-box
   position fixed
   top margin-window
-  bottom margin-window
   left margin-window
   z-index 1
+  max-height 'calc(100% - %s)' % (margin-window * 2)
   margin auto
+  padding 0.5em
+  background-color background-color
   color color-text
-
-  > .inner
-    pointer-events auto
-    padding 0.5em
-    background-color background-color
 
 nav
   ul
