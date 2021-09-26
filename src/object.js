@@ -32,6 +32,9 @@ export default class ObjectGl {
     if ('height' in option) {
       this.height = option.height
     }
+    if ('size' in option) {
+      this.size = option.size
+    }
     if ('x' in option) {
       this.x = option.x
     }
@@ -83,6 +86,14 @@ export default class ObjectGl {
   set height(value) {
     this.heightValue = value
     this.changeMatrix()
+  }
+
+  get size() {
+    return this.width
+  }
+
+  set size(value) {
+    this.width = this.height = value
   }
 
   get x() {

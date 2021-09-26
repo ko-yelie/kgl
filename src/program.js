@@ -22,11 +22,12 @@ const attributeNone = {
   },
 }
 
-function getAttributePlane(width = 1, height = 1) {
+function getAttributePlane(option = {}) {
+  const { width = 1, height = 1, hasLight = false } = option
   const widthHalf = width / 2
   const heightHalf = height / 2
 
-  return {
+  const attributes = {
     aPosition: {
       value: [
         -widthHalf,
@@ -49,6 +50,121 @@ function getAttributePlane(width = 1, height = 1) {
       size: 2,
     },
   }
+
+  if (hasLight) {
+    attributes.aNormal = {
+      value: [0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0],
+      size: 3,
+    }
+  }
+
+  return attributes
+}
+
+function getAttributeCube(option = {}) {
+  const { size = 1, hasLight = false } = option
+  const sizeHalf = size / 2
+
+  const attributes = {
+    aPosition: {
+      value: [
+        sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        sizeHalf,
+        sizeHalf,
+        sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+        sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        sizeHalf,
+        sizeHalf,
+        sizeHalf,
+        sizeHalf,
+        sizeHalf,
+        sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+        sizeHalf,
+        sizeHalf,
+        sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+        sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+        -sizeHalf,
+      ],
+      size: 3,
+    },
+    indices: {
+      value: [
+        0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11, 12, 13, 14, 12,
+        14, 15, 16, 17, 18, 16, 18, 19, 20, 21, 22, 20, 22, 23,
+      ],
+      isIndices: true,
+    },
+  }
+
+  if (hasLight) {
+    attributes.aNormal = {
+      value: [
+        1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0,
+        0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1, 0, 0,
+        -1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, -1, 0, 0, -1, 0, 0, -1,
+        0, 0, -1,
+      ],
+      size: 3,
+    }
+  }
+
+  return attributes
 }
 
 export default class Program extends ObjectGl {
@@ -124,20 +240,23 @@ export default class Program extends ObjectGl {
     } else if (shape) {
       switch (shape) {
         case 'plane':
-          this.createAttribute(getAttributePlane())
+          this.createAttribute(getAttributePlane({ hasLight: this.hasLight }))
+          break
+        case 'cube':
+          this.createAttribute(getAttributeCube({ hasLight: this.hasLight }))
           break
       }
     } else if (attributes) {
       this.createAttribute(attributes)
+    }
 
-      if (this.isInstanced) {
-        this.instancedArraysExt = gl.getExtension('ANGLE_instanced_arrays')
-        if (this.instancedArraysExt == null) {
-          alert('ANGLE_instanced_arrays not supported')
-          return
-        }
-        this.createAttribute(instancedAttributes, true)
+    if (this.isInstanced) {
+      this.instancedArraysExt = gl.getExtension('ANGLE_instanced_arrays')
+      if (this.instancedArraysExt == null) {
+        alert('ANGLE_instanced_arrays not supported')
+        return
       }
+      this.createAttribute(instancedAttributes, true)
     }
 
     this.createUniform(uniforms)
