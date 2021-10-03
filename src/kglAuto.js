@@ -1,4 +1,4 @@
-import Kgl from './kgl.js'
+import Kgl from './kgl.ts'
 import * as Effects from './effects/index.js'
 
 export default class KglAuto extends Kgl {

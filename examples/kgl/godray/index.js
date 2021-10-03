@@ -1,4 +1,4 @@
-import Kgl, { Godray } from '../../../src/index.js'
+import Kgl, { Godray } from '../../../src/index.ts'
 import fragmentShader from './mask.frag'
 import { loadImage, mix } from '../../utils.js'
 

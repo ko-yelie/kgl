@@ -1,4 +1,4 @@
-import Kgl from '../../../src/index.js'
+import Kgl from '../../../src/index.ts'
 import vertexShader from './index.vert'
 import fragmentShader from './index.frag'
 

@@ -1,4 +1,4 @@
-import Kgl from '../../../src/index.js'
+import Kgl from '../../../src/index.ts'
 import resetVelocityFrag from './shaders/reset-velocity.frag'
 import resetPositionFrag from './shaders/reset-position.frag'
 import velocityFrag from './shaders/velocity.frag'
