@@ -240,10 +240,18 @@ export default class Program extends ObjectGl {
     } else if (shape) {
       switch (shape) {
         case 'plane':
-          this.createAttribute(getAttributePlane({ hasLight: this.hasLight }))
+          this.createAttribute(
+            getAttributePlane({
+              hasLight: this.hasLight,
+              width: option.width,
+              height: option.height,
+            })
+          )
           break
         case 'cube':
-          this.createAttribute(getAttributeCube({ hasLight: this.hasLight }))
+          this.createAttribute(
+            getAttributeCube({ hasLight: this.hasLight, size: option.size })
+          )
           break
       }
     } else if (attributes) {
@@ -411,23 +419,27 @@ export default class Program extends ObjectGl {
   addUniform(key, value) {
     let originalType
     let uniformType
-    let uniformValue = value
+    let _value = value
 
     const getTypeFromString = (type, value) => {
       switch (type) {
-        case 'image':
-          originalType = 'image'
+        case 'texture':
+          originalType = 'texture'
           uniformType = '1i'
-          uniformValue = this.createTexture(key, value)
+          _value = this.createTexture(
+            key,
+            this._dummyCanvas ||
+              (this._dummyCanvas = document.createElement('canvas'))
+          )
           break
         case 'framebuffer':
           originalType = 'framebuffer'
           uniformType = '1i'
-          uniformValue = value
+          _value = value
           break
         default:
           uniformType = type
-          uniformValue = value
+          _value = value
       }
     }
 
@@ -457,8 +469,9 @@ export default class Program extends ObjectGl {
           case 'HTMLImageElement':
           case 'HTMLVideoElement':
           case 'HTMLCanvasElement':
+            originalType = 'texture'
             uniformType = '1i'
-            uniformValue = this.createTexture(key, value)
+            _value = this.createTexture(key, value)
             break
           case 'Object':
             getTypeFromString(value.type, value.value)
@@ -477,11 +490,21 @@ export default class Program extends ObjectGl {
 
     let set
     switch (originalType) {
-      case 'image':
-        set = (textureKey) => {
+      case 'texture':
+        set = (value) => {
           this.use()
-          this.gl[type](location, this.textures[textureKey].textureIndex)
-          uniformValue = textureKey
+          switch (typeof value) {
+            case 'number':
+              this.gl[type](location, value)
+              _value = value
+              break
+            case 'string':
+              _value = this.textures[value].textureIndex
+              this.gl[type](location, _value)
+              break
+            default:
+              _value = this.updateTexture(key, value)
+          }
         }
         break
       case 'framebuffer':
@@ -491,30 +514,30 @@ export default class Program extends ObjectGl {
             location,
             this.kgl.framebuffers[framebufferKey].textureIndex
           )
-          uniformValue = framebufferKey
+          _value = framebufferKey
         }
         break
       case 'matrix':
         set = (newValue) => {
           this.use()
           this.gl[type](location, false, newValue)
-          uniformValue = newValue
+          _value = newValue
         }
         break
       default:
         set = (newValue) => {
           this.use()
           this.gl[type](location, newValue)
-          uniformValue = newValue
+          _value = newValue
         }
     }
 
     Object.defineProperty(this.uniforms, key, {
-      get: () => uniformValue,
+      get: () => _value,
       set,
     })
 
-    if (typeof uniformValue !== 'undefined') this.uniforms[key] = uniformValue
+    if (typeof _value !== 'undefined') this.uniforms[key] = _value
   }
 
   updateUniforms(uniforms) {

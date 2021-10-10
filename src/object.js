@@ -19,22 +19,11 @@ export default class ObjectGl {
 
     this.mMatrix = createMatrix()
     this.mvpMatrix = createMatrix()
-    this.translateValue = [0, 0, 0]
-    this.scaleValue = [1, 1, 1]
-    this.rotateValue = [0, 0, 0]
-    this.widthValue = 1
-    this.heightValue = 1
+    this._translate = [0, 0, 0]
+    this._scale = [1, 1, 1]
+    this._rotate = [0, 0, 0]
     this.isUpdateMatrix = false
 
-    if ('width' in option) {
-      this.width = option.width
-    }
-    if ('height' in option) {
-      this.height = option.height
-    }
-    if ('size' in option) {
-      this.size = option.size
-    }
     if ('x' in option) {
       this.x = option.x
     }
@@ -70,121 +59,95 @@ export default class ObjectGl {
     }
   }
 
-  get width() {
-    return this.widthValue
-  }
-
-  set width(value) {
-    this.widthValue = value
-    this.changeMatrix()
-  }
-
-  get height() {
-    return this.heightValue
-  }
-
-  set height(value) {
-    this.heightValue = value
-    this.changeMatrix()
-  }
-
-  get size() {
-    return this.width
-  }
-
-  set size(value) {
-    this.width = this.height = value
-  }
-
   get x() {
-    return this.translateValue[0]
+    return this._translate[0]
   }
 
   set x(value) {
-    this.translateValue[0] = value
+    this._translate[0] = value
     this.changeMatrix()
   }
 
   get y() {
-    return this.translateValue[1]
+    return this._translate[1]
   }
 
   set y(value) {
-    this.translateValue[1] = value
+    this._translate[1] = value
     this.changeMatrix()
   }
 
   get z() {
-    return this.translateValue[2]
+    return this._translate[2]
   }
 
   set z(value) {
-    this.translateValue[2] = value
+    this._translate[2] = value
     this.changeMatrix()
   }
 
   get scale() {
-    return (this.scaleValue[0] === this.scaleValue[1]) === this.scaleValue[2]
-      ? this.scaleValue[0]
+    return (this._scale[0] === this._scale[1]) === this._scale[2]
+      ? this._scale[0]
       : null
   }
 
   set scale(value) {
-    this.scaleValue[0] = this.scaleValue[1] = this.scaleValue[2] = value
+    this._scale[0] = this._scale[1] = this._scale[2] = value
     this.changeMatrix()
   }
 
   get scaleX() {
-    return this.scaleValue[0]
+    return this._scale[0]
   }
 
   set scaleX(value) {
-    this.scaleValue[0] = value
+    this._scale[0] = value
     this.changeMatrix()
   }
 
   get scaleY() {
-    return this.scaleValue[1]
+    return this._scale[1]
   }
 
   set scaleY(value) {
-    this.scaleValue[1] = value
+    this._scale[1] = value
     this.changeMatrix()
   }
 
   get scaleZ() {
-    return this.scaleValue[2]
+    return this._scale[2]
   }
 
   set scaleZ(value) {
-    this.scaleValue[2] = value
+    this._scale[2] = value
     this.changeMatrix()
   }
 
   get rotateX() {
-    return this.rotateValue[0]
+    return this._rotate[0]
   }
 
   set rotateX(radian) {
-    this.rotateValue[0] = radian
+    this._rotate[0] = radian
     this.changeMatrix()
   }
 
   get rotateY() {
-    return this.rotateValue[1]
+    return this._rotate[1]
   }
 
   set rotateY(radian) {
-    this.rotateValue[1] = radian
+    this._rotate[1] = radian
     this.changeMatrix()
   }
 
   get rotateZ() {
-    return this.rotateValue[2]
+    return this._rotate[2]
   }
 
   set rotateZ(radian) {
-    this.rotateValue[2] = radian
+    this._rotate[2] = radian
     this.changeMatrix()
   }
 
@@ -221,19 +184,15 @@ export default class ObjectGl {
     if (isUpdateMatrix) {
       identity(this.mMatrix)
 
-      translate(this.mMatrix, this.translateValue, this.mMatrix)
+      translate(this.mMatrix, this._translate, this.mMatrix)
 
-      rotate(this.mMatrix, this.rotateValue[0], [1, 0, 0], this.mMatrix)
-      rotate(this.mMatrix, this.rotateValue[1], [0, 1, 0], this.mMatrix)
-      rotate(this.mMatrix, this.rotateValue[2], [0, 0, 1], this.mMatrix)
+      rotate(this.mMatrix, this._rotate[0], [1, 0, 0], this.mMatrix)
+      rotate(this.mMatrix, this._rotate[1], [0, 1, 0], this.mMatrix)
+      rotate(this.mMatrix, this._rotate[2], [0, 0, 1], this.mMatrix)
 
       scale(
         this.mMatrix,
-        [
-          this.width * this.scaleValue[0],
-          this.height * this.scaleValue[1],
-          this.scaleValue[2],
-        ],
+        [this._scale[0], this._scale[1], this._scale[2]],
         this.mMatrix
       )
 
