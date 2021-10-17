@@ -221,7 +221,7 @@ export default class Kgl {
       return
     }
 
-    const flg = textureFloat ? gl.FLOAT : textureHalfFloat.HALF_FLOAT_OES
+    const flg = textureHalfFloat ? textureHalfFloat.HALF_FLOAT_OES : gl.FLOAT
     const framebuffer = gl.createFramebuffer()
     const texture = gl.createTexture()
     const textureIndex = ++this.textureIndex
