@@ -8,13 +8,13 @@ uniform float uTime;
 const float pSpeed = 1.5;
 
 #pragma glslify: PI = require(../../shaders/PI.glsl)
-#pragma glslify: adjustRatio = require(../../shaders/adjustRatio.glsl)
+#pragma glslify: fitCover = require(../../shaders/fitCover.glsl)
 #pragma glslify: getZoomedUv = require(../../shaders/getZoomedUv.glsl)
 
 void main() {
   vec2 uv = gl_FragCoord.st / uResolution;
   uv.y = 1. - uv.y;
-  uv = adjustRatio(uv, uImageResolution, uResolution);
+  uv = fitCover(uv, uImageResolution, uResolution);
 
   vec2 uvCenter = uv * 2. - 1.;
   float distortion = min(max(1. / length(uvCenter) * (sin(uTime * pSpeed - PI * 0.5) * 0.5 + 0.5), 0.), 1.);

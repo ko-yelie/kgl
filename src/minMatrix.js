@@ -368,3 +368,23 @@ export function inverse(mat, dest) {
   dest[15] = (i * t - j * r + k * q) * ivd
   return dest
 }
+
+export function getLength(mat) {
+  return Math.sqrt(mat[0] * mat[0] + mat[1] * mat[1] + mat[2] * mat[2])
+}
+
+export function normalize(mat, dest) {
+  return divideScalar(mat, getLength(mat) || 1)
+}
+
+export function multiplyScalar(mat, scalar) {
+  mat[0] *= scalar
+  mat[1] *= scalar
+  mat[2] *= scalar
+
+  return mat
+}
+
+export function divideScalar(mat, scalar) {
+  return multiplyScalar(mat, 1 / scalar)
+}
