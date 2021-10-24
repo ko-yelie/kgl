@@ -26,8 +26,7 @@ function resize() {
   kgl.extraFar = size / 2
   kgl.resize()
 
-  plane.width = size
-  plane.height = size
+  plane.scale = size
 }
 resize()
 window.addEventListener('resize', resize)
@@ -39,7 +38,6 @@ function tick(time) {
   time *= 0.001
 
   plane.x = Math.sin(time * 1) * 300
-  plane.scale = 1 - ((Math.sin(time * 2) + 1) / 2) * 0.5
   plane.rotateY = Math.sin(time * 1) * 1
   plane.uniforms.uTime = time
 
