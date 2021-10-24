@@ -1,11 +1,11 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>KGL Library Examples - God Ray (KglAuto)</title><link rel="stylesheet" href="/kgl/godray.a8d3693c.css"><script src="/kgl/godray.97ce1b6f.js" defer></script></head><body> <script type="x-shader/x-fragment" id="mask">
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><title>KGL Library Examples - God Ray (KglAuto)</title><link rel="stylesheet" href="/kgl/godray.a8d3693c.css"><script src="/kgl/godray.873d3b57.js" defer></script></head><body> <script type="x-shader/x-fragment" id="mask">
     precision highp float;
 
     uniform vec2 uResolution;
     uniform sampler2D uImage;
     uniform vec2 uImageResolution;
 
-    vec2 adjustRatio(vec2 uv, vec2 inputResolution, vec2 outputResolution) {
+    vec2 fitCover(vec2 uv, vec2 inputResolution, vec2 outputResolution) {
       vec2 ratio = vec2(
         min((outputResolution.x / outputResolution.y) / (inputResolution.x / inputResolution.y), 1.),
         min((outputResolution.y / outputResolution.x) / (inputResolution.y / inputResolution.x), 1.)
@@ -16,7 +16,7 @@
     void main() {
       vec2 uv = gl_FragCoord.st / uResolution;
       uv.y = 1. - uv.y;
-      uv = adjustRatio(uv, uImageResolution, uResolution);
+      uv = fitCover(uv, uImageResolution, uResolution);
 
       gl_FragColor = texture2D(uImage, uv);
     }
