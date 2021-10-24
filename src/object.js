@@ -33,6 +33,9 @@ export default class ObjectGl {
     if ('z' in option) {
       this.z = option.z
     }
+    if ('translate3d' in option) {
+      this.translate3d = option.translate3d
+    }
     if ('scale' in option) {
       this.scale = option.scale
     }
@@ -45,6 +48,9 @@ export default class ObjectGl {
     if ('scaleZ' in option) {
       this.scaleZ = option.scaleZ
     }
+    if ('scale3d' in option) {
+      this.scale3d = option.scale3d
+    }
     if ('rotateX' in option) {
       this.rotateX = option.rotateX
     }
@@ -56,6 +62,9 @@ export default class ObjectGl {
     }
     if ('rotate' in option) {
       this.rotate = option.rotate
+    }
+    if ('rotate3d' in option) {
+      this.rotate3d = option.rotate3d
     }
   }
 
@@ -83,6 +92,17 @@ export default class ObjectGl {
 
   set z(value) {
     this._translate[2] = value
+    this.changeMatrix()
+  }
+
+  get translate3d() {
+    return [...this._translate]
+  }
+
+  set translate3d(value) {
+    this._translate[0] = value[0]
+    this._translate[1] = value[1]
+    this._translate[2] = value[2]
     this.changeMatrix()
   }
 
@@ -124,6 +144,17 @@ export default class ObjectGl {
     this.changeMatrix()
   }
 
+  get scale3d() {
+    return [...this._scale]
+  }
+
+  set scale3d(value) {
+    this._scale[0] = value[0]
+    this._scale[1] = value[1]
+    this._scale[2] = value[2]
+    this.changeMatrix()
+  }
+
   get rotateX() {
     return this._rotate[0]
   }
@@ -157,6 +188,17 @@ export default class ObjectGl {
 
   set rotate(radian) {
     this.rotateZ = radian
+  }
+
+  get rotate3d() {
+    return [...this._rotate]
+  }
+
+  set rotate3d(radian) {
+    this._rotate[0] = radian[0]
+    this._rotate[1] = radian[1]
+    this._rotate[2] = radian[2]
+    this.changeMatrix()
   }
 
   changeMatrix() {

@@ -1,9 +1,9 @@
 import ObjectGl from './object.js'
-import { createMatrix, inverse } from './minMatrix.js'
+import { createMatrix, inverse, normalize } from './minMatrix.js'
 
 const vertexShaderShape = {
-  none: 'attribute vec2 aPosition;void main(){gl_Position=vec4(aPosition,0.,1.);}',
-  plane: `
+  d2: 'attribute vec2 aPosition;void main(){gl_Position=vec4(aPosition,0.,1.);}',
+  d3: `
     attribute vec3 aPosition;
     attribute vec2 aUv;
     uniform mat4 uMvpMatrix;
@@ -22,7 +22,7 @@ const attributeNone = {
   },
 }
 
-function getAttributePlane(option = {}) {
+function getShapePlane(option = {}) {
   const { width = 1, height = 1, hasLight = false } = option
   const widthHalf = width / 2
   const heightHalf = height / 2
@@ -58,10 +58,10 @@ function getAttributePlane(option = {}) {
     }
   }
 
-  return attributes
+  return { attributes, resolution: [width, height] }
 }
 
-function getAttributeCube(option = {}) {
+function getShapeCube(option = {}) {
   const { size = 1, hasLight = false } = option
   const sizeHalf = size / 2
 
@@ -164,7 +164,189 @@ function getAttributeCube(option = {}) {
     }
   }
 
-  return attributes
+  return { attributes, resolution: [size, size] }
+}
+
+function getShapeCylinder(option = {}) {
+  const {
+    radius = 1,
+    radiusTop = radius,
+    radiusBottom = radius,
+    height = 1,
+    radialSegments = 8,
+    heightSegments = 1,
+    openEnded = true,
+    thetaStart = 0,
+    thetaLength = Math.PI * 2,
+    hasLight = false,
+  } = option
+
+  const indices = []
+  const vertices = []
+  const normals = []
+  const uvs = []
+
+  // helper variables
+  let index = 0
+  const indexArray = []
+  const halfHeight = height / 2
+
+  // generate geometry
+  generateTorso()
+
+  if (openEnded === false) {
+    if (radiusTop > 0) generateCap(true)
+    if (radiusBottom > 0) generateCap(false)
+  }
+
+  function generateTorso() {
+    // this will be used to calculate the normal
+    const slope = (radiusBottom - radiusTop) / height
+
+    // generate vertices, normals and uvs
+    for (let y = 0; y <= heightSegments; y++) {
+      const indexRow = []
+
+      const v = y / heightSegments
+
+      // calculate the radius of the current row
+      const radius = v * (radiusBottom - radiusTop) + radiusTop
+
+      for (let x = 0; x <= radialSegments; x++) {
+        const u = x / radialSegments
+
+        const theta = u * thetaLength + thetaStart
+
+        const sinTheta = Math.sin(theta)
+        const cosTheta = Math.cos(theta)
+
+        // vertex
+        vertices.push(
+          radius * sinTheta,
+          -v * height + halfHeight,
+          radius * cosTheta
+        )
+
+        // normal
+        if (hasLight) {
+          const normal = [sinTheta, slope, cosTheta]
+          normalize(normal)
+          normals.push(normal[0], normal[1], normal[2])
+        }
+
+        // uv
+        uvs.push(u, 1 - v)
+
+        // save index of vertex in respective row
+        indexRow.push(index++)
+      }
+
+      // now save vertices of the row in our index array
+      indexArray.push(indexRow)
+    }
+
+    // generate indices
+    for (let x = 0; x < radialSegments; x++) {
+      for (let y = 0; y < heightSegments; y++) {
+        // we use the index array to access the correct indices
+        const a = indexArray[y][x]
+        const b = indexArray[y + 1][x]
+        const c = indexArray[y + 1][x + 1]
+        const d = indexArray[y][x + 1]
+
+        // faces
+        indices.push(a, b, d)
+        indices.push(b, c, d)
+      }
+    }
+  }
+
+  function generateCap(top) {
+    // save the index of the first center vertex
+    const centerIndexStart = index
+
+    const radius = top === true ? radiusTop : radiusBottom
+    const sign = top === true ? 1 : -1
+
+    // first we generate the center vertex data of the cap.
+    // because the geometry needs one set of uvs per face,
+    // we must generate a center vertex per face/segment
+    for (let x = 1; x <= radialSegments; x++) {
+      // vertex
+      vertices.push(0, halfHeight * sign, 0)
+
+      // normal
+      normals.push(0, sign, 0)
+
+      // uv
+      uvs.push(0.5, 0.5)
+
+      // increase index
+      index++
+    }
+
+    // save the index of the last center vertex
+    const centerIndexEnd = index
+
+    // now we generate the surrounding vertices, normals and uvs
+    for (let x = 0; x <= radialSegments; x++) {
+      const u = x / radialSegments
+      const theta = u * thetaLength + thetaStart
+
+      const cosTheta = Math.cos(theta)
+      const sinTheta = Math.sin(theta)
+
+      // vertex
+      vertices.push(radius * sinTheta, halfHeight * sign, radius * cosTheta)
+
+      // normal
+      normals.push(0, sign, 0)
+
+      // uv
+      uvs.push(cosTheta * 0.5 + 0.5, sinTheta * 0.5 * sign + 0.5)
+
+      // increase index
+      index++
+    }
+
+    // generate indices
+    for (let x = 0; x < radialSegments; x++) {
+      const c = centerIndexStart + x
+      const i = centerIndexEnd + x
+
+      if (top === true) {
+        // face top
+        indices.push(i, i + 1, c)
+      } else {
+        // face bottom
+        indices.push(i + 1, i, c)
+      }
+    }
+  }
+
+  const attributes = {
+    aPosition: {
+      value: vertices,
+      size: 3,
+    },
+    aUv: {
+      value: uvs,
+      size: 2,
+    },
+    indices: {
+      value: indices,
+      isIndices: true,
+    },
+  }
+
+  if (hasLight) {
+    attributes.aNormal = {
+      value: normals,
+      size: 3,
+    }
+  }
+
+  return { attributes, resolution: [radius * 2 * Math.PI, height] }
 }
 
 export default class Program extends ObjectGl {
@@ -175,13 +357,13 @@ export default class Program extends ObjectGl {
       vertexShader = vertexShaderId
         ? document.getElementById(vertexShaderId).textContent
         : shape
-        ? vertexShaderShape[shape]
-        : vertexShaderShape.none,
+        ? vertexShaderShape.d3
+        : vertexShaderShape.d2,
       fragmentShaderId,
       fragmentShader = document.getElementById(fragmentShaderId).textContent,
       attributes,
       instancedAttributes,
-      uniforms,
+      uniforms = {},
       mode,
       drawType = 'STATIC_DRAW',
       isTransparent = false,
@@ -189,7 +371,7 @@ export default class Program extends ObjectGl {
       isFloats = false,
       isCulling = true,
       isDepth = false,
-      isAutoResolution = !isFloats && !(uniforms && uniforms.uResolution),
+      isAutoResolution = !isFloats && !uniforms.uResolution,
       hasCamera = !isFloats && kgl.hasCamera,
       hasLight = !isFloats && kgl.hasLight,
     } = option
@@ -238,21 +420,31 @@ export default class Program extends ObjectGl {
     if (isWhole) {
       this.createAttribute(attributeNone)
     } else if (shape) {
+      let shapeData
       switch (shape) {
         case 'plane':
-          this.createAttribute(
-            getAttributePlane({
-              hasLight: this.hasLight,
-              width: option.width,
-              height: option.height,
-            })
-          )
+          shapeData = getShapePlane({
+            hasLight: this.hasLight,
+            width: option.width,
+            height: option.height,
+          })
           break
         case 'cube':
-          this.createAttribute(
-            getAttributeCube({ hasLight: this.hasLight, size: option.size })
-          )
+          shapeData = getShapeCube({
+            hasLight: this.hasLight,
+            size: option.size,
+          })
           break
+        case 'cylinder':
+          shapeData = getShapeCylinder({
+            hasLight: this.hasLight,
+            ...option,
+          })
+          break
+      }
+      if (shapeData) {
+        this.createAttribute(shapeData.attributes)
+        uniforms.uResolutionShape = shapeData.resolution
       }
     } else if (attributes) {
       this.createAttribute(attributes)
@@ -573,9 +765,12 @@ export default class Program extends ObjectGl {
 
   updateTexture(key, el) {
     const { gl } = this
+    const { textureIndex } = this.textures[key]
 
-    gl.activeTexture(gl[`TEXTURE${this.textures[key].textureIndex}`])
+    gl.activeTexture(gl[`TEXTURE${textureIndex}`])
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, el)
+
+    return textureIndex
   }
 
   use() {
