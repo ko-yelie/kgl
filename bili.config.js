@@ -14,6 +14,7 @@ module.exports = {
     minimal: true,
   },
   banner,
+  input: ['src/index.js', 'src/kgl.js'],
   output: {
     moduleName: 'Kgl',
     format: ['es', 'iife', 'iife-min'],
