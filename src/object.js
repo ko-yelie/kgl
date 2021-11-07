@@ -211,7 +211,7 @@ export default class ObjectGl {
     if (!this.hasMatrix) return
     this.isUpdateMatrix = true
 
-    if (!this.isProgram && this.children.length > 0) {
+    if (!this.isProgram) {
       for (let i = 0; i < this.children.length; i = (i + 1) | 0) {
         this.children[i].setIsUpdateMatrix()
       }
@@ -240,7 +240,7 @@ export default class ObjectGl {
 
       multiply(vpMatrix, this.mMatrix, this.mvpMatrix)
 
-      if (!this.isProgram && this.children.length > 0) {
+      if (!this.isProgram) {
         for (let i = 0; i < this.children.length; i = (i + 1) | 0) {
           this.children[i].updateMatrix(this.mvpMatrix)
         }
@@ -264,6 +264,14 @@ export default class ObjectGl {
       }
       return false
     })
+  }
+
+  draw() {
+    if (this.children.length > 0) {
+      for (let i = 0; i < this.children.length; i = (i + 1) | 0) {
+        this.children[i].draw()
+      }
+    }
   }
 
   forEachProgram(func) {
