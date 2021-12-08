@@ -107,7 +107,8 @@ export default class ObjectGl {
   }
 
   get scale() {
-    return (this._scale[0] === this._scale[1]) === this._scale[2]
+    return this._scale[0] === this._scale[1] &&
+      this._scale[0] === this._scale[2]
       ? this._scale[0]
       : null
   }
