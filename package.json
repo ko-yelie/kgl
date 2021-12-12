@@ -6,8 +6,7 @@
   "main": "dist/index.es.js",
   "unpkg": "dist/index.iife.min.js",
   "files": [
-    "dist/",
-    "src/"
+    "dist/"
   ],
   "scripts": {
     "build": "bili",

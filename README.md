@@ -20,6 +20,9 @@ import Kgl from '@ko-yelie/kgl'
 
 // KglAuto
 import { KglAuto } from '@ko-yelie/kgl'
+
+// Import only KGL (ignore KglAuto and effects)
+import Kgl from '@ko-yelie/kgl/dist/kgl.es.js'
 ```
 
 #### CDN
