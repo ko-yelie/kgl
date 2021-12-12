@@ -364,7 +364,7 @@ export default class Program extends ObjectGl {
       attributes,
       instancedAttributes,
       uniforms = {},
-      mode,
+      mode = shape === 'point' ? 'POINTS' : null,
       drawType = 'STATIC_DRAW',
       isTransparent = false,
       isAdditive = false,
@@ -419,7 +419,7 @@ export default class Program extends ObjectGl {
 
     if (isWhole) {
       this.createAttribute(attributeNone)
-    } else if (shape) {
+    } else if (shape && shape !== 'point') {
       let shapeData
       switch (shape) {
         case 'plane':
