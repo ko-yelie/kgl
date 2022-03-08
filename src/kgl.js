@@ -24,12 +24,22 @@ export default class Kgl {
       clearedColor,
       hasCamera = false,
       hasLight = false,
+      isFullSize = false,
+      stencil = false,
+      premultipliedAlpha = true,
+      pixelRatio,
+      pixelRatioFixed,
     } = option
 
     this.isClear = isClear
     this.clearedColor = clearedColor || [0, 0, 0, 0]
     this.hasCamera = hasCamera
     this.hasLight = hasLight
+    this.isFullSize = isFullSize
+    this.stencil = stencil
+    this.premultipliedAlpha = premultipliedAlpha
+    this.pixelRatio = pixelRatio
+    this.pixelRatioFixed = pixelRatioFixed
 
     if (hasCamera) {
       const {
@@ -86,9 +96,14 @@ export default class Kgl {
       document.body.appendChild(this.canvas)
     }
 
+    const contextAttributes = {
+      alpha: true,
+      stencil: this.stencil,
+      premultipliedAlpha: this.premultipliedAlpha,
+    }
     const gl = (this.gl =
-      this.canvas.getContext('webgl') ||
-      this.canvas.getContext('experimental-webgl'))
+      this.canvas.getContext('webgl', contextAttributes) ||
+      this.canvas.getContext('experimental-webgl', contextAttributes))
 
     gl.depthFunc(gl.LEQUAL)
   }
@@ -278,8 +293,34 @@ export default class Kgl {
 
   resize() {
     const { gl } = this
-    const width = this.canvas.clientWidth
-    const height = this.canvas.clientHeight
+
+    this.canvas.width = ''
+    this.canvas.height = ''
+    this.canvasNativeWidth = this.canvas.clientWidth
+    this.canvasNativeHeight = this.canvas.clientHeight
+
+    const pixelRatio = this.pixelRatioFixed
+      ? this.pixelRatioFixed
+      : this.pixelRatio
+      ? Math.min(this.pixelRatio, window.devicePixelRatio)
+      : window.devicePixelRatio
+
+    const width = Math.floor(
+      (this.isFullSize
+        ? Math.max(
+            Math.min(window.innerWidth, window.outerWidth),
+            this.canvasNativeWidth
+          )
+        : this.canvasNativeWidth) * pixelRatio
+    )
+    const height = Math.floor(
+      (this.isFullSize
+        ? Math.max(
+            Math.min(window.innerHeight, window.outerHeight),
+            this.canvasNativeHeight
+          )
+        : this.canvasNativeHeight) * pixelRatio
+    )
 
     this.canvas.width = width
     this.canvas.height = height
