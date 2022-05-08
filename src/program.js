@@ -143,6 +143,13 @@ function getShapeCube(option = {}) {
       ],
       size: 3,
     },
+    aUv: {
+      value: [
+        1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0,
+        1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 1, 0,
+      ],
+      size: 2,
+    },
     indices: {
       value: [
         0, 1, 2, 0, 2, 3, 4, 5, 6, 4, 6, 7, 8, 9, 10, 8, 10, 11, 12, 13, 14, 12,
@@ -371,6 +378,7 @@ export default class Program extends ObjectGl {
       isFloats = false,
       isCulling = true,
       isDepth = false,
+      isHidden = false,
       isAutoResolution = !isFloats && !uniforms.uResolution,
       hasCamera = !isFloats && kgl.hasCamera,
       hasLight = !isFloats && kgl.hasLight,
@@ -381,6 +389,7 @@ export default class Program extends ObjectGl {
     super(kgl, option)
 
     this.isProgram = true
+    this.isPoint = shape === 'point'
     this.attributes = {}
     this.uniforms = {}
     this.textures = {}
@@ -412,6 +421,7 @@ export default class Program extends ObjectGl {
     this.isCulling = isCulling
     this.isDepth = isDepth
     this.isInstanced = instancedAttributes
+    this.isHidden = isHidden
 
     this.createProgram(vertexShader, fragmentShader)
 
@@ -602,6 +612,9 @@ export default class Program extends ObjectGl {
       if (!mergedData.uEyeDirection) mergedData.uEyeDirection = [0, 0, 0]
       if (!mergedData.uAmbientColor) mergedData.uAmbientColor = [0.1, 0.1, 0.1]
     }
+    if (this.isPoint) {
+      mergedData.uPixelRatio = this.kgl.pixelRatio
+    }
 
     Object.keys(mergedData).forEach((key) => {
       this.addUniform(key, mergedData[key])
@@ -780,7 +793,17 @@ export default class Program extends ObjectGl {
     this.kgl.currentProgramId = this.id
   }
 
+  visible() {
+    this.isHidden = false
+  }
+
+  hidden() {
+    this.isHidden = true
+  }
+
   draw() {
+    if (this.isHidden) return
+
     const { gl } = this
 
     if (this.isUpdateMatrix) {
@@ -791,7 +814,12 @@ export default class Program extends ObjectGl {
 
     if (this.isTransparent) {
       gl.enable(gl.BLEND)
-      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+      gl.blendFuncSeparate(
+        gl.SRC_ALPHA,
+        gl.ONE_MINUS_SRC_ALPHA,
+        gl.ONE,
+        gl.ONE_MINUS_SRC_ALPHA
+      )
     } else if (this.isAdditive) {
       gl.enable(gl.BLEND)
       gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE, gl.ONE, gl.ONE)

@@ -10,7 +10,7 @@ import Program from './program.js'
 
 export default class Kgl {
   constructor(option = {}) {
-    this.root = new ObjectGl(this)
+    this.root = null
     this.indexProgram = -1
     this.currentProgramId = null
     this.isUpdateMatrix = false
@@ -20,25 +20,27 @@ export default class Kgl {
 
     const {
       canvas,
-      isClear = false,
+      disableClear = false,
       clearedColor,
       hasCamera = false,
       hasLight = false,
       isFullSize = false,
       stencil = false,
+      alpha = true,
       premultipliedAlpha = true,
-      pixelRatio,
+      pixelRatioMax,
       pixelRatioFixed,
     } = option
 
-    this.isClear = isClear
+    this.disableClear = disableClear
     this.clearedColor = clearedColor || [0, 0, 0, 0]
     this.hasCamera = hasCamera
     this.hasLight = hasLight
     this.isFullSize = isFullSize
     this.stencil = stencil
+    this.alpha = alpha
     this.premultipliedAlpha = premultipliedAlpha
-    this.pixelRatio = pixelRatio
+    this.pixelRatioMax = pixelRatioMax
     this.pixelRatioFixed = pixelRatioFixed
 
     if (hasCamera) {
@@ -77,6 +79,16 @@ export default class Kgl {
       this.ambientColor = ambientColor
     }
 
+    this.setPixelRatio()
+
+    this.root = new ObjectGl(this)
+
+    if (this.isAutoUpdateCameraPositionZ) {
+      this.root.forEachProgram((program) => {
+        program.pixelRatio = this.pixelRatio
+      })
+    }
+
     this._initWebgl(canvas)
   }
 
@@ -97,11 +109,17 @@ export default class Kgl {
     }
 
     const contextAttributes = {
-      alpha: true,
+      alpha: this.alpha,
+      depth: true,
       stencil: this.stencil,
+      antialias: false,
       premultipliedAlpha: this.premultipliedAlpha,
+      preserveDrawingBuffer: false,
+      powerPreference: 'default',
+      failIfMajorPerformanceCaveat: false,
     }
     const gl = (this.gl =
+      // this.canvas.getContext('webgl2', contextAttributes) ||
       this.canvas.getContext('webgl', contextAttributes) ||
       this.canvas.getContext('experimental-webgl', contextAttributes))
 
@@ -291,6 +309,14 @@ export default class Kgl {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   }
 
+  setPixelRatio() {
+    this.pixelRatio = this.pixelRatioFixed
+      ? this.pixelRatioFixed
+      : this.pixelRatioMax
+      ? Math.min(this.pixelRatioMax, window.devicePixelRatio)
+      : window.devicePixelRatio
+  }
+
   resize() {
     const { gl } = this
 
@@ -299,28 +325,37 @@ export default class Kgl {
     this.canvasNativeWidth = this.canvas.clientWidth
     this.canvasNativeHeight = this.canvas.clientHeight
 
-    const pixelRatio = this.pixelRatioFixed
-      ? this.pixelRatioFixed
-      : this.pixelRatio
-      ? Math.min(this.pixelRatio, window.devicePixelRatio)
-      : window.devicePixelRatio
+    this.setPixelRatio()
+    const { pixelRatio } = this
 
-    const width = Math.floor(
-      (this.isFullSize
-        ? Math.max(
-            Math.min(window.innerWidth, window.outerWidth),
-            this.canvasNativeWidth
-          )
-        : this.canvasNativeWidth) * pixelRatio
+    if (this.isAutoUpdateCameraPositionZ) {
+      this.root.forEachProgram((program) => {
+        program.pixelRatio = this.pixelRatio
+      })
+    }
+
+    const windowWidth = Math.max(
+      Math.min(window.innerWidth, window.outerWidth),
+      this.canvasNativeWidth
     )
-    const height = Math.floor(
-      (this.isFullSize
-        ? Math.max(
-            Math.min(window.innerHeight, window.outerHeight),
-            this.canvasNativeHeight
-          )
-        : this.canvasNativeHeight) * pixelRatio
-    )
+
+    this.width = this.widthView = this.isFullSize
+      ? windowWidth
+      : this.canvasNativeWidth
+    this.height = this.isFullSize
+      ? Math.max(
+          Math.min(window.innerHeight, window.outerHeight),
+          this.canvasNativeHeight
+        )
+      : this.canvasNativeHeight
+
+    if (this.isFullSize && this.height > this.width) {
+      this.width = this.height
+      this.canvas.style.margin = `0 ${-(this.width - windowWidth) / 2}px`
+    }
+
+    const width = Math.floor(this.width * pixelRatio)
+    const height = Math.floor(this.height * pixelRatio)
 
     this.canvas.width = width
     this.canvas.height = height
@@ -330,6 +365,10 @@ export default class Kgl {
     this.root.forEachProgram((program) => {
       if (program.isAutoResolution) {
         program.uniforms.uResolution = [width, height]
+      }
+
+      if (program.isPoint) {
+        program.uniforms.uPixelRatio = this.pixelRatio
       }
     })
 
@@ -422,7 +461,7 @@ export default class Kgl {
   }
 
   draw() {
-    if (this.isClear) {
+    if (!this.disableClear) {
       this.clear()
     }
 
@@ -447,6 +486,6 @@ export default class Kgl {
       program.destroy()
     })
 
-    gl.getExtension('WEBGL_lose_context')?.loseContext()
+    gl.getExtension('WEBGL_lose_context')?.loseContext() // eslint-disable-line no-unused-expressions
   }
 }

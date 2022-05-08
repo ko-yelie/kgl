@@ -1,6 +1,6 @@
 import Kgl from '../../../src/index.js'
 import fragmentShader from './index.frag'
-import fragmentShaderRed from './red.frag'
+import fragmentShaderCross from './cross.frag'
 
 const kgl = new Kgl({
   hasCamera: true,
@@ -11,28 +11,28 @@ const { root } = kgl // root group
  * program
  */
 
-/* group red */
-const groupRed = kgl.createGroup({
+/* group cross */
+const groupCross = kgl.createGroup({
   isAutoAdd: true, // add to kgl.root
 })
 
-/* red1 */
-const red1 = kgl.createProgram({
+/* cross1 */
+const cross1 = kgl.createProgram({
   shape: 'plane',
   width: 200,
   height: 50,
-  fragmentShader: fragmentShaderRed,
+  fragmentShader: fragmentShaderCross,
 })
-groupRed.add(red1)
+groupCross.add(cross1)
 
-/* red2 */
-const red2 = kgl.createProgram({
+/* cross2 */
+const cross2 = kgl.createProgram({
   shape: 'plane',
   width: 50,
   height: 200,
-  fragmentShader: fragmentShaderRed,
+  fragmentShader: fragmentShaderCross,
 })
-groupRed.add(red2)
+groupCross.add(cross2)
 
 /* plane1 */
 const size = 500
@@ -62,11 +62,12 @@ const plane2 = kgl.createProgram({
 })
 kgl.add(plane2) // add to kgl.root
 
+kgl.extraFar = size / 2
+
 /**
  * resize
  */
 function resize() {
-  kgl.extraFar = size / 2
   kgl.resize()
 }
 resize()
@@ -93,8 +94,8 @@ function tick(time) {
   plane2.rotateX = Math.sin(time * 1) * 1
   plane2.uniforms.uTime = time
 
-  groupRed.rotate = time * 3
-  red2.x = -Math.sin(time * 5) * 100
+  groupCross.rotate = time * 3
+  cross2.x = -Math.sin(time * 5) * 100
 
   kgl.draw()
 

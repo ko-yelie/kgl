@@ -4,6 +4,7 @@ attribute vec3 aPosition;
 attribute float aRandom;
 
 uniform mat4 uMvpMatrix;
+uniform float uPixelRatio;
 uniform float uTime;
 
 varying float vRandom;
@@ -16,5 +17,5 @@ void main () {
   position.xy += vec2(cos(time), sin(time)) * 30.;
 
   gl_Position = uMvpMatrix * vec4(position, 1.);
-  gl_PointSize = mix(50., 100., aRandom);
+  gl_PointSize = uPixelRatio * mix(16., 32., aRandom);
 }

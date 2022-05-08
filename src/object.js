@@ -19,11 +19,19 @@ export default class ObjectGl {
 
     this.mMatrix = createMatrix()
     this.mvpMatrix = createMatrix()
+    this._appearanceSize = [1, 1, 1]
     this._translate = [0, 0, 0]
     this._scale = [1, 1, 1]
     this._rotate = [0, 0, 0]
+    this._pixelRatio = 1
     this.isUpdateMatrix = false
 
+    if ('appearanceWidth' in option) {
+      this.appearanceWidth = option.appearanceWidth
+    }
+    if ('appearanceHeight' in option) {
+      this.appearanceHeight = option.appearanceHeight
+    }
     if ('x' in option) {
       this.x = option.x
     }
@@ -48,6 +56,9 @@ export default class ObjectGl {
     if ('scaleZ' in option) {
       this.scaleZ = option.scaleZ
     }
+    if ('scale2d' in option) {
+      this.scale2d = option.scale2d
+    }
     if ('scale3d' in option) {
       this.scale3d = option.scale3d
     }
@@ -66,6 +77,37 @@ export default class ObjectGl {
     if ('rotate3d' in option) {
       this.rotate3d = option.rotate3d
     }
+    if ('pixelRatio' in option) {
+      this.pixelRatio = option.pixelRatio
+    }
+  }
+
+  get appearanceWidth() {
+    return this._appearanceSize[0]
+  }
+
+  set appearanceWidth(value) {
+    this._appearanceSize[0] = value * this.kgl.pixelRatio
+    this.changeMatrix()
+  }
+
+  get appearanceHeight() {
+    return this._appearanceSize[1]
+  }
+
+  set appearanceHeight(value) {
+    this._appearanceSize[1] = value * this.kgl.pixelRatio
+    this.changeMatrix()
+  }
+
+  get appearanceSize2d() {
+    return [this._appearanceSize[0], this._appearanceSize[1]]
+  }
+
+  set appearanceSize2d(value) {
+    this._appearanceSize[0] = value[0] * this.kgl.pixelRatio
+    this._appearanceSize[1] = value[1] * this.kgl.pixelRatio
+    this.changeMatrix()
   }
 
   get x() {
@@ -73,7 +115,7 @@ export default class ObjectGl {
   }
 
   set x(value) {
-    this._translate[0] = value
+    this._translate[0] = value * this.kgl.pixelRatio
     this.changeMatrix()
   }
 
@@ -82,7 +124,7 @@ export default class ObjectGl {
   }
 
   set y(value) {
-    this._translate[1] = value
+    this._translate[1] = value * this.kgl.pixelRatio
     this.changeMatrix()
   }
 
@@ -100,8 +142,8 @@ export default class ObjectGl {
   }
 
   set translate3d(value) {
-    this._translate[0] = value[0]
-    this._translate[1] = value[1]
+    this._translate[0] = value[0] * this.kgl.pixelRatio
+    this._translate[1] = value[1] * this.kgl.pixelRatio
     this._translate[2] = value[2]
     this.changeMatrix()
   }
@@ -145,14 +187,32 @@ export default class ObjectGl {
     this.changeMatrix()
   }
 
+  get scale2d() {
+    return [this._scale[0], this._scale[1]]
+  }
+
+  set scale2d(value) {
+    if (value.length === 2) {
+      this._scale[0] = value[0]
+      this._scale[1] = value[1]
+    } else {
+      this._scale[0] = this._scale[1] = value
+    }
+    this.changeMatrix()
+  }
+
   get scale3d() {
-    return [...this._scale]
+    return [this._scale[0], this._scale[1], this._scale[2]]
   }
 
   set scale3d(value) {
-    this._scale[0] = value[0]
-    this._scale[1] = value[1]
-    this._scale[2] = value[2]
+    if (value.length === 3) {
+      this._scale[0] = value[0]
+      this._scale[1] = value[1]
+      this._scale[2] = value[2]
+    } else {
+      this._scale[0] = this._scale[1] = this._scale[2] = value
+    }
     this.changeMatrix()
   }
 
@@ -202,6 +262,15 @@ export default class ObjectGl {
     this.changeMatrix()
   }
 
+  get pixelRatio() {
+    return this._pixelRatio
+  }
+
+  set pixelRatio(value) {
+    this._pixelRatio = value
+    this.changeMatrix()
+  }
+
   changeMatrix() {
     if (this.isUpdateMatrix) return
 
@@ -235,7 +304,11 @@ export default class ObjectGl {
 
       scale(
         this.mMatrix,
-        [this._scale[0], this._scale[1], this._scale[2]],
+        [
+          this._appearanceSize[0] * this._scale[0] * this._pixelRatio,
+          this._appearanceSize[1] * this._scale[1] * this._pixelRatio,
+          this._appearanceSize[2] * this._scale[2] * this._pixelRatio,
+        ],
         this.mMatrix
       )
 
