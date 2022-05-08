@@ -188,19 +188,27 @@ export default class ObjectGl {
   }
 
   set scale2d(value) {
-    this._scale[0] = value[0]
-    this._scale[1] = value[1]
+    if (value.length === 2) {
+      this._scale[0] = value[0]
+      this._scale[1] = value[1]
+    } else {
+      this._scale[0] = this._scale[1] = value
+    }
     this.changeMatrix()
   }
 
   get scale3d() {
-    return [...this._scale]
+    return [this._scale[0], this._scale[1], this._scale[2]]
   }
 
   set scale3d(value) {
-    this._scale[0] = value[0]
-    this._scale[1] = value[1]
-    this._scale[2] = value[2]
+    if (value.length === 3) {
+      this._scale[0] = value[0]
+      this._scale[1] = value[1]
+      this._scale[2] = value[2]
+    } else {
+      this._scale[0] = this._scale[1] = this._scale[2] = value
+    }
     this.changeMatrix()
   }
 
