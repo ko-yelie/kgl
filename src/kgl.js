@@ -10,7 +10,7 @@ import Program from './program.js'
 
 export default class Kgl {
   constructor(option = {}) {
-    this.root = new ObjectGl(this)
+    this.root = null
     this.indexProgram = -1
     this.currentProgramId = null
     this.isUpdateMatrix = false
@@ -77,6 +77,16 @@ export default class Kgl {
       this.lightDirection = lightDirection
       this.eyeDirection = eyeDirection
       this.ambientColor = ambientColor
+    }
+
+    this.setPixelRatio()
+
+    this.root = new ObjectGl(this)
+
+    if (this.isAutoUpdateCameraPositionZ) {
+      this.root.forEachProgram((program) => {
+        program.pixelRatio = this.pixelRatio
+      })
     }
 
     this._initWebgl(canvas)
@@ -299,6 +309,14 @@ export default class Kgl {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   }
 
+  setPixelRatio() {
+    this.pixelRatio = this.pixelRatioFixed
+      ? this.pixelRatioFixed
+      : this.pixelRatioMax
+      ? Math.min(this.pixelRatioMax, window.devicePixelRatio)
+      : window.devicePixelRatio
+  }
+
   resize() {
     const { gl } = this
 
@@ -307,11 +325,14 @@ export default class Kgl {
     this.canvasNativeWidth = this.canvas.clientWidth
     this.canvasNativeHeight = this.canvas.clientHeight
 
-    const pixelRatio = (this.pixelRatio = this.pixelRatioFixed
-      ? this.pixelRatioFixed
-      : this.pixelRatioMax
-      ? Math.min(this.pixelRatioMax, window.devicePixelRatio)
-      : window.devicePixelRatio)
+    this.setPixelRatio()
+    const { pixelRatio } = this
+
+    if (this.isAutoUpdateCameraPositionZ) {
+      this.root.forEachProgram((program) => {
+        program.pixelRatio = this.pixelRatio
+      })
+    }
 
     const windowWidth = Math.max(
       Math.min(window.innerWidth, window.outerWidth),
@@ -344,6 +365,10 @@ export default class Kgl {
     this.root.forEachProgram((program) => {
       if (program.isAutoResolution) {
         program.uniforms.uResolution = [width, height]
+      }
+
+      if (program.isPoint) {
+        program.uniforms.uPixelRatio = this.pixelRatio
       }
     })
 

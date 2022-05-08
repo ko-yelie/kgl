@@ -23,6 +23,7 @@ export default class ObjectGl {
     this._translate = [0, 0, 0]
     this._scale = [1, 1, 1]
     this._rotate = [0, 0, 0]
+    this._pixelRatio = 1
     this.isUpdateMatrix = false
 
     if ('appearanceWidth' in option) {
@@ -75,6 +76,9 @@ export default class ObjectGl {
     }
     if ('rotate3d' in option) {
       this.rotate3d = option.rotate3d
+    }
+    if ('pixelRatio' in option) {
+      this.pixelRatio = option.pixelRatio
     }
   }
 
@@ -258,6 +262,15 @@ export default class ObjectGl {
     this.changeMatrix()
   }
 
+  get pixelRatio() {
+    return this._pixelRatio
+  }
+
+  set pixelRatio(value) {
+    this._pixelRatio = value
+    this.changeMatrix()
+  }
+
   changeMatrix() {
     if (this.isUpdateMatrix) return
 
@@ -292,9 +305,9 @@ export default class ObjectGl {
       scale(
         this.mMatrix,
         [
-          this._appearanceSize[0] * this._scale[0],
-          this._appearanceSize[1] * this._scale[1],
-          this._appearanceSize[2] * this._scale[2],
+          this._appearanceSize[0] * this._scale[0] * this._pixelRatio,
+          this._appearanceSize[1] * this._scale[1] * this._pixelRatio,
+          this._appearanceSize[2] * this._scale[2] * this._pixelRatio,
         ],
         this.mMatrix
       )

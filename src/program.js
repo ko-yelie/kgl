@@ -382,6 +382,7 @@ export default class Program extends ObjectGl {
     super(kgl, option)
 
     this.isProgram = true
+    this.isPoint = shape === 'point'
     this.attributes = {}
     this.uniforms = {}
     this.textures = {}
@@ -603,6 +604,9 @@ export default class Program extends ObjectGl {
       if (!mergedData.uLightDirection) mergedData.uLightDirection = [0, 0, 0]
       if (!mergedData.uEyeDirection) mergedData.uEyeDirection = [0, 0, 0]
       if (!mergedData.uAmbientColor) mergedData.uAmbientColor = [0.1, 0.1, 0.1]
+    }
+    if (this.isPoint) {
+      mergedData.uPixelRatio = this.kgl.pixelRatio
     }
 
     Object.keys(mergedData).forEach((key) => {

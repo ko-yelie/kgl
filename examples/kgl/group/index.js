@@ -62,11 +62,12 @@ const plane2 = kgl.createProgram({
 })
 kgl.add(plane2) // add to kgl.root
 
+kgl.extraFar = size / 2
+
 /**
  * resize
  */
 function resize() {
-  kgl.extraFar = size / 2
   kgl.resize()
 }
 resize()
