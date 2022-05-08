@@ -3,14 +3,15 @@
   "private": true,
   "scripts": {
     "dev": "parcel index.html",
-    "build": "parcel build index.html --no-source-maps --out-dir ../docs --public-url /kgl/",
-    "build2": "parcel build index.html --no-source-maps --dist-dir ../docs --public-url /kgl/",
-    "pages": "rm -rf ../docs && npm run build2"
+    "build": "parcel build index.html --no-source-maps --dist-dir ../docs --public-url /kgl/",
+    "pages": "rm -rf ../docs && npm run build"
   },
   "devDependencies": {
     "@babel/core": "^7.17.10",
     "@babel/plugin-transform-runtime": "^7.17.10",
-    "parcel-bundler": "^1.12.5",
+    "@parcel/transformer-glsl": "^2.5.0",
+    "@parcel/transformer-stylus": "^2.5.0",
+    "parcel": "^2.5.0",
     "stylus": "^0.57.0"
   },
   "dependencies": {
