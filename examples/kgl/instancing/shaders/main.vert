@@ -1,4 +1,5 @@
 attribute vec3 aPosition;
+attribute vec2 aUv;
 attribute vec3 aNormal;
 attribute vec2 aInstancedUv;
 
@@ -11,6 +12,7 @@ uniform vec3 uAmbientColor;
 uniform vec3 uEyeDirection;
 uniform float uTime;
 
+varying vec2 vUv;
 varying vec4 vColor;
 
 #pragma glslify: rotateQ = require(glsl-y-rotate/rotateQ)
@@ -55,6 +57,8 @@ void main () {
   vec3 halfLE = normalize(invLight + invEye);
   float diffuse = clamp(dot(cNormal, invLight), 0.1, 1.);
   float specular = pow(clamp(dot(cNormal, halfLE), 0., 1.), 50.);
+
+  vUv = aUv;
 
   float colorNTime = mod(uTime, colorInterval) / colorInterval;
   float alpha = 1.;
