@@ -20,7 +20,7 @@ export default class Kgl {
 
     const {
       canvas,
-      isClear = false,
+      disableClear = false,
       clearedColor,
       hasCamera = false,
       hasLight = false,
@@ -32,7 +32,7 @@ export default class Kgl {
       pixelRatioFixed,
     } = option
 
-    this.isClear = isClear
+    this.disableClear = disableClear
     this.clearedColor = clearedColor || [0, 0, 0, 0]
     this.hasCamera = hasCamera
     this.hasLight = hasLight
@@ -436,7 +436,7 @@ export default class Kgl {
   }
 
   draw() {
-    if (this.isClear) {
+    if (!this.disableClear) {
       this.clear()
     }
 
@@ -461,6 +461,6 @@ export default class Kgl {
       program.destroy()
     })
 
-    gl.getExtension('WEBGL_lose_context')?.loseContext()
+    gl.getExtension('WEBGL_lose_context')?.loseContext() // eslint-disable-line no-unused-expressions
   }
 }
