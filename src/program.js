@@ -371,6 +371,7 @@ export default class Program extends ObjectGl {
       isFloats = false,
       isCulling = true,
       isDepth = false,
+      isHidden = false,
       isAutoResolution = !isFloats && !uniforms.uResolution,
       hasCamera = !isFloats && kgl.hasCamera,
       hasLight = !isFloats && kgl.hasLight,
@@ -412,6 +413,7 @@ export default class Program extends ObjectGl {
     this.isCulling = isCulling
     this.isDepth = isDepth
     this.isInstanced = instancedAttributes
+    this.isHidden = isHidden
 
     this.createProgram(vertexShader, fragmentShader)
 
@@ -780,7 +782,17 @@ export default class Program extends ObjectGl {
     this.kgl.currentProgramId = this.id
   }
 
+  visible() {
+    this.isHidden = false
+  }
+
+  hidden() {
+    this.isHidden = true
+  }
+
   draw() {
+    if (this.isHidden) return
+
     const { gl } = this
 
     if (this.isUpdateMatrix) {
