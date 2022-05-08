@@ -26,6 +26,7 @@ export default class Kgl {
       hasLight = false,
       isFullSize = false,
       stencil = false,
+      alpha = true,
       premultipliedAlpha = true,
       pixelRatioMax,
       pixelRatioFixed,
@@ -37,6 +38,7 @@ export default class Kgl {
     this.hasLight = hasLight
     this.isFullSize = isFullSize
     this.stencil = stencil
+    this.alpha = alpha
     this.premultipliedAlpha = premultipliedAlpha
     this.pixelRatioMax = pixelRatioMax
     this.pixelRatioFixed = pixelRatioFixed
@@ -97,11 +99,17 @@ export default class Kgl {
     }
 
     const contextAttributes = {
-      alpha: true,
+      alpha: this.alpha,
+      depth: true,
       stencil: this.stencil,
+      antialias: false,
       premultipliedAlpha: this.premultipliedAlpha,
+      preserveDrawingBuffer: false,
+      powerPreference: 'default',
+      failIfMajorPerformanceCaveat: false,
     }
     const gl = (this.gl =
+      // this.canvas.getContext('webgl2', contextAttributes) ||
       this.canvas.getContext('webgl', contextAttributes) ||
       this.canvas.getContext('experimental-webgl', contextAttributes))
 
