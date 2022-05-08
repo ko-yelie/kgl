@@ -48,6 +48,9 @@ export default class ObjectGl {
     if ('scaleZ' in option) {
       this.scaleZ = option.scaleZ
     }
+    if ('scale2d' in option) {
+      this.scale2d = option.scale2d
+    }
     if ('scale3d' in option) {
       this.scale3d = option.scale3d
     }
@@ -73,7 +76,7 @@ export default class ObjectGl {
   }
 
   set x(value) {
-    this._translate[0] = value
+    this._translate[0] = value * this.kgl.pixelRatio
     this.changeMatrix()
   }
 
@@ -82,7 +85,7 @@ export default class ObjectGl {
   }
 
   set y(value) {
-    this._translate[1] = value
+    this._translate[1] = value * this.kgl.pixelRatio
     this.changeMatrix()
   }
 
@@ -100,8 +103,8 @@ export default class ObjectGl {
   }
 
   set translate3d(value) {
-    this._translate[0] = value[0]
-    this._translate[1] = value[1]
+    this._translate[0] = value[0] * this.kgl.pixelRatio
+    this._translate[1] = value[1] * this.kgl.pixelRatio
     this._translate[2] = value[2]
     this.changeMatrix()
   }
@@ -142,6 +145,16 @@ export default class ObjectGl {
 
   set scaleZ(value) {
     this._scale[2] = value
+    this.changeMatrix()
+  }
+
+  get scale2d() {
+    return [this._scale[0], this._scale[1]]
+  }
+
+  set scale2d(value) {
+    this._scale[0] = value[0]
+    this._scale[1] = value[1]
     this.changeMatrix()
   }
 

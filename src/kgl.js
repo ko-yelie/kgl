@@ -27,7 +27,7 @@ export default class Kgl {
       isFullSize = false,
       stencil = false,
       premultipliedAlpha = true,
-      pixelRatio,
+      pixelRatioMax,
       pixelRatioFixed,
     } = option
 
@@ -38,7 +38,7 @@ export default class Kgl {
     this.isFullSize = isFullSize
     this.stencil = stencil
     this.premultipliedAlpha = premultipliedAlpha
-    this.pixelRatio = pixelRatio
+    this.pixelRatioMax = pixelRatioMax
     this.pixelRatioFixed = pixelRatioFixed
 
     if (hasCamera) {
@@ -299,28 +299,34 @@ export default class Kgl {
     this.canvasNativeWidth = this.canvas.clientWidth
     this.canvasNativeHeight = this.canvas.clientHeight
 
-    const pixelRatio = this.pixelRatioFixed
+    const pixelRatio = (this.pixelRatio = this.pixelRatioFixed
       ? this.pixelRatioFixed
-      : this.pixelRatio
-      ? Math.min(this.pixelRatio, window.devicePixelRatio)
-      : window.devicePixelRatio
+      : this.pixelRatioMax
+      ? Math.min(this.pixelRatioMax, window.devicePixelRatio)
+      : window.devicePixelRatio)
 
-    const width = Math.floor(
-      (this.isFullSize
-        ? Math.max(
-            Math.min(window.innerWidth, window.outerWidth),
-            this.canvasNativeWidth
-          )
-        : this.canvasNativeWidth) * pixelRatio
+    const windowWidth = Math.max(
+      Math.min(window.innerWidth, window.outerWidth),
+      this.canvasNativeWidth
     )
-    const height = Math.floor(
-      (this.isFullSize
-        ? Math.max(
-            Math.min(window.innerHeight, window.outerHeight),
-            this.canvasNativeHeight
-          )
-        : this.canvasNativeHeight) * pixelRatio
-    )
+
+    this.width = this.widthView = this.isFullSize
+      ? windowWidth
+      : this.canvasNativeWidth
+    this.height = this.isFullSize
+      ? Math.max(
+          Math.min(window.innerHeight, window.outerHeight),
+          this.canvasNativeHeight
+        )
+      : this.canvasNativeHeight
+
+    if (this.isFullSize && this.height > this.width) {
+      this.width = this.height
+      this.canvas.style.margin = `0 ${-(this.width - windowWidth) / 2}px`
+    }
+
+    const width = Math.floor(this.width * pixelRatio)
+    const height = Math.floor(this.height * pixelRatio)
 
     this.canvas.width = width
     this.canvas.height = height
