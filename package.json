@@ -42,15 +42,15 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-promise": "^6.0.0",
-    "glsl-curl-noise": "^0.0.4",
-    "glsl-random": "^0.0.5",
-    "glsl-y-rotate": "^3.0.0",
     "parcel": "^2.5.0",
     "prettier": "^2.6.2",
     "rollup-plugin-glslify": "^1.2.1",
     "stylus": "^0.57.0"
   },
   "dependencies": {
-    "glsl-fast-gaussian-blur": "^1.0.2"
+    "glsl-curl-noise": "^0.0.4",
+    "glsl-fast-gaussian-blur": "^1.0.2",
+    "glsl-random": "^0.0.5",
+    "glsl-y-rotate": "^3.0.0"
   }
 }
