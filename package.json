@@ -30,15 +30,15 @@
   "homepage": "https://github.com/ko-yelie/kgl#readme",
   "devDependencies": {
     "bili": "^5.0.5",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "eslint-config-standard": "^16.0.3",
-    "eslint-plugin-import": "^2.24.2",
+    "eslint": "^8.15.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-prettier": "^4.0.0",
-    "eslint-plugin-promise": "^5.1.0",
-    "prettier": "^2.3.2",
-    "rollup-plugin-glslify": "^1.2.0"
+    "eslint-plugin-promise": "^6.0.0",
+    "prettier": "^2.6.2",
+    "rollup-plugin-glslify": "^1.2.1"
   },
   "dependencies": {
     "glsl-fast-gaussian-blur": "^1.0.2",
