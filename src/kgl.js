@@ -85,7 +85,7 @@ export default class Kgl {
 
     if (this.isAutoUpdateCameraPositionZ) {
       this.root.forEachProgram((program) => {
-        program.pixelRatio = this.pixelRatio
+        program.scalePatch = this.pixelRatio
       })
     }
 
@@ -330,7 +330,7 @@ export default class Kgl {
 
     if (this.isAutoUpdateCameraPositionZ) {
       this.root.forEachProgram((program) => {
-        program.pixelRatio = this.pixelRatio
+        program.scalePatch = this.pixelRatio
       })
     }
 
@@ -349,11 +349,8 @@ export default class Kgl {
         )
       : this.canvasNativeHeight
 
-    if (this.isFullSize && this.height > this.width) {
-      this.width = this.height
-      this.canvas.style.width = `${this.width}px`
-      this.canvas.style.margin = `0 ${-(this.width - windowWidth) / 2}px`
-    }
+    this.root.scalePatch =
+      this.height > this.width ? this.width / this.height : 1
 
     const width = Math.floor(this.width * pixelRatio)
     const height = Math.floor(this.height * pixelRatio)
