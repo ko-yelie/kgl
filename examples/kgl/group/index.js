@@ -4,6 +4,7 @@ import fragmentShaderCross from './cross.frag'
 
 const kgl = new Kgl({
   hasCamera: true,
+  isFullSize: true,
 })
 const { root } = kgl // root group
 
