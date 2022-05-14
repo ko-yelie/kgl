@@ -351,6 +351,7 @@ export default class Kgl {
 
     if (this.isFullSize && this.height > this.width) {
       this.width = this.height
+      this.canvas.style.width = `${this.width}px`
       this.canvas.style.margin = `0 ${-(this.width - windowWidth) / 2}px`
     }
 
