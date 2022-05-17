@@ -17,6 +17,7 @@ export default class Kgl {
     this.effectList = []
     this.framebuffers = {}
     this.textureIndex = -1
+    this.textureIndexes = []
 
     const {
       canvas,

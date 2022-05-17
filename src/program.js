@@ -396,6 +396,7 @@ export default class Program extends ObjectGl {
 
     const { gl } = kgl
     this.gl = gl
+    this.kglTextureIndexes = kgl.textureIndexes
 
     kgl.indexProgram = kgl.indexProgram + 1
     this.id = kgl.indexProgram
@@ -758,13 +759,16 @@ export default class Program extends ObjectGl {
 
     const { gl } = this
     const texture = gl.createTexture()
-    const textureIndex = ++this.kgl.textureIndex
+    const indexDeleted = this.kglTextureIndexes.indexOf(false)
+    const textureIndex =
+      indexDeleted >= 0 ? indexDeleted : ++this.kgl.textureIndex
     this.textures[key] = {
       texture,
       textureIndex,
     }
+    this.kglTextureIndexes[textureIndex] = true
 
-    gl.activeTexture(gl[`TEXTURE${textureIndex}`])
+    gl.activeTexture(gl.TEXTURE0 + textureIndex)
     gl.bindTexture(gl.TEXTURE_2D, texture)
     // gl.generateMipmap(gl.TEXTURE_2D)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
@@ -780,7 +784,7 @@ export default class Program extends ObjectGl {
     const { gl } = this
     const { textureIndex } = this.textures[key]
 
-    gl.activeTexture(gl[`TEXTURE${textureIndex}`])
+    gl.activeTexture(gl.TEXTURE0 + textureIndex)
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, el)
 
     return textureIndex
@@ -882,8 +886,9 @@ export default class Program extends ObjectGl {
     })
 
     Object.keys(this.textures).forEach((key) => {
-      const { texture } = this.textures[key]
+      const { texture, textureIndex } = this.textures[key]
       gl.deleteTexture(texture)
+      this.kglTextureIndexes[textureIndex] = false
     })
 
     gl.deleteProgram(this.program)
