@@ -17,7 +17,7 @@ export default class Kgl {
     this.effectList = []
     this.framebuffers = {}
     this.textureIndex = -1
-    this.textureIndexes = []
+    this.textures = []
 
     const {
       canvas,
@@ -216,12 +216,8 @@ export default class Kgl {
     height = this.canvas.height
   ) {
     const { gl } = this
-    const {
-      framebuffer,
-      textureIndex,
-      depthRenderBuffer,
-      isFloat,
-    } = this.framebuffers[key]
+    const { framebuffer, textureIndex, depthRenderBuffer, isFloat } =
+      this.framebuffers[key]
     if (isFloat) return
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
