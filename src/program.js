@@ -23,7 +23,11 @@ const attributeNone = {
 }
 
 function getShapePlane(option = {}) {
-  const { width = 1, height = 1, hasLight = false } = option
+  const { program, width = 1, height = 1, hasLight = false } = option
+
+  program.width = width
+  program.height = height
+
   const widthHalf = width / 2
   const heightHalf = height / 2
 
@@ -62,7 +66,10 @@ function getShapePlane(option = {}) {
 }
 
 function getShapeCube(option = {}) {
-  const { size = 1, hasLight = false } = option
+  const { program, size = 1, hasLight = false } = option
+
+  program.size = size
+
   const sizeHalf = size / 2
 
   const attributes = {
@@ -176,6 +183,7 @@ function getShapeCube(option = {}) {
 
 function getShapeCylinder(option = {}) {
   const {
+    program,
     radius = 1,
     radiusTop = radius,
     radiusBottom = radius,
@@ -187,6 +195,16 @@ function getShapeCylinder(option = {}) {
     thetaLength = Math.PI * 2,
     hasLight = false,
   } = option
+
+  program.radius = radius
+  program.radiusTop = radiusTop
+  program.radiusBottom = radiusBottom
+  program.height = height
+  program.radialSegments = radialSegments
+  program.heightSegments = heightSegments
+  program.openEnded = openEnded
+  program.thetaStart = thetaStart
+  program.thetaLength = thetaLength
 
   const indices = []
   const vertices = []
@@ -438,18 +456,21 @@ export default class Program extends ObjectGl {
             hasLight: this.hasLight,
             width: option.width,
             height: option.height,
+            program: this,
           })
           break
         case 'cube':
           shapeData = getShapeCube({
             hasLight: this.hasLight,
             size: option.size,
+            program: this,
           })
           break
         case 'cylinder':
           shapeData = getShapeCylinder({
             hasLight: this.hasLight,
             ...option,
+            program: this,
           })
           break
       }
