@@ -23,7 +23,11 @@ const attributeNone = {
 }
 
 function getShapePlane(option = {}) {
-  const { width = 1, height = 1, hasLight = false } = option
+  const { program, width = 1, height = 1, hasLight = false } = option
+
+  program.width = width
+  program.height = height
+
   const widthHalf = width / 2
   const heightHalf = height / 2
 
@@ -62,7 +66,10 @@ function getShapePlane(option = {}) {
 }
 
 function getShapeCube(option = {}) {
-  const { size = 1, hasLight = false } = option
+  const { program, size = 1, hasLight = false } = option
+
+  program.size = size
+
   const sizeHalf = size / 2
 
   const attributes = {
@@ -176,6 +183,7 @@ function getShapeCube(option = {}) {
 
 function getShapeCylinder(option = {}) {
   const {
+    program,
     radius = 1,
     radiusTop = radius,
     radiusBottom = radius,
@@ -187,6 +195,16 @@ function getShapeCylinder(option = {}) {
     thetaLength = Math.PI * 2,
     hasLight = false,
   } = option
+
+  program.radius = radius
+  program.radiusTop = radiusTop
+  program.radiusBottom = radiusBottom
+  program.height = height
+  program.radialSegments = radialSegments
+  program.heightSegments = heightSegments
+  program.openEnded = openEnded
+  program.thetaStart = thetaStart
+  program.thetaLength = thetaLength
 
   const indices = []
   const vertices = []
@@ -396,7 +414,7 @@ export default class Program extends ObjectGl {
 
     const { gl } = kgl
     this.gl = gl
-    this.kglTextureIndexes = kgl.textureIndexes
+    this.kglTextures = kgl.textures
 
     kgl.indexProgram = kgl.indexProgram + 1
     this.id = kgl.indexProgram
@@ -438,18 +456,21 @@ export default class Program extends ObjectGl {
             hasLight: this.hasLight,
             width: option.width,
             height: option.height,
+            program: this,
           })
           break
         case 'cube':
           shapeData = getShapeCube({
             hasLight: this.hasLight,
             size: option.size,
+            program: this,
           })
           break
         case 'cylinder':
           shapeData = getShapeCylinder({
             hasLight: this.hasLight,
             ...option,
+            program: this,
           })
           break
       }
@@ -758,15 +779,35 @@ export default class Program extends ObjectGl {
     if (!el) return
 
     const { gl } = this
-    const texture = gl.createTexture()
-    const indexDeleted = this.kglTextureIndexes.indexOf(false)
-    const textureIndex =
-      indexDeleted >= 0 ? indexDeleted : ++this.kgl.textureIndex
+
+    let texture, textureIndex
+
+    const textureMatch = this.kglTextures.filter(
+      ({ src }) => el.currentSrc === src
+    )[0]
+
+    if (textureMatch) {
+      texture = textureMatch.texture
+      textureIndex = textureMatch.textureIndex
+    } else {
+      texture = gl.createTexture()
+      const textureDeleted = this.kglTextures.filter(
+        ({ isActive }) => !isActive
+      )[0]
+      const indexDeleted = textureDeleted ? textureDeleted.textureIndex : -1
+      textureIndex = indexDeleted >= 0 ? indexDeleted : ++this.kgl.textureIndex
+      this.kglTextures[textureIndex] = {
+        isActive: true,
+        texture,
+        textureIndex,
+        src: el.currentSrc,
+      }
+    }
+
     this.textures[key] = {
       texture,
       textureIndex,
     }
-    this.kglTextureIndexes[textureIndex] = true
 
     gl.activeTexture(gl.TEXTURE0 + textureIndex)
     gl.bindTexture(gl.TEXTURE_2D, texture)
@@ -888,7 +929,7 @@ export default class Program extends ObjectGl {
     Object.keys(this.textures).forEach((key) => {
       const { texture, textureIndex } = this.textures[key]
       gl.deleteTexture(texture)
-      this.kglTextureIndexes[textureIndex] = false
+      this.kglTextures[textureIndex] = false
     })
 
     gl.deleteProgram(this.program)

@@ -17,7 +17,7 @@ export default class Kgl {
     this.effectList = []
     this.framebuffers = {}
     this.textureIndex = -1
-    this.textureIndexes = []
+    this.textures = []
 
     const {
       canvas,
@@ -84,12 +84,6 @@ export default class Kgl {
 
     this.root = new ObjectGl(this)
 
-    if (this.isAutoUpdateCameraPositionZ) {
-      this.root.forEachProgram((program) => {
-        program.scalePatch = this.pixelRatio
-      })
-    }
-
     this._initWebgl(canvas)
   }
 
@@ -129,6 +123,10 @@ export default class Kgl {
 
   add(objectGl) {
     this.root.add(objectGl)
+
+    if (this.isAutoUpdateCameraPositionZ && objectGl.isProgram) {
+      objectGl.scalePatch = this.pixelRatio
+    }
   }
 
   remove(objectGl) {
