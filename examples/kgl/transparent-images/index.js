@@ -1,0 +1,76 @@
+import Kgl from '../../../src/index.js'
+import fragmentShader from './index.frag'
+import { loadImage } from '../../utils.js'
+import image from '../../images/1-white-clouds-png-image_400x400.png'
+
+const kgl = new Kgl({
+  hasCamera: true,
+  isFullSize: true,
+})
+
+const groupCloud = kgl.createGroup({
+  isAutoAdd: true,
+})
+
+function createCloud(img) {
+  const randomScale = Math.random() * 2
+
+  const program = kgl.createProgram({
+    shape: 'plane',
+    fragmentShader,
+    uniforms: {
+      uImage: img,
+      uImageResolution: [img.width, img.height],
+    },
+    isTransparent: true,
+    isAutoAdd: true,
+    width: img.width,
+    height: img.height,
+    x: (Math.random() * 2 - 1) * window.innerWidth * 0.5,
+    y: (Math.random() * 2 - 1) * window.innerHeight * 0.5,
+    z: randomScale * kgl.cameraPosition[2] * 0.3,
+    scale: 1 + randomScale,
+  })
+
+  groupCloud.add(program)
+}
+
+async function main() {
+  /**
+   * program
+   */
+  const [img] = await loadImage(image, true)
+
+  for (let i = 0; i < 10; i++) {
+    createCloud(img)
+  }
+
+  /**
+   * resize
+   */
+  function resize() {
+    kgl.resize()
+  }
+  resize()
+  window.addEventListener('resize', resize)
+
+  /**
+   * tick
+   */
+  function tick(time) {
+    groupCloud.forEachProgram((program) => {
+      program.x += 1 * program.scale
+
+      kgl.draw()
+
+      const xMax = window.innerWidth * 0.5 + program.width * program.scale * 0.5
+      if (program.x > xMax) {
+        program.x = -xMax
+      }
+    })
+
+    requestAnimationFrame(tick)
+  }
+  requestAnimationFrame(tick)
+}
+main()
