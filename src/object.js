@@ -70,9 +70,6 @@ export default class ObjectGl {
     if ('rotate3d' in option) {
       this.rotate3d = option.rotate3d
     }
-    if ('pixelRatio' in option) {
-      this.pixelRatio = option.pixelRatio
-    }
   }
 
   get x() {
@@ -80,7 +77,7 @@ export default class ObjectGl {
   }
 
   set x(value) {
-    this._translate[0] = value * this.kgl.pixelRatio
+    this._translate[0] = value
     this.changeMatrix()
   }
 
@@ -89,7 +86,7 @@ export default class ObjectGl {
   }
 
   set y(value) {
-    this._translate[1] = value * this.kgl.pixelRatio
+    this._translate[1] = value
     this.changeMatrix()
   }
 
@@ -107,8 +104,8 @@ export default class ObjectGl {
   }
 
   set translate3d(value) {
-    this._translate[0] = value[0] * this.kgl.pixelRatio
-    this._translate[1] = value[1] * this.kgl.pixelRatio
+    this._translate[0] = value[0]
+    this._translate[1] = value[1]
     this._translate[2] = value[2]
     this.changeMatrix()
   }
@@ -261,7 +258,15 @@ export default class ObjectGl {
     if (isUpdateMatrix) {
       identity(this.mMatrix)
 
-      translate(this.mMatrix, this._translate, this.mMatrix)
+      translate(
+        this.mMatrix,
+        [
+          this._translate[0] * this.kgl.pixelRatio,
+          this._translate[1] * this.kgl.pixelRatio,
+          this._translate[2],
+        ],
+        this.mMatrix
+      )
 
       rotate(this.mMatrix, this._rotate[0], [1, 0, 0], this.mMatrix)
       rotate(this.mMatrix, this._rotate[1], [0, 1, 0], this.mMatrix)
