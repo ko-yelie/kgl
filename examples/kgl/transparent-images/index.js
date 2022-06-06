@@ -8,10 +8,6 @@ const kgl = new Kgl({
   isFullSize: true,
 })
 
-const groupCloud = kgl.createGroup({
-  isAutoAdd: true,
-})
-
 function createCloud(img) {
   const randomScale = Math.random() * 2
 
@@ -20,7 +16,6 @@ function createCloud(img) {
     fragmentShader,
     uniforms: {
       uImage: img,
-      uImageResolution: [img.width, img.height],
     },
     isTransparent: true,
     isAutoAdd: true,
@@ -28,21 +23,26 @@ function createCloud(img) {
     height: img.height,
     x: (Math.random() * 2 - 1) * window.innerWidth * 0.5,
     y: (Math.random() * 2 - 1) * window.innerHeight * 0.5,
-    z: randomScale * kgl.cameraPosition[2] * 0.3,
+    // z: randomScale * kgl.cameraPosition[2] * 0.3,
     scale: 1 + randomScale,
   })
 
-  groupCloud.add(program)
+  return program
 }
 
 async function main() {
   /**
    * program
    */
+  const groupCloud = kgl.createGroup({
+    isAutoAdd: true,
+  })
+
   const img = await loadImage(image)
 
   for (let i = 0; i < 10; i++) {
-    createCloud(img)
+    const program = createCloud(img)
+    groupCloud.add(program)
   }
 
   /**
