@@ -1,7 +1,7 @@
 import Kgl from '../../../src/index.js'
 import fragmentShader from './index.frag'
 import { loadImage } from '../../utils.js'
-import image from '../../images/1-white-clouds-png-image_400x400.png'
+import image from './1-white-clouds-png-image_400x400.png'
 
 const kgl = new Kgl({
   hasCamera: true,
@@ -39,7 +39,7 @@ async function main() {
   /**
    * program
    */
-  const [img] = await loadImage(image, true)
+  const img = await loadImage(image)
 
   for (let i = 0; i < 10; i++) {
     createCloud(img)

@@ -1,21 +1,36 @@
-export function loadImage(srcs, isCrossOrigin) {
-  if (!(typeof srcs === 'object' && srcs.constructor.name === 'Array')) {
-    srcs = [srcs]
-  }
-  const promises = []
-  srcs.forEach((src) => {
-    const img = document.createElement('img')
-    promises.push(
-      new Promise((resolve) => {
-        img.addEventListener('load', () => {
-          resolve(img)
-        })
+export function onLoadImage(el) {
+  return new Promise((resolve) => {
+    if (el.complete) {
+      resolve(el)
+    } else {
+      el.addEventListener('load', () => {
+        resolve(el)
       })
-    )
-    if (isCrossOrigin) img.crossOrigin = 'anonymous'
-    img.src = src
+    }
   })
-  return Promise.all(promises)
+}
+
+const cacheLoadImage = {}
+
+export function loadImage(src, isCrossOrigin) {
+  const isArray = typeof src === 'object' && src.constructor.name === 'Array'
+  const promises = []
+  ;(isArray ? src : [src]).forEach((srcString) => {
+    const cache = cacheLoadImage[srcString]
+    if (cache) {
+      promises.push(Promise.resolve(cache))
+      return
+    }
+    const img = document.createElement('img')
+    if (isCrossOrigin) img.crossOrigin = 'anonymous'
+    img.src = srcString
+    const promiseLoad = onLoadImage(img)
+    promiseLoad.then(() => {
+      cacheLoadImage[srcString] = img
+    })
+    promises.push(promiseLoad)
+  })
+  return isArray ? Promise.all(promises) : promises[0]
 }
 
 export function mix(x, y, a) {

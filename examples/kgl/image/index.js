@@ -11,7 +11,7 @@ async function main() {
   /**
    * program
    */
-  const [img] = await loadImage(image, true)
+  const img = await loadImage(image, true)
 
   const program = kgl.createProgram({
     fragmentShader,
