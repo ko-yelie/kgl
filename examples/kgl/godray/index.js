@@ -12,7 +12,7 @@ const minRadius = 0.1
 const kgl = new Kgl()
 
 async function main() {
-  const [img] = await loadImage(image, true)
+  const img = await loadImage(image, true)
 
   const mask = kgl.createProgram({
     fragmentShader,

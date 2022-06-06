@@ -9,7 +9,7 @@ const maxRadius = window.innerWidth < 768 ? 0.4 : 0.8
 const minRadius = 0.1
 
 async function main() {
-  const [img] = await loadImage(image, true)
+  const img = await loadImage(image, true)
 
   new KglAuto({
     programs: {
