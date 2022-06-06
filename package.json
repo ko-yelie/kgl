@@ -27,7 +27,7 @@
   "bugs": {
     "url": "https://github.com/ko-yelie/kgl/issues"
   },
-  "homepage": "https://github.com/ko-yelie/kgl#readme",
+  "homepage": "https://ko-yelie.github.io/kgl/",
   "devDependencies": {
     "bili": "^5.0.5",
     "eslint": "^8.15.0",
