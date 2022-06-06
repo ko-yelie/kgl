@@ -1,4 +1,4 @@
-import Program from '../program.js'
+import Program from '../program'
 import Blur from './blur.js'
 import Specular from './specular.js'
 import Zoomblur from './zoomblur.js'

@@ -1,4 +1,4 @@
-import Program from '../program.js'
+import Program from '../program'
 import specularFrag from '../shaders/postprocessing/specular.frag'
 
 export default class Specular extends Program {

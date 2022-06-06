@@ -1,5 +1,28 @@
-import ObjectGl from './object.js'
-import { createMatrix, inverse, normalize } from './minMatrix.js'
+import ObjectGl from './object'
+import { createMatrix, inverse, normalize } from './minMatrix'
+import { Matrix, Vec3 } from './type'
+import Kgl, { KglTexture } from './kgl'
+
+type AttributeValue = number[]
+
+type Attributes = {
+  [K: string]: {
+    value: AttributeValue
+    size?: number
+    isIndices?: boolean
+  }
+}
+
+type UniformValue = any
+
+type Uniforms = {
+  [K: string]: UniformValue
+}
+
+type Shape = {
+  attributes: Attributes
+  resolution: [number, number]
+}
 
 const vertexShaderShape = {
   d2: 'attribute vec2 aPosition;void main(){gl_Position=vec4(aPosition,0.,1.);}',
@@ -22,8 +45,20 @@ const attributeNone = {
   },
 }
 
-function getShapePlane(option = {}) {
-  const { program, width = 1, height = 1, hasLight = false } = option
+type OptionShapePlane = {
+  program: Program
+  width: number
+  height: number
+  hasLight: boolean
+}
+
+function getShapePlane(option: OptionShapePlane | {} = {}): Shape {
+  const {
+    program,
+    width = 1,
+    height = 1,
+    hasLight = false,
+  } = option as OptionShapePlane
 
   program.width = width
   program.height = height
@@ -31,7 +66,7 @@ function getShapePlane(option = {}) {
   const widthHalf = width / 2
   const heightHalf = height / 2
 
-  const attributes = {
+  const attributes: Attributes = {
     aPosition: {
       value: [
         -widthHalf,
@@ -65,14 +100,20 @@ function getShapePlane(option = {}) {
   return { attributes, resolution: [width, height] }
 }
 
-function getShapeCube(option = {}) {
-  const { program, size = 1, hasLight = false } = option
+type OptionShapeCube = {
+  program: Program
+  size: number
+  hasLight: boolean
+}
+
+function getShapeCube(option: OptionShapeCube | {} = {}): Shape {
+  const { program, size = 1, hasLight = false } = option as OptionShapeCube
 
   program.size = size
 
   const sizeHalf = size / 2
 
-  const attributes = {
+  const attributes: Attributes = {
     aPosition: {
       value: [
         sizeHalf,
@@ -181,7 +222,21 @@ function getShapeCube(option = {}) {
   return { attributes, resolution: [size, size] }
 }
 
-function getShapeCylinder(option = {}) {
+type OptionShapeCylinder = {
+  program: Program
+  radius: number
+  radiusTop: number
+  radiusBottom: number
+  height: number
+  radialSegments: number
+  heightSegments: number
+  openEnded: boolean
+  thetaStart: number
+  thetaLength: number
+  hasLight: boolean
+}
+
+function getShapeCylinder(option: OptionShapeCylinder | {} = {}): Shape {
   const {
     program,
     radius = 1,
@@ -194,7 +249,7 @@ function getShapeCylinder(option = {}) {
     thetaStart = 0,
     thetaLength = Math.PI * 2,
     hasLight = false,
-  } = option
+  } = option as OptionShapeCylinder
 
   program.radius = radius
   program.radiusTop = radiusTop
@@ -206,14 +261,14 @@ function getShapeCylinder(option = {}) {
   program.thetaStart = thetaStart
   program.thetaLength = thetaLength
 
-  const indices = []
-  const vertices = []
-  const normals = []
-  const uvs = []
+  const indices: number[] = []
+  const vertices: number[] = []
+  const normals: number[] = []
+  const uvs: number[] = []
 
   // helper variables
   let index = 0
-  const indexArray = []
+  const indexArray: number[][] = []
   const halfHeight = height / 2
 
   // generate geometry
@@ -230,7 +285,7 @@ function getShapeCylinder(option = {}) {
 
     // generate vertices, normals and uvs
     for (let y = 0; y <= heightSegments; y++) {
-      const indexRow = []
+      const indexRow: number[] = []
 
       const v = y / heightSegments
 
@@ -254,7 +309,7 @@ function getShapeCylinder(option = {}) {
 
         // normal
         if (hasLight) {
-          const normal = [sinTheta, slope, cosTheta]
+          const normal: Vec3 = [sinTheta, slope, cosTheta]
           normalize(normal)
           normals.push(normal[0], normal[1], normal[2])
         }
@@ -286,12 +341,12 @@ function getShapeCylinder(option = {}) {
     }
   }
 
-  function generateCap(top) {
+  function generateCap(isTop: boolean) {
     // save the index of the first center vertex
     const centerIndexStart = index
 
-    const radius = top === true ? radiusTop : radiusBottom
-    const sign = top === true ? 1 : -1
+    const radius = isTop ? radiusTop : radiusBottom
+    const sign = isTop ? 1 : -1
 
     // first we generate the center vertex data of the cap.
     // because the geometry needs one set of uvs per face,
@@ -339,7 +394,7 @@ function getShapeCylinder(option = {}) {
       const c = centerIndexStart + x
       const i = centerIndexEnd + x
 
-      if (top === true) {
+      if (isTop) {
         // face top
         indices.push(i, i + 1, c)
       } else {
@@ -349,7 +404,7 @@ function getShapeCylinder(option = {}) {
     }
   }
 
-  const attributes = {
+  const attributes: Attributes = {
     aPosition: {
       value: vertices,
       size: 3,
@@ -374,22 +429,134 @@ function getShapeCylinder(option = {}) {
   return { attributes, resolution: [radius * 2 * Math.PI, height] }
 }
 
+export type Texture = {
+  texture: WebGLTexture
+  textureIndex: number
+}
+
+type Mode =
+  | 'POINTS'
+  | 'LINE_STRIP'
+  | 'LINE_LOOP'
+  | 'LINES'
+  | 'TRIANGLE_STRIP'
+  | 'TRIANGLE_FAN'
+  | 'TRIANGLES'
+
+type DrawType = 'STATIC_DRAW' | 'DYNAMIC_DRAW' | 'STREAM_DRAW'
+
+type AttributeProgram = {
+  location: number
+  size?: number
+  isInstanced: boolean
+  ibo?: WebGLBuffer | null
+  vbo?: WebGLBuffer | null
+}
+
+export type OptionProgram = {
+  shape: 'plane' | 'cube' | 'cylinder' | 'point'
+  vertexShaderId: string
+  vertexShader: string
+  fragmentShaderId: string
+  fragmentShader: string
+  attributes: Attributes
+  instancedAttributes: Attributes
+  uniforms: Uniforms
+  mode: Mode
+  drawType: DrawType
+  isTransparent: boolean
+  isAdditive: boolean
+  isFloats: boolean
+  isCulling: boolean
+  isDepth: boolean
+  isHidden: boolean
+  isAutoResolution: boolean
+  hasCamera: boolean
+  hasLight: boolean
+  hasMatrix: boolean
+
+  width?: number
+  height?: number
+  size?: number
+}
+
 export default class Program extends ObjectGl {
-  constructor(kgl, option = {}) {
+  isProgram = true
+  isPoint = false
+  attributes: { [K: string]: AttributeProgram } = {}
+  uniforms: Uniforms = {}
+  textures: { [K: string]: Texture } = {}
+
+  gl: WebGLRenderingContext
+
+  kglTextures: KglTexture[] = []
+
+  id: number = -1
+
+  invMatrix?: Matrix
+
+  mode?: Mode
+  glMode: GLenum
+  drawType: DrawType
+  isTransparent: boolean
+  isAdditive: boolean
+  isAutoResolution: boolean
+  hasCamera: boolean
+  hasLight: boolean
+  isCulling: boolean
+  isDepth: boolean
+  isInstanced: boolean
+  isHidden: boolean
+
+  instancedArraysExt?: ANGLE_instanced_arrays
+
+  vertexShader: WebGLShader | null = null
+  fragmentShader: WebGLShader | null = null
+  program: WebGLProgram | null = null
+
+  indicesCount?: number
+  instanceCount?: number
+  count?: number
+
+  // ShapePlane
+  width?: number
+  height?: number
+
+  // ShapeCube
+  size?: number
+
+  // ShapeCylinder
+  radius?: number
+  radiusTop?: number
+  radiusBottom?: number
+  radialSegments?: number
+  heightSegments?: number
+  openEnded?: boolean
+  thetaStart?: number
+  thetaLength?: number
+
+  private _dummyCanvas?: HTMLCanvasElement
+
+  constructor(kgl: Kgl, option: OptionProgram | {} = {}) {
     const {
       shape,
       vertexShaderId,
-      vertexShader = vertexShaderId
-        ? document.getElementById(vertexShaderId).textContent
+      vertexShader = vertexShaderId &&
+      document.getElementById(vertexShaderId) &&
+      document.getElementById(vertexShaderId)!.textContent
+        ? document.getElementById(vertexShaderId)!.textContent!
         : shape
         ? vertexShaderShape.d3
         : vertexShaderShape.d2,
       fragmentShaderId,
-      fragmentShader = document.getElementById(fragmentShaderId).textContent,
+      fragmentShader = document.getElementById(fragmentShaderId) &&
+      document.getElementById(fragmentShaderId)!.textContent
+        ? document.getElementById(fragmentShaderId)!.textContent!
+        : '',
       attributes,
       instancedAttributes,
       uniforms = {},
-      mode = shape === 'point' ? 'POINTS' : null,
+      mode = shape === 'point' ? 'POINTS' : undefined,
       drawType = 'STATIC_DRAW',
       isTransparent = false,
       isAdditive = false,
@@ -400,11 +567,11 @@ export default class Program extends ObjectGl {
       isAutoResolution = !isFloats && !uniforms.uResolution,
       hasCamera = !isFloats && kgl.hasCamera,
       hasLight = !isFloats && kgl.hasLight,
-    } = option
+    } = option as OptionProgram
 
-    option.hasMatrix = hasCamera
+    const hasMatrix = hasCamera
 
-    super(kgl, option)
+    super(kgl, option, hasMatrix)
 
     this.isProgram = true
     this.isPoint = shape === 'point'
@@ -413,7 +580,7 @@ export default class Program extends ObjectGl {
     this.textures = {}
 
     const { gl } = kgl
-    this.gl = gl
+    this.gl = gl!
     this.kglTextures = kgl.textures
 
     kgl.indexProgram = kgl.indexProgram + 1
@@ -424,13 +591,13 @@ export default class Program extends ObjectGl {
     }
 
     const isWhole = !(
-      option.shape ||
-      option.vertexShaderId ||
-      option.vertexShader
+      (option as OptionProgram).shape ||
+      (option as OptionProgram).vertexShaderId ||
+      (option as OptionProgram).vertexShader
     )
 
     this.mode = mode
-    this.glMode = gl[mode || 'TRIANGLE_STRIP']
+    this.glMode = this.gl[mode || 'TRIANGLE_STRIP']
     this.drawType = drawType
     this.isTransparent = isTransparent
     this.isAdditive = isAdditive
@@ -439,7 +606,7 @@ export default class Program extends ObjectGl {
     this.hasLight = hasLight
     this.isCulling = isCulling
     this.isDepth = isDepth
-    this.isInstanced = instancedAttributes
+    this.isInstanced = !!instancedAttributes
     this.isHidden = isHidden
 
     this.createProgram(vertexShader, fragmentShader)
@@ -454,15 +621,15 @@ export default class Program extends ObjectGl {
         case 'plane':
           shapeData = getShapePlane({
             hasLight: this.hasLight,
-            width: option.width,
-            height: option.height,
+            width: (option as OptionProgram).width,
+            height: (option as OptionProgram).height,
             program: this,
           })
           break
         case 'cube':
           shapeData = getShapeCube({
             hasLight: this.hasLight,
-            size: option.size,
+            size: (option as OptionProgram).size,
             program: this,
           })
           break
@@ -483,32 +650,34 @@ export default class Program extends ObjectGl {
     }
 
     if (this.isInstanced) {
-      this.instancedArraysExt = gl.getExtension('ANGLE_instanced_arrays')
-      if (this.instancedArraysExt == null) {
+      const instancedArraysExt = this.gl.getExtension('ANGLE_instanced_arrays')
+      if (instancedArraysExt == null) {
         alert('ANGLE_instanced_arrays not supported')
         return
       }
+      this.instancedArraysExt = instancedArraysExt
       this.createAttribute(instancedAttributes, true)
     }
 
     this.createUniform(uniforms)
   }
 
-  createProgram(vertexShader, fragmentShader) {
+  createProgram(codeVertexShader: string, codeFragmentShader: string) {
     const { gl } = this
 
-    const program = gl.createProgram()
-    gl.attachShader(
-      program,
-      (this.vertexShader = this.createShader('VERTEX_SHADER', vertexShader))
+    const program = gl.createProgram()!
+
+    const vertexShader = this.createShader('VERTEX_SHADER', codeVertexShader)
+    if (!vertexShader) return
+    gl.attachShader(program, (this.vertexShader = vertexShader))
+
+    const fragmentShader = this.createShader(
+      'FRAGMENT_SHADER',
+      codeFragmentShader
     )
-    gl.attachShader(
-      program,
-      (this.fragmentShader = this.createShader(
-        'FRAGMENT_SHADER',
-        fragmentShader
-      ))
-    )
+    if (!fragmentShader) return
+    gl.attachShader(program, (this.fragmentShader = fragmentShader))
+
     gl.linkProgram(program)
 
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
@@ -524,9 +693,9 @@ export default class Program extends ObjectGl {
     this.program = program
   }
 
-  createShader(type, content) {
+  createShader(type: 'VERTEX_SHADER' | 'FRAGMENT_SHADER', content: string) {
     const { gl } = this
-    const shader = gl.createShader(gl[type])
+    const shader = gl.createShader(gl[type])!
 
     gl.shaderSource(shader, content)
     gl.compileShader(shader)
@@ -539,7 +708,7 @@ export default class Program extends ObjectGl {
     return shader
   }
 
-  createAttribute(data, isInstanced) {
+  createAttribute(data: Attributes, isInstanced = false) {
     Object.keys(data).forEach((key) => {
       const { value, size, isIndices } = data[key]
 
@@ -547,14 +716,20 @@ export default class Program extends ObjectGl {
     })
   }
 
-  addAttribute(key, value, size, isIndices, isInstanced) {
+  addAttribute(
+    key: string,
+    value: AttributeValue,
+    size?: number,
+    isIndices: boolean = false,
+    isInstanced: boolean = false
+  ) {
     const { gl } = this
-    const location = gl.getAttribLocation(this.program, key)
-    const attribute = (this.attributes[key] = {
+    const location = gl.getAttribLocation(this.program!, key)
+    const attribute: AttributeProgram = {
       location,
       size,
       isInstanced,
-    })
+    }
 
     if (isIndices) {
       const ibo = gl.createBuffer()
@@ -575,35 +750,37 @@ export default class Program extends ObjectGl {
       attribute.vbo = vbo
 
       if (isInstanced) {
-        this.instanceCount = this.instanceCount || value.length / size
+        this.instanceCount = this.instanceCount || value.length / size!
       }
-      this.count = this.count || value.length / size
+      this.count = this.count || value.length / size!
     }
+
+    this.attributes[key] = attribute
   }
 
-  setAttribute(key) {
+  setAttribute(key: string) {
     const { gl } = this
     const { location, size, vbo, ibo, isInstanced } = this.attributes[key]
 
     if (ibo) {
       gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ibo)
-    } else {
+    } else if (vbo) {
       gl.bindBuffer(gl.ARRAY_BUFFER, vbo)
       gl.enableVertexAttribArray(location)
-      gl.vertexAttribPointer(location, size, gl.FLOAT, false, 0, 0)
+      gl.vertexAttribPointer(location, size!, gl.FLOAT, false, 0, 0)
       if (isInstanced)
-        this.instancedArraysExt.vertexAttribDivisorANGLE(location, 1)
+        this.instancedArraysExt!.vertexAttribDivisorANGLE(location, 1)
     }
   }
 
-  updateAttribute(key, values, offset = 0) {
+  updateAttribute(key: string, values: AttributeValue, offset = 0) {
     const { gl } = this
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes[key].vbo)
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.attributes[key].vbo!)
     gl.bufferSubData(gl.ARRAY_BUFFER, offset, new Float32Array(values))
   }
 
-  updateMatrix(vpMatrix) {
+  updateMatrix(vpMatrix: Matrix) {
     if (!this.hasMatrix) return
 
     const isUpdateMatrix = super.updateMatrix(vpMatrix)
@@ -614,12 +791,14 @@ export default class Program extends ObjectGl {
     }
 
     if (this.hasLight) {
-      inverse(this.mMatrix, this.invMatrix)
+      inverse(this.mMatrix, this.invMatrix!)
       this.uniforms.uInvMatrix = this.invMatrix
     }
+
+    return isUpdateMatrix
   }
 
-  createUniform(data) {
+  createUniform(data: Uniforms) {
     const mergedData = Object.assign({}, data)
 
     if (this.isAutoResolution && !mergedData.uResolution) {
@@ -643,12 +822,12 @@ export default class Program extends ObjectGl {
     })
   }
 
-  addUniform(key, value) {
+  addUniform(key: string, value: UniformValue) {
     let originalType
     let uniformType
     let _value = value
 
-    const getTypeFromString = (type, value) => {
+    const getTypeFromString = (type: string, value?: UniformValue) => {
       switch (type) {
         case 'texture':
           originalType = 'texture'
@@ -712,22 +891,22 @@ export default class Program extends ObjectGl {
       return
     }
 
-    const location = this.gl.getUniformLocation(this.program, key)
+    const location = this.gl.getUniformLocation(this.program!, key)
     const type = `uniform${uniformType}`
 
     let set
     switch (originalType) {
       case 'texture':
-        set = (value) => {
+        set = (value: UniformValue) => {
           this.use()
           switch (typeof value) {
             case 'number':
-              this.gl[type](location, value)
+              ;(this.gl as any)[type](location, value)
               _value = value
               break
             case 'string':
               _value = this.textures[value].textureIndex
-              this.gl[type](location, _value)
+              ;(this.gl as any)[type](location, _value)
               break
             default:
               _value = this.updateTexture(key, value)
@@ -735,9 +914,9 @@ export default class Program extends ObjectGl {
         }
         break
       case 'framebuffer':
-        set = (framebufferKey) => {
+        set = (framebufferKey: string) => {
           this.use()
-          this.gl[type](
+          ;(this.gl as any)[type](
             location,
             this.kgl.framebuffers[framebufferKey].textureIndex
           )
@@ -745,16 +924,16 @@ export default class Program extends ObjectGl {
         }
         break
       case 'matrix':
-        set = (newValue) => {
+        set = (newValue: Float32Array) => {
           this.use()
-          this.gl[type](location, false, newValue)
+          ;(this.gl as any)[type](location, false, newValue)
           _value = newValue
         }
         break
       default:
-        set = (newValue) => {
+        set = (newValue: any) => {
           this.use()
-          this.gl[type](location, newValue)
+          ;(this.gl as any)[type](location, newValue)
           _value = newValue
         }
     }
@@ -767,7 +946,7 @@ export default class Program extends ObjectGl {
     if (typeof _value !== 'undefined') this.uniforms[key] = _value
   }
 
-  updateUniforms(uniforms) {
+  updateUniforms(uniforms: { [K: string]: any }) {
     const keys = Object.keys(uniforms)
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
@@ -775,7 +954,7 @@ export default class Program extends ObjectGl {
     }
   }
 
-  createTexture(key, el) {
+  createTexture(key: string, el: TexImageSource) {
     if (!el) return
 
     const { gl } = this
@@ -783,14 +962,14 @@ export default class Program extends ObjectGl {
     let texture, textureIndex
 
     const textureMatch = this.kglTextures.filter(
-      ({ src }) => el.currentSrc === src
+      ({ src }) => (el as HTMLImageElement).currentSrc === src
     )[0]
 
     if (textureMatch) {
       texture = textureMatch.texture
       textureIndex = textureMatch.textureIndex
     } else {
-      texture = gl.createTexture()
+      texture = gl.createTexture()!
       const textureDeleted = this.kglTextures.filter(
         ({ isActive }) => !isActive
       )[0]
@@ -800,7 +979,7 @@ export default class Program extends ObjectGl {
         isActive: true,
         texture,
         textureIndex,
-        src: el.currentSrc,
+        src: (el as HTMLImageElement).currentSrc,
       }
     }
 
@@ -821,7 +1000,7 @@ export default class Program extends ObjectGl {
     return textureIndex
   }
 
-  updateTexture(key, el) {
+  updateTexture(key: string, el: TexImageSource) {
     const { gl } = this
     const { textureIndex } = this.textures[key]
 
@@ -891,26 +1070,26 @@ export default class Program extends ObjectGl {
 
     if (this.isInstanced) {
       if (this.indicesCount) {
-        this.instancedArraysExt.drawElementsInstancedANGLE(
+        this.instancedArraysExt!.drawElementsInstancedANGLE(
           this.glMode,
           this.indicesCount,
           gl.UNSIGNED_SHORT,
           0,
-          this.instanceCount
+          this.instanceCount!
         )
       } else {
-        this.instancedArraysExt.drawArraysInstancedANGLE(
+        this.instancedArraysExt!.drawArraysInstancedANGLE(
           this.glMode,
           0,
-          this.count,
-          this.instanceCount
+          this.count!,
+          this.instanceCount!
         )
       }
     } else {
       if (this.indicesCount) {
         gl.drawElements(this.glMode, this.indicesCount, gl.UNSIGNED_SHORT, 0)
       } else {
-        gl.drawArrays(this.glMode, 0, this.count)
+        gl.drawArrays(this.glMode, 0, this.count!)
       }
     }
   }
@@ -923,13 +1102,13 @@ export default class Program extends ObjectGl {
 
     Object.keys(this.attributes).forEach((key) => {
       const { vbo, ibo } = this.attributes[key]
-      gl.deleteBuffer(vbo || ibo)
+      gl.deleteBuffer(vbo! || ibo!)
     })
 
     Object.keys(this.textures).forEach((key) => {
       const { texture, textureIndex } = this.textures[key]
       gl.deleteTexture(texture)
-      this.kglTextures[textureIndex] = false
+      this.kglTextures[textureIndex].isActive = false
     })
 
     gl.deleteProgram(this.program)

@@ -5,11 +5,13 @@
 // https://wgld.org/d/library/l001.html
 // ------------------------------------------------------------------------------------------------
 
+import { Matrix, Vec3 } from './type'
+
 export function createMatrix() {
   return identity(new Float32Array(16))
 }
 
-export function identity(dest) {
+export function identity(dest: Matrix) {
   dest[0] = 1
   dest[1] = 0
   dest[2] = 0
@@ -29,7 +31,7 @@ export function identity(dest) {
   return dest
 }
 
-export function multiply(mat1, mat2, dest) {
+export function multiply(mat1: Matrix, mat2: Matrix, dest: Matrix) {
   const a = mat1[0]
   const b = mat1[1]
   const c = mat1[2]
@@ -81,7 +83,7 @@ export function multiply(mat1, mat2, dest) {
   return dest
 }
 
-export function scale(mat, vec, dest) {
+export function scale(mat: Matrix, vec: Vec3, dest: Matrix) {
   dest[0] = mat[0] * vec[0]
   dest[1] = mat[1] * vec[0]
   dest[2] = mat[2] * vec[0]
@@ -101,7 +103,7 @@ export function scale(mat, vec, dest) {
   return dest
 }
 
-export function translate(mat, vec, dest) {
+export function translate(mat: Matrix, vec: Vec3, dest: Matrix) {
   dest[0] = mat[0]
   dest[1] = mat[1]
   dest[2] = mat[2]
@@ -121,7 +123,7 @@ export function translate(mat, vec, dest) {
   return dest
 }
 
-export function rotate(mat, angle, axis, dest) {
+export function rotate(mat: Matrix, angle: number, axis: Vec3, dest: Matrix) {
   let sq = Math.sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2])
   if (!sq) {
     return null
@@ -184,7 +186,7 @@ export function rotate(mat, angle, axis, dest) {
   return dest
 }
 
-export function lookAt(eye, center, up, dest) {
+export function lookAt(eye: Vec3, center: Vec3, up: Vec3, dest: Matrix) {
   const eyeX = eye[0]
   const eyeY = eye[1]
   const eyeZ = eye[2]
@@ -252,7 +254,13 @@ export function lookAt(eye, center, up, dest) {
   return dest
 }
 
-export function perspective(fovy, aspect, near, far, dest) {
+export function perspective(
+  fovy: number,
+  aspect: number,
+  near: number,
+  far: number,
+  dest: Matrix
+) {
   const t = near * Math.tan((fovy * Math.PI) / 360)
   const r = t * aspect
   const a = r * 2
@@ -277,7 +285,15 @@ export function perspective(fovy, aspect, near, far, dest) {
   return dest
 }
 
-export function ortho(left, right, top, bottom, near, far, dest) {
+export function ortho(
+  left: number,
+  right: number,
+  top: number,
+  bottom: number,
+  near: number,
+  far: number,
+  dest: Matrix
+) {
   const h = right - left
   const v = top - bottom
   const d = far - near
@@ -300,7 +316,7 @@ export function ortho(left, right, top, bottom, near, far, dest) {
   return dest
 }
 
-export function transpose(mat, dest) {
+export function transpose(mat: Matrix, dest: Matrix) {
   dest[0] = mat[0]
   dest[1] = mat[4]
   dest[2] = mat[8]
@@ -320,7 +336,7 @@ export function transpose(mat, dest) {
   return dest
 }
 
-export function inverse(mat, dest) {
+export function inverse(mat: Matrix, dest: Matrix) {
   const a = mat[0]
   const b = mat[1]
   const c = mat[2]
@@ -369,15 +385,15 @@ export function inverse(mat, dest) {
   return dest
 }
 
-export function getLength(mat) {
+export function getLength(mat: Vec3) {
   return Math.sqrt(mat[0] * mat[0] + mat[1] * mat[1] + mat[2] * mat[2])
 }
 
-export function normalize(mat, dest) {
+export function normalize(mat: Vec3) {
   return divideScalar(mat, getLength(mat) || 1)
 }
 
-export function multiplyScalar(mat, scalar) {
+export function multiplyScalar(mat: Vec3, scalar: number) {
   mat[0] *= scalar
   mat[1] *= scalar
   mat[2] *= scalar
@@ -385,6 +401,6 @@ export function multiplyScalar(mat, scalar) {
   return mat
 }
 
-export function divideScalar(mat, scalar) {
+export function divideScalar(mat: Vec3, scalar: number) {
   return multiplyScalar(mat, 1 / scalar)
 }

@@ -1,7 +1,7 @@
-import Kgl from './kgl.ts'
+import KglEffect from './kglEffect'
 import * as Effects from './effects/index.js'
 
-export default class KglAuto extends Kgl {
+export default class KglAuto extends KglEffect {
   constructor(option = {}) {
     super(option)
 

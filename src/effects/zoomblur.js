@@ -1,4 +1,4 @@
-import Program from '../program.js'
+import Program from '../program'
 import zoomblurFrag from '../shaders/postprocessing/zoomblur.frag'
 
 export default class Zoomblur extends Program {

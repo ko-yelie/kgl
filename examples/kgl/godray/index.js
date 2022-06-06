@@ -1,4 +1,4 @@
-import Kgl, { Godray } from '../../../src/index.ts'
+import { KglEffect, Godray } from '../../../src/index.ts'
 import fragmentShader from './mask.frag'
 import { loadImage, mix } from '../../utils.js'
 
@@ -9,7 +9,7 @@ const strength = 12
 const maxRadius = window.innerWidth < 768 ? 0.4 : 0.8
 const minRadius = 0.1
 
-const kgl = new Kgl()
+const kgl = new KglEffect()
 
 async function main() {
   const img = await loadImage(image, true)

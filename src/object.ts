@@ -1,3 +1,4 @@
+import Kgl from './kgl'
 import {
   createMatrix,
   identity,
@@ -5,25 +6,49 @@ import {
   rotate,
   scale,
   translate,
-} from './minMatrix.js'
+} from './minMatrix'
+import { Matrix, Vec2, Vec3 } from './type'
+
+type Option = {
+  hasMatrix: boolean
+  x: number
+  y: number
+  z: number
+  translate3d: Vec3
+  scale: number
+  scaleX: number
+  scaleY: number
+  scaleZ: number
+  scale2d: Vec2
+  scale3d: Vec3
+  rotateX: number
+  rotateY: number
+  rotateZ: number
+  rotate: number
+  rotate3d: Vec3
+}
 
 export default class ObjectGl {
-  constructor(kgl, option = {}) {
-    this.isProgram = false
-    this.children = []
+  isProgram = false
+  children: ObjectGl[] = []
 
+  kgl: Kgl
+
+  hasMatrix = true
+
+  mMatrix = createMatrix()
+  mvpMatrix = createMatrix()
+  _translate = [0, 0, 0]
+  _scale = [1, 1, 1]
+  _rotate = [0, 0, 0]
+  _scalePatch = 1
+  isUpdateMatrix = false
+
+  constructor(kgl: Kgl, option: Option | {} = {}, hasMatrix = true) {
     this.kgl = kgl
 
-    this.hasMatrix = 'hasMatrix' in option ? option.hasMatrix : true
+    this.hasMatrix = hasMatrix
     if (!this.hasMatrix) return
-
-    this.mMatrix = createMatrix()
-    this.mvpMatrix = createMatrix()
-    this._translate = [0, 0, 0]
-    this._scale = [1, 1, 1]
-    this._rotate = [0, 0, 0]
-    this._scalePatch = 1
-    this.isUpdateMatrix = false
 
     if ('x' in option) {
       this.x = option.x
@@ -73,135 +98,135 @@ export default class ObjectGl {
   }
 
   get x() {
-    return this._translate[0]
+    return this._translate![0]
   }
 
   set x(value) {
-    this._translate[0] = value
+    this._translate![0] = value
     this.changeMatrix()
   }
 
   get y() {
-    return this._translate[1]
+    return this._translate![1]
   }
 
   set y(value) {
-    this._translate[1] = value
+    this._translate![1] = value
     this.changeMatrix()
   }
 
   get z() {
-    return this._translate[2]
+    return this._translate![2]
   }
 
   set z(value) {
-    this._translate[2] = value
+    this._translate![2] = value
     this.changeMatrix()
   }
 
   get translate3d() {
-    return [...this._translate]
+    return [...this._translate!]
   }
 
   set translate3d(value) {
-    this._translate[0] = value[0]
-    this._translate[1] = value[1]
-    this._translate[2] = value[2]
+    this._translate![0] = value[0]
+    this._translate![1] = value[1]
+    this._translate![2] = value[2]
     this.changeMatrix()
   }
 
   get scale() {
-    return this._scale[0] === this._scale[1] &&
-      this._scale[0] === this._scale[2]
-      ? this._scale[0]
-      : null
+    return this._scale![0] === this._scale![1] &&
+      this._scale![0] === this._scale![2]
+      ? this._scale![0]
+      : 1
   }
 
   set scale(value) {
-    this._scale[0] = this._scale[1] = this._scale[2] = value
+    this._scale![0] = this._scale![1] = this._scale![2] = value
     this.changeMatrix()
   }
 
   get scaleX() {
-    return this._scale[0]
+    return this._scale![0]
   }
 
   set scaleX(value) {
-    this._scale[0] = value
+    this._scale![0] = value
     this.changeMatrix()
   }
 
   get scaleY() {
-    return this._scale[1]
+    return this._scale![1]
   }
 
   set scaleY(value) {
-    this._scale[1] = value
+    this._scale![1] = value
     this.changeMatrix()
   }
 
   get scaleZ() {
-    return this._scale[2]
+    return this._scale![2]
   }
 
   set scaleZ(value) {
-    this._scale[2] = value
+    this._scale![2] = value
     this.changeMatrix()
   }
 
   get scale2d() {
-    return [this._scale[0], this._scale[1]]
+    return [this._scale![0], this._scale![1]]
   }
 
-  set scale2d(value) {
-    if (value.length === 2) {
-      this._scale[0] = value[0]
-      this._scale[1] = value[1]
+  set scale2d(value: Vec2 | number) {
+    if ((value as Vec2).length === 2) {
+      this._scale![0] = (value as Vec2)[0]
+      this._scale![1] = (value as Vec2)[1]
     } else {
-      this._scale[0] = this._scale[1] = value
+      this._scale![0] = this._scale![1] = value as number
     }
     this.changeMatrix()
   }
 
   get scale3d() {
-    return [this._scale[0], this._scale[1], this._scale[2]]
+    return [this._scale![0], this._scale![1], this._scale![2]]
   }
 
-  set scale3d(value) {
-    if (value.length === 3) {
-      this._scale[0] = value[0]
-      this._scale[1] = value[1]
-      this._scale[2] = value[2]
+  set scale3d(value: Vec3 | number) {
+    if ((value as Vec3).length === 3) {
+      this._scale![0] = (value as Vec3)[0]
+      this._scale![1] = (value as Vec3)[1]
+      this._scale![2] = (value as Vec3)[2]
     } else {
-      this._scale[0] = this._scale[1] = this._scale[2] = value
+      this._scale![0] = this._scale![1] = this._scale![2] = value as number
     }
     this.changeMatrix()
   }
 
   get rotateX() {
-    return this._rotate[0]
+    return this._rotate![0]
   }
 
   set rotateX(radian) {
-    this._rotate[0] = radian
+    this._rotate![0] = radian
     this.changeMatrix()
   }
 
   get rotateY() {
-    return this._rotate[1]
+    return this._rotate![1]
   }
 
   set rotateY(radian) {
-    this._rotate[1] = radian
+    this._rotate![1] = radian
     this.changeMatrix()
   }
 
   get rotateZ() {
-    return this._rotate[2]
+    return this._rotate![2]
   }
 
   set rotateZ(radian) {
-    this._rotate[2] = radian
+    this._rotate![2] = radian
     this.changeMatrix()
   }
 
@@ -214,13 +239,13 @@ export default class ObjectGl {
   }
 
   get rotate3d() {
-    return [...this._rotate]
+    return [...this._rotate!]
   }
 
   set rotate3d(radian) {
-    this._rotate[0] = radian[0]
-    this._rotate[1] = radian[1]
-    this._rotate[2] = radian[2]
+    this._rotate![0] = radian[0]
+    this._rotate![1] = radian[1]
+    this._rotate![2] = radian[2]
     this.changeMatrix()
   }
 
@@ -250,43 +275,43 @@ export default class ObjectGl {
     }
   }
 
-  updateMatrix(vpMatrix) {
+  updateMatrix(vpMatrix: Matrix) {
     if (!this.hasMatrix) return
 
     const { isUpdateMatrix } = this
 
     if (isUpdateMatrix) {
-      identity(this.mMatrix)
+      identity(this.mMatrix!)
 
       translate(
-        this.mMatrix,
+        this.mMatrix!,
         [
-          this._translate[0] * this.kgl.pixelRatio,
-          this._translate[1] * this.kgl.pixelRatio,
-          this._translate[2],
+          this._translate![0] * this.kgl.pixelRatio,
+          this._translate![1] * this.kgl.pixelRatio,
+          this._translate![2],
         ],
-        this.mMatrix
+        this.mMatrix!
       )
 
-      rotate(this.mMatrix, this._rotate[0], [1, 0, 0], this.mMatrix)
-      rotate(this.mMatrix, this._rotate[1], [0, 1, 0], this.mMatrix)
-      rotate(this.mMatrix, this._rotate[2], [0, 0, 1], this.mMatrix)
+      rotate(this.mMatrix!, this._rotate![0], [1, 0, 0], this.mMatrix!)
+      rotate(this.mMatrix!, this._rotate![1], [0, 1, 0], this.mMatrix!)
+      rotate(this.mMatrix!, this._rotate![2], [0, 0, 1], this.mMatrix!)
 
       scale(
-        this.mMatrix,
+        this.mMatrix!,
         [
-          this._scale[0] * this._scalePatch,
-          this._scale[1] * this._scalePatch,
-          this._scale[2] * this._scalePatch,
+          this._scale![0] * this._scalePatch!,
+          this._scale![1] * this._scalePatch!,
+          this._scale![2] * this._scalePatch!,
         ],
-        this.mMatrix
+        this.mMatrix!
       )
 
-      multiply(vpMatrix, this.mMatrix, this.mvpMatrix)
+      multiply(vpMatrix, this.mMatrix!, this.mvpMatrix!)
 
       if (!this.isProgram) {
         for (let i = 0; i < this.children.length; i = (i + 1) | 0) {
-          this.children[i].updateMatrix(this.mvpMatrix)
+          this.children[i].updateMatrix(this.mvpMatrix!)
         }
       }
 
@@ -296,11 +321,11 @@ export default class ObjectGl {
     return isUpdateMatrix
   }
 
-  add(objectGl) {
+  add(objectGl: ObjectGl) {
     this.children.push(objectGl)
   }
 
-  remove(objectGl) {
+  remove(objectGl: ObjectGl) {
     this.children.some((value, i) => {
       if (value === objectGl) {
         this.children.splice(i, 1)
@@ -318,7 +343,7 @@ export default class ObjectGl {
     }
   }
 
-  forEachProgram(func) {
+  forEachProgram(func: Function) {
     if (this.isProgram) {
       func(this)
     } else {

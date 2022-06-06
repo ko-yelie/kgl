@@ -1,4 +1,4 @@
-import Program from '../program.js'
+import Program from '../program'
 import blurFrag from '../shaders/postprocessing/blur.frag'
 
 export default class Blur extends Program {

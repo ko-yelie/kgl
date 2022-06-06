@@ -4,21 +4,101 @@ import {
   multiply,
   perspective,
   rotate,
-} from './minMatrix.js'
-import ObjectGl from './object.js'
-import Program from './program.js'
+} from './minMatrix'
+import ObjectGl from './object'
+import Program, { OptionProgram } from './program'
+import { Vec2, Vec3, Vec4 } from './type'
+
+export type KglTexture = {
+  isActive: boolean
+  texture: WebGLTexture
+  textureIndex: number
+  src: string
+}
+
+export type Framebuffer = {
+  framebuffer: WebGLFramebuffer
+  textureIndex: number
+  texture: WebGLTexture
+  depthRenderBuffer?: WebGLRenderbuffer
+  isFloat?: boolean
+}
+
+type OptionCreateProgram = {
+  isAutoAdd?: boolean
+} & OptionProgram
+
+type Option = {
+  canvas?: HTMLCanvasElement | string
+  disableClear?: boolean
+  clearedColor?: [number, number, number, number]
+  hasCamera?: boolean
+  hasLight?: boolean
+  isFullSize?: boolean
+  stencil?: boolean
+  alpha?: boolean
+  premultipliedAlpha?: boolean
+  pixelRatioMax?: number
+  pixelRatioFixed?: number
+
+  fov?: number
+  near?: number
+  far?: number
+  cameraPosition?: [number, number, number]
+  cameraRotation?: [number, number]
+  extraFar?: number
+
+  lightDirection?: Vec3
+  eyeDirection?: Vec3
+  ambientColor?: Vec3
+}
 
 export default class Kgl {
-  constructor(option = {}) {
-    this.root = null
-    this.indexProgram = -1
-    this.currentProgramId = null
-    this.isUpdateMatrix = false
-    this.effectList = []
-    this.framebuffers = {}
-    this.textureIndex = -1
-    this.textures = []
+  root: ObjectGl
+  indexProgram = -1
+  currentProgramId: number = -1
+  isUpdateMatrix = false
+  framebuffers: { [K: string]: Framebuffer } = {}
+  textureIndex = -1
+  textures: KglTexture[] = []
+  pixelRatio = 1
 
+  canvas: HTMLCanvasElement
+  disableClear: boolean
+  clearedColor: Vec4
+  hasCamera: boolean
+  hasLight: boolean
+  isFullSize: boolean
+  stencil: boolean
+  alpha: boolean
+  premultipliedAlpha: boolean
+  pixelRatioMax: number
+  pixelRatioFixed: number
+
+  vMatrix = createMatrix()
+  pMatrix = createMatrix()
+  vpMatrix = createMatrix()
+  fov: number = 50
+  near: number = 0.1
+  far: number = 2000
+  aspect: number = 1
+  cameraPosition: Vec3 = [0, 0, 0]
+  cameraRotation: Vec2 = [0, 0]
+  extraFar: number = 0
+  isAutoUpdateCameraPositionZ: boolean = false
+
+  lightDirection: Vec3 = [0, 0, 0]
+  eyeDirection: Vec3 = [0, 0, 0]
+  ambientColor: Vec3 = [0, 0, 0]
+
+  gl: WebGLRenderingContext
+
+  width: number = 0
+  height: number = 0
+  canvasNativeWidth: number = 0
+  canvasNativeHeight: number = 0
+
+  constructor(option: Option | {} = {}) {
     const {
       canvas,
       disableClear = false,
@@ -29,9 +109,9 @@ export default class Kgl {
       stencil = false,
       alpha = true,
       premultipliedAlpha = true,
-      pixelRatioMax,
-      pixelRatioFixed,
-    } = option
+      pixelRatioMax = 0,
+      pixelRatioFixed = 0,
+    } = option as Option
 
     this.disableClear = disableClear
     this.clearedColor = clearedColor || [0, 0, 0, 0]
@@ -52,20 +132,17 @@ export default class Kgl {
         cameraPosition = [0, 0, 30],
         cameraRotation = [0, 0],
         extraFar = 1,
-      } = option
+      } = option as Option
 
-      this.vMatrix = createMatrix()
-      this.pMatrix = createMatrix()
-      this.vpMatrix = createMatrix()
       this.fov = fov
       this.near = near
       this.far = far
       this.cameraPosition = cameraPosition
       this.cameraRotation = cameraRotation
+      this.extraFar = extraFar
       this.isAutoUpdateCameraPositionZ = !(
         'cameraPosition' in option || 'far' in option
       )
-      this.extraFar = extraFar
     }
 
     if (hasLight) {
@@ -73,7 +150,7 @@ export default class Kgl {
         lightDirection = [-1, 1, 1],
         eyeDirection = this.cameraPosition,
         ambientColor = [0.1, 0.1, 0.1],
-      } = option
+      } = option as Option
 
       this.lightDirection = lightDirection
       this.eyeDirection = eyeDirection
@@ -84,17 +161,24 @@ export default class Kgl {
 
     this.root = new ObjectGl(this)
 
-    this._initWebgl(canvas)
-  }
-
-  _initWebgl(canvas) {
+    // init canvas
+    let canvasElement:
+      | HTMLCanvasElement
+      | HTMLElement
+      | string
+      | null
+      | undefined = canvas
     if (typeof canvas === 'string') {
-      this.canvas = document.querySelector(canvas)
-    } else if (
-      typeof canvas === 'object' &&
-      canvas.constructor.name === 'HTMLCanvasElement'
+      canvasElement = document.querySelector<HTMLCanvasElement | HTMLElement>(
+        canvas
+      )
+    }
+
+    if (
+      typeof canvasElement === 'object' &&
+      canvasElement!.constructor.name === 'HTMLCanvasElement'
     ) {
-      this.canvas = canvas
+      this.canvas = canvasElement as HTMLCanvasElement
     } else {
       this.canvas = document.createElement('canvas')
       this.canvas.style.display = 'block'
@@ -103,6 +187,7 @@ export default class Kgl {
       document.body.appendChild(this.canvas)
     }
 
+    // get WebGL context
     const contextAttributes = {
       alpha: this.alpha,
       depth: true,
@@ -115,13 +200,24 @@ export default class Kgl {
     }
     const gl = (this.gl =
       // this.canvas.getContext('webgl2', contextAttributes) ||
-      this.canvas.getContext('webgl', contextAttributes) ||
-      this.canvas.getContext('experimental-webgl', contextAttributes))
+      (this.canvas.getContext(
+        'webgl',
+        contextAttributes
+      ) as WebGLRenderingContext) ||
+      (this.canvas.getContext(
+        'experimental-webgl',
+        contextAttributes
+      ) as WebGLRenderingContext))
+
+    if (!gl) {
+      console.error('WebGL not support')
+      return
+    }
 
     gl.depthFunc(gl.LEQUAL)
   }
 
-  add(objectGl) {
+  add(objectGl: ObjectGl) {
     this.root.add(objectGl)
 
     if (this.isAutoUpdateCameraPositionZ && objectGl.isProgram) {
@@ -129,42 +225,36 @@ export default class Kgl {
     }
   }
 
-  remove(objectGl) {
+  remove(objectGl: ObjectGl) {
     this.root.remove(objectGl)
   }
 
-  createProgram(option = {}) {
+  createProgram(option: OptionCreateProgram | {} = {}) {
     const program = new Program(this, option)
-    if (option.isAutoAdd) {
+    if ((option as OptionCreateProgram).isAutoAdd) {
       this.add(program)
     }
     return program
   }
 
-  createGroup(option = {}) {
+  createGroup(option: OptionCreateProgram | {} = {}) {
     const group = new ObjectGl(this, option)
-    if (option.isAutoAdd) {
+    if ((option as OptionCreateProgram).isAutoAdd) {
       this.add(group)
     }
     return group
   }
 
-  createEffect(EffectClass, option) {
-    const effect = new EffectClass(this, option)
-    this.effectList.push(effect)
-    return effect
-  }
-
   createFramebuffer(
-    key,
+    key: string,
     width = this.canvas.width,
     height = this.canvas.height
   ) {
     const { gl } = this
 
-    const framebuffer = gl.createFramebuffer()
+    const framebuffer = gl.createFramebuffer()!
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
-    const depthRenderBuffer = gl.createRenderbuffer()
+    const depthRenderBuffer = gl.createRenderbuffer()!
     gl.bindRenderbuffer(gl.RENDERBUFFER, depthRenderBuffer)
     gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height)
     gl.framebufferRenderbuffer(
@@ -173,9 +263,9 @@ export default class Kgl {
       gl.RENDERBUFFER,
       depthRenderBuffer
     )
-    const texture = gl.createTexture()
+    const texture = gl.createTexture()!
     const textureIndex = ++this.textureIndex
-    gl.activeTexture(gl[`TEXTURE${textureIndex}`])
+    gl.activeTexture((gl as any)[`TEXTURE${textureIndex}`])
     gl.bindTexture(gl.TEXTURE_2D, texture)
     gl.texImage2D(
       gl.TEXTURE_2D,
@@ -211,7 +301,7 @@ export default class Kgl {
   }
 
   resizeFramebuffer(
-    key,
+    key: string,
     width = this.canvas.width,
     height = this.canvas.height
   ) {
@@ -221,15 +311,15 @@ export default class Kgl {
     if (isFloat) return
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
-    gl.bindRenderbuffer(gl.RENDERBUFFER, depthRenderBuffer)
+    gl.bindRenderbuffer(gl.RENDERBUFFER, depthRenderBuffer!)
     gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height)
     gl.framebufferRenderbuffer(
       gl.FRAMEBUFFER,
       gl.DEPTH_ATTACHMENT,
       gl.RENDERBUFFER,
-      depthRenderBuffer
+      depthRenderBuffer!
     )
-    gl.activeTexture(gl[`TEXTURE${textureIndex}`])
+    gl.activeTexture((gl as any)[`TEXTURE${textureIndex}`])
     gl.texImage2D(
       gl.TEXTURE_2D,
       0,
@@ -243,7 +333,7 @@ export default class Kgl {
     )
   }
 
-  createFramebufferFloat(key, width, height = width) {
+  createFramebufferFloat(key: string, width: number, height: number = width) {
     const { gl } = this
     const textureFloat = gl.getExtension('OES_texture_float')
     const textureHalfFloat = gl.getExtension('OES_texture_half_float')
@@ -254,12 +344,12 @@ export default class Kgl {
     }
 
     const flg = textureHalfFloat ? textureHalfFloat.HALF_FLOAT_OES : gl.FLOAT
-    const framebuffer = gl.createFramebuffer()
-    const texture = gl.createTexture()
+    const framebuffer = gl.createFramebuffer()!
+    const texture = gl.createTexture()!
     const textureIndex = ++this.textureIndex
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer)
-    gl.activeTexture(gl[`TEXTURE${textureIndex}`])
+    gl.activeTexture((gl as any)[`TEXTURE${textureIndex}`])
     gl.bindTexture(gl.TEXTURE_2D, texture)
     gl.texImage2D(
       gl.TEXTURE_2D,
@@ -293,7 +383,7 @@ export default class Kgl {
     }
   }
 
-  bindFramebuffer(key) {
+  bindFramebuffer(key: string) {
     const { gl } = this
 
     gl.bindFramebuffer(
@@ -309,18 +399,19 @@ export default class Kgl {
   }
 
   setPixelRatio() {
-    this.pixelRatio = this.pixelRatioFixed
-      ? this.pixelRatioFixed
-      : this.pixelRatioMax
-      ? Math.min(this.pixelRatioMax, window.devicePixelRatio)
-      : window.devicePixelRatio
+    this.pixelRatio =
+      this.pixelRatioFixed > 0
+        ? this.pixelRatioFixed
+        : this.pixelRatioMax > 0
+        ? Math.min(this.pixelRatioMax, window.devicePixelRatio)
+        : window.devicePixelRatio
   }
 
   resize() {
     const { gl } = this
 
-    this.canvas.width = ''
-    this.canvas.height = ''
+    ;(this.canvas.width as number | '') = ''
+    ;(this.canvas.height as number | '') = ''
     this.canvasNativeWidth = this.canvas.clientWidth
     this.canvasNativeHeight = this.canvas.clientHeight
 
@@ -328,7 +419,7 @@ export default class Kgl {
     const { pixelRatio } = this
 
     if (this.isAutoUpdateCameraPositionZ) {
-      this.root.forEachProgram((program) => {
+      this.root.forEachProgram((program: Program) => {
         program.scalePatch = this.pixelRatio
       })
     }
@@ -338,9 +429,7 @@ export default class Kgl {
       this.canvasNativeWidth
     )
 
-    this.width = this.widthView = this.isFullSize
-      ? windowWidth
-      : this.canvasNativeWidth
+    this.width = this.isFullSize ? windowWidth : this.canvasNativeWidth
     this.height = this.isFullSize
       ? Math.max(
           Math.min(window.innerHeight, window.outerHeight),
@@ -359,19 +448,13 @@ export default class Kgl {
 
     gl.viewport(0, 0, width, height)
 
-    this.root.forEachProgram((program) => {
+    this.root.forEachProgram((program: Program) => {
       if (program.isAutoResolution) {
         program.uniforms.uResolution = [width, height]
       }
 
       if (program.isPoint) {
         program.uniforms.uPixelRatio = this.pixelRatio
-      }
-    })
-
-    this.effectList.forEach((program) => {
-      if (program.isAutoResolution) {
-        program.uniforms.uResolution = [width, height]
       }
     })
 
@@ -430,7 +513,7 @@ export default class Kgl {
   updateLight() {
     const { lightDirection, eyeDirection, ambientColor } = this
 
-    this.root.forEachProgram((program) => {
+    this.root.forEachProgram((program: Program) => {
       if (program.hasLight) {
         program.uniforms.uLightDirection = lightDirection
         program.uniforms.uEyeDirection = eyeDirection
@@ -462,7 +545,7 @@ export default class Kgl {
       this.clear()
     }
 
-    this.root.forEachProgram((program) => {
+    this.root.forEachProgram((program: Program) => {
       program.draw()
     })
   }
@@ -479,7 +562,7 @@ export default class Kgl {
       }
     })
 
-    this.root.forEachProgram((program) => {
+    this.root.forEachProgram((program: Program) => {
       program.destroy()
     })
 

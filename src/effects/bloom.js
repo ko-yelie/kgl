@@ -1,4 +1,4 @@
-import Program from '../program.js'
+import Program from '../program'
 import Specular from './specular.js'
 import Blur from './blur.js'
 import textureFrag from '../shaders/template/texture.frag'
