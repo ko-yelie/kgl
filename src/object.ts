@@ -7,7 +7,8 @@ import {
   scale,
   translate,
 } from './minMatrix'
-import { Matrix, Vec2, Vec3 } from './type'
+import { Array2, Array3 } from './type'
+import { Matrix, Vec2, Vec3 } from './vector'
 
 type Option = {
   hasMatrix: boolean
@@ -38,9 +39,9 @@ export default class ObjectGl {
 
   mMatrix = createMatrix()
   mvpMatrix = createMatrix()
-  _translate = [0, 0, 0]
-  _scale = [1, 1, 1]
-  _rotate = [0, 0, 0]
+  _translate = new Vec3([0, 0, 0])
+  _scale = new Vec3([1, 1, 1])
+  _rotate = new Vec3([0, 0, 0])
   _scalePatch = 1
   isUpdateMatrix = false
 
@@ -125,7 +126,7 @@ export default class ObjectGl {
   }
 
   get translate3d() {
-    return [...this._translate!]
+    return this._translate
   }
 
   set translate3d(value) {
@@ -175,13 +176,13 @@ export default class ObjectGl {
   }
 
   get scale2d() {
-    return [this._scale![0], this._scale![1]]
+    return this._scale
   }
 
-  set scale2d(value: Vec2 | number) {
-    if ((value as Vec2).length === 2) {
-      this._scale![0] = (value as Vec2)[0]
-      this._scale![1] = (value as Vec2)[1]
+  set scale2d(value: Vec2 | Array2 | number) {
+    if ((value as Vec2 | Array2).length === 2) {
+      this._scale![0] = (value as Vec2 | Array2)[0]
+      this._scale![1] = (value as Vec2 | Array2)[1]
     } else {
       this._scale![0] = this._scale![1] = value as number
     }
@@ -189,14 +190,14 @@ export default class ObjectGl {
   }
 
   get scale3d() {
-    return [this._scale![0], this._scale![1], this._scale![2]]
+    return this._scale
   }
 
-  set scale3d(value: Vec3 | number) {
-    if ((value as Vec3).length === 3) {
-      this._scale![0] = (value as Vec3)[0]
-      this._scale![1] = (value as Vec3)[1]
-      this._scale![2] = (value as Vec3)[2]
+  set scale3d(value: Vec3 | Array3 | number) {
+    if ((value as Vec3 | Array3).length === 3) {
+      this._scale![0] = (value as Vec3 | Array3)[0]
+      this._scale![1] = (value as Vec3 | Array3)[1]
+      this._scale![2] = (value as Vec3 | Array3)[2]
     } else {
       this._scale![0] = this._scale![1] = this._scale![2] = value as number
     }
@@ -239,7 +240,7 @@ export default class ObjectGl {
   }
 
   get rotate3d() {
-    return [...this._rotate!]
+    return this._rotate
   }
 
   set rotate3d(radian) {

@@ -1,7 +1,7 @@
 import ObjectGl from './object'
 import { createMatrix, inverse, normalize } from './minMatrix'
-import { Matrix, Vec3 } from './type'
 import Kgl, { KglTexture } from './kgl'
+import { Matrix, Vec3 } from './vector'
 
 type AttributeValue = number[]
 
@@ -309,7 +309,7 @@ function getShapeCylinder(option: OptionShapeCylinder | {} = {}): Shape {
 
         // normal
         if (hasLight) {
-          const normal: Vec3 = [sinTheta, slope, cosTheta]
+          const normal: Vec3 = new Vec3([sinTheta, slope, cosTheta])
           normalize(normal)
           normals.push(normal[0], normal[1], normal[2])
         }

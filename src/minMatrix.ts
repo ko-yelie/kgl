@@ -5,10 +5,11 @@
 // https://wgld.org/d/library/l001.html
 // ------------------------------------------------------------------------------------------------
 
-import { Matrix, Vec3 } from './type'
+import { Array3 } from './type'
+import { Matrix, Vec3 } from './vector'
 
 export function createMatrix() {
-  return identity(new Float32Array(16))
+  return identity(new Matrix())
 }
 
 export function identity(dest: Matrix) {
@@ -83,7 +84,7 @@ export function multiply(mat1: Matrix, mat2: Matrix, dest: Matrix) {
   return dest
 }
 
-export function scale(mat: Matrix, vec: Vec3, dest: Matrix) {
+export function scale(mat: Matrix, vec: Vec3 | Array3, dest: Matrix) {
   dest[0] = mat[0] * vec[0]
   dest[1] = mat[1] * vec[0]
   dest[2] = mat[2] * vec[0]
@@ -103,7 +104,7 @@ export function scale(mat: Matrix, vec: Vec3, dest: Matrix) {
   return dest
 }
 
-export function translate(mat: Matrix, vec: Vec3, dest: Matrix) {
+export function translate(mat: Matrix, vec: Vec3 | Array3, dest: Matrix) {
   dest[0] = mat[0]
   dest[1] = mat[1]
   dest[2] = mat[2]
@@ -123,7 +124,12 @@ export function translate(mat: Matrix, vec: Vec3, dest: Matrix) {
   return dest
 }
 
-export function rotate(mat: Matrix, angle: number, axis: Vec3, dest: Matrix) {
+export function rotate(
+  mat: Matrix,
+  angle: number,
+  axis: Vec3 | Array3,
+  dest: Matrix
+) {
   let sq = Math.sqrt(axis[0] * axis[0] + axis[1] * axis[1] + axis[2] * axis[2])
   if (!sq) {
     return null
@@ -186,7 +192,12 @@ export function rotate(mat: Matrix, angle: number, axis: Vec3, dest: Matrix) {
   return dest
 }
 
-export function lookAt(eye: Vec3, center: Vec3, up: Vec3, dest: Matrix) {
+export function lookAt(
+  eye: Vec3 | Array3,
+  center: Vec3 | Array3,
+  up: Vec3 | Array3,
+  dest: Matrix
+) {
   const eyeX = eye[0]
   const eyeY = eye[1]
   const eyeZ = eye[2]

@@ -7,7 +7,8 @@ import {
 } from './minMatrix'
 import ObjectGl from './object'
 import Program, { OptionProgram } from './program'
-import { Vec2, Vec3, Vec4 } from './type'
+import { Array2, Array3, Array4 } from './type'
+import { Vec2, Vec3, Vec4 } from './vector'
 
 export type KglTexture = {
   isActive: boolean
@@ -31,7 +32,7 @@ type OptionCreateProgram = {
 type Option = {
   canvas?: HTMLCanvasElement | string
   disableClear?: boolean
-  clearedColor?: [number, number, number, number]
+  clearedColor?: Vec4 | Array4
   hasCamera?: boolean
   hasLight?: boolean
   isFullSize?: boolean
@@ -44,13 +45,13 @@ type Option = {
   fov?: number
   near?: number
   far?: number
-  cameraPosition?: [number, number, number]
-  cameraRotation?: [number, number]
+  cameraPosition?: Vec3 | Array3
+  cameraRotation?: Vec2 | Array2
   extraFar?: number
 
-  lightDirection?: Vec3
-  eyeDirection?: Vec3
-  ambientColor?: Vec3
+  lightDirection?: Vec3 | Array3
+  eyeDirection?: Vec3 | Array3
+  ambientColor?: Vec3 | Array3
 }
 
 export default class Kgl {
@@ -82,14 +83,14 @@ export default class Kgl {
   near: number = 0.1
   far: number = 2000
   aspect: number = 1
-  cameraPosition: Vec3 = [0, 0, 0]
-  cameraRotation: Vec2 = [0, 0]
+  cameraPosition: Vec3 = new Vec3([0, 0, 0])
+  cameraRotation: Vec2 = new Vec2([0, 0])
   extraFar: number = 0
   isAutoUpdateCameraPositionZ: boolean = false
 
-  lightDirection: Vec3 = [0, 0, 0]
-  eyeDirection: Vec3 = [0, 0, 0]
-  ambientColor: Vec3 = [0, 0, 0]
+  lightDirection: Vec3 = new Vec3([0, 0, 0])
+  eyeDirection: Vec3 = new Vec3([0, 0, 0])
+  ambientColor: Vec3 = new Vec3([0, 0, 0])
 
   gl: WebGLRenderingContext
 
@@ -114,7 +115,10 @@ export default class Kgl {
     } = option as Option
 
     this.disableClear = disableClear
-    this.clearedColor = clearedColor || [0, 0, 0, 0]
+    this.clearedColor =
+      clearedColor && clearedColor.length === 4
+        ? new Vec4(clearedColor as Array4)
+        : (clearedColor as Vec4) || new Vec4([0, 0, 0, 0])
     this.hasCamera = hasCamera
     this.hasLight = hasLight
     this.isFullSize = isFullSize
@@ -137,8 +141,14 @@ export default class Kgl {
       this.fov = fov
       this.near = near
       this.far = far
-      this.cameraPosition = cameraPosition
-      this.cameraRotation = cameraRotation
+      this.cameraPosition =
+        cameraPosition && cameraPosition.length === 3
+          ? new Vec3(cameraPosition as Array3)
+          : (cameraPosition as Vec3)
+      this.cameraRotation =
+        cameraRotation && cameraRotation.length === 2
+          ? new Vec2(cameraRotation as Array2)
+          : (cameraRotation as Vec2)
       this.extraFar = extraFar
       this.isAutoUpdateCameraPositionZ = !(
         'cameraPosition' in option || 'far' in option
@@ -152,9 +162,18 @@ export default class Kgl {
         ambientColor = [0.1, 0.1, 0.1],
       } = option as Option
 
-      this.lightDirection = lightDirection
-      this.eyeDirection = eyeDirection
-      this.ambientColor = ambientColor
+      this.lightDirection =
+        lightDirection && lightDirection.length === 3
+          ? new Vec3(lightDirection as Array3)
+          : (lightDirection as Vec3)
+      this.eyeDirection =
+        eyeDirection && eyeDirection.length === 3
+          ? new Vec3(eyeDirection as Array3)
+          : (eyeDirection as Vec3)
+      this.ambientColor =
+        ambientColor && ambientColor.length === 3
+          ? new Vec3(ambientColor as Array3)
+          : (ambientColor as Vec3)
     }
 
     this.setPixelRatio()
