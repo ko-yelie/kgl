@@ -1,4 +1,4 @@
-import { KglAuto } from '../../../src/index.ts'
+import { KglAuto } from '../../../src/index'
 
 new KglAuto({
   programs: {

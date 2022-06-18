@@ -1,4 +1,4 @@
-import { KglAuto } from '../../../src/index.ts'
+import { KglAuto } from '../../../src/index'
 import { loadImage, mix } from '../../utils.js'
 
 const image =

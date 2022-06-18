@@ -1,10 +1,9 @@
-import Kgl from './kgl.ts'
-import * as Effects from './effects/index.js'
+import Kgl from './kgl'
 
 export default class KglEffect extends Kgl {
-  effectList = []
+  effectList: any[] = []
 
-  createEffect(EffectClass, option) {
+  createEffect(EffectClass: any, option?: any) {
     const effect = new EffectClass(this, option)
     this.effectList.push(effect)
     return effect

@@ -1,4 +1,4 @@
-import Kgl from '../../../src/index.ts'
+import Kgl from '../../../src/index'
 import fragmentShader from './index.frag'
 import fragmentShaderCross from './cross.frag'
 
