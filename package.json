@@ -18,9 +18,6 @@
     "dev": "npm run dev --prefix examples",
     "pages": "npm run pages --prefix examples"
   },
-  "browserslist": {
-    "ignoreUnknownVersions": "ios_saf 13.2"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ko-yelie/kgl.git"

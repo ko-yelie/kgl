@@ -1,22 +1,22 @@
-export class Vec2 extends Float32Array {
+export class Vec2 {
   constructor(initialValues?: [number, number]) {
-    initialValues ? super(initialValues) : super(2)
+    return initialValues ? new Float32Array(initialValues) : new Float32Array(2)
   }
 }
 
-export class Vec3 extends Float32Array {
+export class Vec3 {
   constructor(initialValues?: [number, number, number]) {
-    initialValues ? super(initialValues) : super(3)
+    return initialValues ? new Float32Array(initialValues) : new Float32Array(3)
   }
 }
 
-export class Vec4 extends Float32Array {
+export class Vec4 {
   constructor(initialValues?: [number, number, number, number]) {
-    initialValues ? super(initialValues) : super(4)
+    return initialValues ? new Float32Array(initialValues) : new Float32Array(4)
   }
 }
 
-export class Matrix extends Float32Array {
+export class Matrix {
   constructor(
     initialValues?: [
       number,
@@ -37,6 +37,8 @@ export class Matrix extends Float32Array {
       number
     ]
   ) {
-    initialValues ? super(initialValues) : super(16)
+    return initialValues
+      ? new Float32Array(initialValues)
+      : new Float32Array(16)
   }
 }
