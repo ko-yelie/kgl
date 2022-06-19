@@ -402,7 +402,7 @@ export default class Kgl {
     }
   }
 
-  bindFramebuffer(key: string) {
+  bindFramebuffer(key?: string | null) {
     const { gl } = this
 
     gl.bindFramebuffer(

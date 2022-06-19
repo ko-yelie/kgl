@@ -1,8 +1,10 @@
+import KglEffect from '../kglEffect'
 import Program from '../program'
 import zoomblurFrag from '../shaders/postprocessing/zoomblur.frag'
+import { Array2 } from '../type'
 
 export default class Zoomblur extends Program {
-  constructor(kgl) {
+  constructor(kgl: KglEffect) {
     const option = {
       fragmentShader: zoomblurFrag,
       uniforms: {
@@ -14,7 +16,13 @@ export default class Zoomblur extends Program {
     super(kgl, option)
   }
 
-  draw(readFramebufferKey, outFramebufferKey, strength, center, isOnscreen) {
+  drawEffect(
+    readFramebufferKey: string,
+    outFramebufferKey: string,
+    strength?: number,
+    center?: Array2,
+    isOnscreen?: boolean
+  ) {
     this.kgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
     this.uniforms.uTexture = readFramebufferKey
     if (typeof strength !== 'undefined') this.uniforms.uStrength = strength

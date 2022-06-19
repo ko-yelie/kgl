@@ -30,7 +30,7 @@ async function main() {
       kgl.bindFramebuffer('mask')
       kgl.programs.mask.draw()
 
-      kgl.effects.godray.draw(
+      kgl.effects.godray.drawEffect(
         'mask',
         'cache',
         'output',

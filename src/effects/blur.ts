@@ -1,8 +1,11 @@
+import KglEffect from '../kglEffect'
 import Program from '../program'
 import blurFrag from '../shaders/postprocessing/blur.frag'
 
 export default class Blur extends Program {
-  constructor(kgl) {
+  radius = 0.5
+
+  constructor(kgl: KglEffect) {
     const option = {
       fragmentShader: blurFrag,
       uniforms: {
@@ -15,11 +18,14 @@ export default class Blur extends Program {
     }
 
     super(kgl, option)
-
-    this.radius = 0.5
   }
 
-  draw(readFramebufferKey, cacheFramebufferKey, radius, isOnscreen) {
+  drawEffect(
+    readFramebufferKey: string,
+    cacheFramebufferKey: string,
+    radius?: number,
+    isOnscreen?: boolean
+  ) {
     const iterations = 8
     for (let i = 0; i < iterations; i++) {
       this.kgl.bindFramebuffer(

@@ -1,11 +1,18 @@
+import KglEffect from '../kglEffect'
 import Program from '../program'
-import Blur from './blur.js'
-import Specular from './specular.js'
-import Zoomblur from './zoomblur.js'
+import Blur from './blur'
+import Specular from './specular'
+import Zoomblur from './zoomblur'
 import textureFrag from '../shaders/template/texture.frag'
+import { Array2 } from '../type'
 
-export default class Godray extends Program {
-  constructor(kgl) {
+export default class GodrayLight extends Program {
+  godraySpecular: Specular
+  godrayZoomblur: Zoomblur
+  godrayBlur: Blur
+  radius = 0.02
+
+  constructor(kgl: KglEffect) {
     const option = {
       fragmentShader: textureFrag,
       uniforms: {
@@ -22,48 +29,33 @@ export default class Godray extends Program {
     this.godrayZoomblur = kgl.createEffect(Zoomblur)
 
     this.godrayBlur = kgl.createEffect(Blur)
-
-    this.godrayBase = kgl.createEffect(Program, {
-      fragmentShader: textureFrag,
-      uniforms: {
-        uTexture: 'framebuffer',
-      },
-    })
-
-    this.radius = 0.02
   }
 
-  draw(
-    readFramebufferKey,
-    cacheFramebufferKey,
-    outFramebufferKey,
-    strength,
-    center,
-    radius,
-    isOnscreen
+  drawEffect(
+    readFramebufferKey: string,
+    cacheFramebufferKey: string,
+    outFramebufferKey: string,
+    strength?: number,
+    center?: Array2,
+    radius?: number,
+    isOnscreen?: boolean
   ) {
-    this.godraySpecular.draw(readFramebufferKey, outFramebufferKey)
+    this.godraySpecular.drawEffect(readFramebufferKey, outFramebufferKey)
 
-    this.godrayZoomblur.draw(
+    this.godrayZoomblur.drawEffect(
       outFramebufferKey,
       cacheFramebufferKey,
       strength,
       center
     )
 
-    this.godrayBlur.draw(
+    this.godrayBlur.drawEffect(
       cacheFramebufferKey,
       outFramebufferKey,
       typeof radius !== 'undefined' ? radius : this.radius
     )
 
     this.kgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
-
-    {
-      const program = this.godrayBase
-      program.uniforms.uTexture = readFramebufferKey
-      program.draw()
-    }
 
     this.uniforms.uTexture = cacheFramebufferKey
     super.draw()
