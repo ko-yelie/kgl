@@ -9,7 +9,7 @@ import { Array3 } from './type'
 import { Matrix, Vec3 } from './vector'
 
 export function createMatrix() {
-  return identity(new Matrix())
+  return identity(new Float32Array(16))
 }
 
 export function identity(dest: Matrix) {

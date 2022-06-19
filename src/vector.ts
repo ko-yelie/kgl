@@ -1,44 +1,31 @@
-export class Vec2 {
+export class Vec2 extends Array {
   constructor(initialValues?: [number, number]) {
-    return initialValues ? new Float32Array(initialValues) : new Float32Array(2)
+    if (initialValues) {
+      return initialValues
+    } else {
+      super(2)
+    }
   }
 }
 
-export class Vec3 {
+export class Vec3 extends Array {
   constructor(initialValues?: [number, number, number]) {
-    return initialValues ? new Float32Array(initialValues) : new Float32Array(3)
+    if (initialValues) {
+      return initialValues
+    } else {
+      super(3)
+    }
   }
 }
 
-export class Vec4 {
+export class Vec4 extends Array {
   constructor(initialValues?: [number, number, number, number]) {
-    return initialValues ? new Float32Array(initialValues) : new Float32Array(4)
+    if (initialValues) {
+      return initialValues
+    } else {
+      super(4)
+    }
   }
 }
 
-export class Matrix {
-  constructor(
-    initialValues?: [
-      number,
-      number,
-      number,
-      number,
-      number,
-      number,
-      number,
-      number,
-      number,
-      number,
-      number,
-      number,
-      number,
-      number,
-      number,
-      number
-    ]
-  ) {
-    return initialValues
-      ? new Float32Array(initialValues)
-      : new Float32Array(16)
-  }
-}
+export type Matrix = Float32Array
