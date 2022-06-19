@@ -19,6 +19,7 @@ module.exports = {
     moduleName: 'Kgl',
     format: ['es', 'iife', 'iife-min'],
     sourceMap: false,
+    target: 'browser',
   },
   plugins: {
     replace: { preventAssignment: true },

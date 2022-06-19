@@ -4,13 +4,16 @@
   "version": "0.5.4",
   "description": "Minimal WebGL library",
   "main": "dist/index.es.js",
+  "types": "types/index.d.ts",
   "unpkg": "dist/index.iife.min.js",
   "files": [
-    "dist/"
+    "dist",
+    "types"
   ],
   "scripts": {
-    "build": "bili",
-    "publish": "npm run build && npm publish",
+    "build": "rm -rf dist && bili",
+    "types": "tsc --build tsconfig.types.json",
+    "publish": "npm run build && types && npm publish",
     "dev": "npm run dev --prefix examples",
     "pages": "npm run pages --prefix examples"
   },
