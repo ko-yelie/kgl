@@ -14,11 +14,12 @@ module.exports = {
     minimal: true,
   },
   banner,
-  input: ['src/index.js', 'src/kgl.js'],
+  input: ['src/index.ts', 'src/kgl.ts'],
   output: {
     moduleName: 'Kgl',
     format: ['es', 'iife', 'iife-min'],
     sourceMap: false,
+    target: 'browser',
   },
   plugins: {
     replace: { preventAssignment: true },

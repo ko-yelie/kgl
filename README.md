@@ -2,6 +2,26 @@
 
 Minimal WebGL library
 
+## Pros and Cons
+
+### Pros
+
+- Lightweight
+- Can write with less code.
+- Automates calculations to match WebGL and DOM sizes.
+- Support TypeScript.
+
+### Cons
+
+- Fragment shaders must always be written by you.
+- Cannot use complex 3D models.
+- Cannot use lighting.
+- Not support WebGL2 yet.
+
+## Documentation
+
+- [API](https://ko-yelie.github.io/kgl/api/)
+
 ## Usage
 
 ### Installation

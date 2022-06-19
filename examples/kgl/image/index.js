@@ -1,4 +1,4 @@
-import Kgl from '../../../src/index.js'
+import Kgl from '../../../src/index'
 import fragmentShader from './index.frag'
 import { loadImage } from '../../utils.js'
 

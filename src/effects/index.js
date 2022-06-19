@@ -1,6 +1,0 @@
-export { default as Blur } from './blur.js'
-export { default as Specular } from './specular.js'
-export { default as Bloom } from './bloom.js'
-export { default as Zoomblur } from './zoomblur.js'
-export { default as Godray } from './godray.js'
-export { default as GodrayLight } from './godrayLight.js'

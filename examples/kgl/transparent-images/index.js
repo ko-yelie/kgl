@@ -1,4 +1,4 @@
-import Kgl from '../../../src/index.js'
+import Kgl from '../../../src/index'
 import fragmentShader from './index.frag'
 import { loadImage } from '../../utils.js'
 import image from './1-white-clouds-png-image_400x400.png'

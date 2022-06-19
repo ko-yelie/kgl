@@ -1,4 +1,6 @@
 .DS_Store
-node_modules/
-dist/
-# docs/
+/node_modules
+/dist
+/lib
+/types
+# /docs

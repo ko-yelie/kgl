@@ -1,6 +1,7 @@
-import Kgl from '../../../src/index.js'
+import Kgl from '../../../src/index'
 import fragmentShader from './index.frag'
 import fragmentShaderCross from './cross.frag'
+import fragmentShaderFull from './full.frag'
 
 const kgl = new Kgl({
   hasCamera: true,
@@ -11,6 +12,14 @@ const { root } = kgl // root group
 /**
  * program
  */
+
+const full = kgl.createProgram({
+  fragmentShader: fragmentShaderFull,
+  uniforms: {
+    uTime: 0,
+  },
+  isAutoAdd: true,
+})
 
 /* group cross */
 const groupCross = kgl.createGroup({
@@ -83,6 +92,8 @@ function tick(time) {
   // kgl.cameraPosition[1] = Math.sin(time * 0.5) * 300
   // kgl.cameraRotation[1] = Math.sin(time * 0.1)
   // kgl.updateCamera()
+
+  full.uniforms.uTime = time
 
   root.x = -Math.sin(time * 0.5) * 500
 
