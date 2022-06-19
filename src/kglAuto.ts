@@ -1,20 +1,14 @@
 import { Option as OptionKgl, Framebuffer, OptionCreateProgram } from './kgl'
 import KglEffect from './kglEffect'
 import Program from './program'
+import { EffectInstance, KeyofEffect } from './effects/index'
 import * as Effects from './effects/index'
 
 type framebufferOptions = { [K: string]: { width: number; height: number } }
 
 type Option = {
   programs?: { [K: string]: OptionCreateProgram }
-  effects?: (
-    | 'blur'
-    | 'specular'
-    | 'bloom'
-    | 'zoomblur'
-    | 'godray'
-    | 'godrayLight'
-  )[]
+  effects?: KeyofEffect[]
   framebuffers?: string[] | framebufferOptions
   framebufferFloats?: framebufferOptions
   tick?: Function
@@ -27,13 +21,7 @@ type Option = {
 export default class KglAuto extends KglEffect {
   programs: { [K: string]: Program } = {}
   effects: {
-    [K: string]:
-      | Effects.Blur
-      | Effects.Specular
-      | Effects.Bloom
-      | Effects.Zoomblur
-      | Effects.Godray
-      | Effects.GodrayLight
+    [K: string]: EffectInstance
   } = {}
   framebuffers: { [K: string]: Framebuffer } = {}
   ticks: Function[] = []
@@ -74,14 +62,9 @@ export default class KglAuto extends KglEffect {
     })
 
     effects.forEach((key) => {
-      const classKey = (key.charAt(0).toUpperCase() + key.slice(1)) as
-        | 'Blur'
-        | 'Specular'
-        | 'Bloom'
-        | 'Zoomblur'
-        | 'Godray'
-        | 'GodrayLight'
-      this.effects[key] = this.createEffect(Effects[classKey])
+      const classKey = (key.charAt(0).toUpperCase() +
+        key.slice(1)) as keyof typeof Effects
+      this.effects[key] = this.createEffect<EffectInstance>(Effects[classKey])
     })
 
     if (isAutoResize) {

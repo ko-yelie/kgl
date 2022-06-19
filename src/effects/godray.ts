@@ -3,14 +3,13 @@ import Program from '../program'
 import Blur from './blur'
 import Specular from './specular'
 import Zoomblur from './zoomblur'
-import textureFrag from '../shaders/template/texture.frag'
+import textureFrag from '../shaders/postprocessing/godray.frag'
 import { Array2 } from '../type'
 
 export default class Godray extends Program {
   godraySpecular: Specular
   godrayZoomblur: Zoomblur
   godrayBlur: Blur
-  godrayBase: Program
   radius = 0.02
 
   constructor(kgl: KglEffect) {
@@ -18,6 +17,7 @@ export default class Godray extends Program {
       fragmentShader: textureFrag,
       uniforms: {
         uTexture: 'framebuffer',
+        uTextureCache: 'framebuffer',
       },
       isAdditive: true,
     }
@@ -30,13 +30,6 @@ export default class Godray extends Program {
     this.godrayZoomblur = kgl.createEffect(Zoomblur)
 
     this.godrayBlur = kgl.createEffect(Blur)
-
-    this.godrayBase = kgl.createEffect(Program, {
-      fragmentShader: textureFrag,
-      uniforms: {
-        uTexture: 'framebuffer',
-      },
-    })
   }
 
   drawEffect(
@@ -65,13 +58,8 @@ export default class Godray extends Program {
 
     this.kgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
 
-    {
-      const program = this.godrayBase
-      program.uniforms.uTexture = readFramebufferKey
-      program.draw()
-    }
-
-    this.uniforms.uTexture = cacheFramebufferKey
+    this.uniforms.uTexture = readFramebufferKey
+    this.uniforms.uTextureCache = cacheFramebufferKey
     super.draw()
   }
 }

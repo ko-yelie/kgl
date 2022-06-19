@@ -2,13 +2,11 @@ import KglEffect from '../kglEffect'
 import Program from '../program'
 import Specular from './specular'
 import Blur from './blur'
-import textureFrag from '../shaders/template/texture.frag'
 import bloomFrag from '../shaders/postprocessing/bloom.frag'
 
 export default class Bloom extends Program {
   bloomSpecular: Specular
   bloomBlur: Blur
-  bloomBase: Program
   radius = 0.4
 
   constructor(kgl: KglEffect) {
@@ -16,6 +14,7 @@ export default class Bloom extends Program {
       fragmentShader: bloomFrag,
       uniforms: {
         uSpecular: 'framebuffer',
+        uTextureRead: 'framebuffer',
       },
       isAdditive: true,
       hasCamera: false,
@@ -28,15 +27,6 @@ export default class Bloom extends Program {
     })
 
     this.bloomBlur = kgl.createEffect(Blur)
-
-    this.bloomBase = kgl.createEffect(Program, {
-      fragmentShader: textureFrag,
-      uniforms: {
-        uTexture: 'framebuffer',
-      },
-    })
-
-    this.radius = 0.4
   }
 
   drawEffect(
@@ -56,12 +46,7 @@ export default class Bloom extends Program {
 
     this.kgl.bindFramebuffer(isOnscreen ? null : outFramebufferKey)
 
-    {
-      const program = this.bloomBase
-      program.uniforms.uTexture = readFramebufferKey
-      program.draw()
-    }
-
+    this.uniforms.uTextureRead = readFramebufferKey
     this.uniforms.uSpecular = cacheFramebufferKey
     super.draw()
   }

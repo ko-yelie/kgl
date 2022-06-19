@@ -2,7 +2,7 @@ import KglEffect from '../kglEffect'
 import Program from '../program'
 import specularFrag from '../shaders/postprocessing/specular.frag'
 
-type Option = {
+export type Option = {
   threshold?: number
 }
 
