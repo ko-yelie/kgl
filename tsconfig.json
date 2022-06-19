@@ -4,6 +4,7 @@
     "sourceMap": true,
     "target": "ES2015",
     "module": "ESNext",
+    "moduleResolution": "node",
   },
   "exclude": [
     "node_modules"
