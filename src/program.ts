@@ -922,7 +922,7 @@ export default class Program extends ObjectGl {
         }
         break
       default:
-        set = (newValue: any) => {
+        set = (newValue: UniformValue) => {
           this.use()
           ;(this.gl as any)[type](location, newValue)
           _value = newValue
@@ -937,7 +937,7 @@ export default class Program extends ObjectGl {
     if (typeof _value !== 'undefined') this.uniforms[key] = _value
   }
 
-  updateUniforms(uniforms: { [K: string]: any }) {
+  updateUniforms(uniforms: { [K: string]: UniformValue }) {
     const keys = Object.keys(uniforms)
     for (let i = 0; i < keys.length; i++) {
       const key = keys[i]
