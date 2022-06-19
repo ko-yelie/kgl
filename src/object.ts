@@ -11,7 +11,6 @@ import { Array2, Array3 } from './type'
 import { Matrix, Vec2, Vec3 } from './vector'
 
 type Option = {
-  hasMatrix: boolean
   x: number
   y: number
   z: number

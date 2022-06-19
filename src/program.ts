@@ -473,7 +473,6 @@ export type OptionProgram = {
   isAutoResolution: boolean
   hasCamera: boolean
   hasLight: boolean
-  hasMatrix: boolean
 
   width?: number
   height?: number
@@ -569,7 +568,13 @@ export default class Program extends ObjectGl {
       hasLight = !isFloats && kgl.hasLight,
     } = option as OptionProgram
 
-    const hasMatrix = hasCamera
+    const isWhole = !(
+      (option as OptionProgram).shape ||
+      (option as OptionProgram).vertexShaderId ||
+      (option as OptionProgram).vertexShader
+    )
+
+    const hasMatrix = !isWhole && hasCamera
 
     super(kgl, option, hasMatrix)
 
@@ -589,12 +594,6 @@ export default class Program extends ObjectGl {
     if (hasLight) {
       this.invMatrix = createMatrix()
     }
-
-    const isWhole = !(
-      (option as OptionProgram).shape ||
-      (option as OptionProgram).vertexShaderId ||
-      (option as OptionProgram).vertexShader
-    )
 
     this.mode = mode
     this.glMode = this.gl[mode || 'TRIANGLE_STRIP']
