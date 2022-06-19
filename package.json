@@ -16,7 +16,7 @@
     "publish": "npm run build && types && npm publish",
     "docs": "typedoc ./src/index.ts --out docs/api",
     "dev": "npm run dev --prefix examples",
-    "pages": "npm run pages --prefix examples"
+    "pages": "npm run pages --prefix examples && npm run docs"
   },
   "repository": {
     "type": "git",
