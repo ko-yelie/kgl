@@ -1,4 +1,4 @@
-import ObjectGl from './object'
+import ObjectGl, { Option as OptionObjectGl } from './object'
 import { createMatrix, inverse, normalize } from './minMatrix'
 import Kgl, { KglTexture } from './kgl'
 import { Matrix, Vec3 } from './vector'
@@ -46,19 +46,13 @@ const attributeNone = {
 }
 
 type OptionShapePlane = {
-  program: Program
-  width: number
-  height: number
-  hasLight: boolean
+  width?: number
+  height?: number
+  hasLight?: boolean
 }
 
-function getShapePlane(option: OptionShapePlane | {} = {}): Shape {
-  const {
-    program,
-    width = 1,
-    height = 1,
-    hasLight = false,
-  } = option as OptionShapePlane
+function getShapePlane(program: Program, option: OptionShapePlane = {}): Shape {
+  const { width = 1, height = 1, hasLight = false } = option
 
   program.width = width
   program.height = height
@@ -101,13 +95,12 @@ function getShapePlane(option: OptionShapePlane | {} = {}): Shape {
 }
 
 type OptionShapeCube = {
-  program: Program
-  size: number
-  hasLight: boolean
+  size?: number
+  hasLight?: boolean
 }
 
-function getShapeCube(option: OptionShapeCube | {} = {}): Shape {
-  const { program, size = 1, hasLight = false } = option as OptionShapeCube
+function getShapeCube(program: Program, option: OptionShapeCube = {}): Shape {
+  const { size = 1, hasLight = false } = option
 
   program.size = size
 
@@ -223,22 +216,23 @@ function getShapeCube(option: OptionShapeCube | {} = {}): Shape {
 }
 
 type OptionShapeCylinder = {
-  program: Program
-  radius: number
-  radiusTop: number
-  radiusBottom: number
-  height: number
-  radialSegments: number
-  heightSegments: number
-  openEnded: boolean
-  thetaStart: number
-  thetaLength: number
-  hasLight: boolean
+  radius?: number
+  radiusTop?: number
+  radiusBottom?: number
+  height?: number
+  radialSegments?: number
+  heightSegments?: number
+  openEnded?: boolean
+  thetaStart?: number
+  thetaLength?: number
+  hasLight?: boolean
 }
 
-function getShapeCylinder(option: OptionShapeCylinder | {} = {}): Shape {
+function getShapeCylinder(
+  program: Program,
+  option: OptionShapeCylinder = {}
+): Shape {
   const {
-    program,
     radius = 1,
     radiusTop = radius,
     radiusBottom = radius,
@@ -249,7 +243,7 @@ function getShapeCylinder(option: OptionShapeCylinder | {} = {}): Shape {
     thetaStart = 0,
     thetaLength = Math.PI * 2,
     hasLight = false,
-  } = option as OptionShapeCylinder
+  } = option
 
   program.radius = radius
   program.radiusTop = radiusTop
@@ -453,31 +447,31 @@ type AttributeProgram = {
   vbo?: WebGLBuffer | null
 }
 
-export type OptionProgram = {
-  shape: 'plane' | 'cube' | 'cylinder' | 'point'
-  vertexShaderId: string
-  vertexShader: string
-  fragmentShaderId: string
-  fragmentShader: string
-  attributes: Attributes
-  instancedAttributes: Attributes
-  uniforms: Uniforms
-  mode: Mode
-  drawType: DrawType
-  isTransparent: boolean
-  isAdditive: boolean
-  isFloats: boolean
-  isCulling: boolean
-  isDepth: boolean
-  isHidden: boolean
-  isAutoResolution: boolean
-  hasCamera: boolean
-  hasLight: boolean
+export type Option = {
+  shape?: 'plane' | 'cube' | 'cylinder' | 'point'
+  vertexShaderId?: string
+  vertexShader?: string
+  fragmentShaderId?: string
+  fragmentShader?: string
+  attributes?: Attributes
+  instancedAttributes?: Attributes
+  uniforms?: Uniforms
+  mode?: Mode
+  drawType?: DrawType
+  isTransparent?: boolean
+  isAdditive?: boolean
+  isFloats?: boolean
+  isCulling?: boolean
+  isDepth?: boolean
+  isHidden?: boolean
+  isAutoResolution?: boolean
+  hasCamera?: boolean
+  hasLight?: boolean
 
   width?: number
   height?: number
   size?: number
-}
+} & OptionObjectGl
 
 export default class Program extends ObjectGl {
   isProgram = true
@@ -536,7 +530,7 @@ export default class Program extends ObjectGl {
 
   private _dummyCanvas?: HTMLCanvasElement
 
-  constructor(kgl: Kgl, option: OptionProgram | {} = {}) {
+  constructor(kgl: Kgl, option: Option = {}) {
     const {
       shape,
       vertexShaderId,
@@ -548,7 +542,8 @@ export default class Program extends ObjectGl {
         ? vertexShaderShape.d3
         : vertexShaderShape.d2,
       fragmentShaderId,
-      fragmentShader = document.getElementById(fragmentShaderId) &&
+      fragmentShader = fragmentShaderId &&
+      document.getElementById(fragmentShaderId) &&
       document.getElementById(fragmentShaderId)!.textContent
         ? document.getElementById(fragmentShaderId)!.textContent!
         : '',
@@ -566,12 +561,12 @@ export default class Program extends ObjectGl {
       isAutoResolution = !isFloats && !uniforms.uResolution,
       hasCamera = !isFloats && kgl.hasCamera,
       hasLight = !isFloats && kgl.hasLight,
-    } = option as OptionProgram
+    } = option
 
     const isWhole = !(
-      (option as OptionProgram).shape ||
-      (option as OptionProgram).vertexShaderId ||
-      (option as OptionProgram).vertexShader
+      option.shape ||
+      option.vertexShaderId ||
+      option.vertexShader
     )
 
     const hasMatrix = !isWhole && hasCamera
@@ -618,25 +613,22 @@ export default class Program extends ObjectGl {
       let shapeData
       switch (shape) {
         case 'plane':
-          shapeData = getShapePlane({
+          shapeData = getShapePlane(this, {
             hasLight: this.hasLight,
-            width: (option as OptionProgram).width,
-            height: (option as OptionProgram).height,
-            program: this,
+            width: option.width,
+            height: option.height,
           })
           break
         case 'cube':
-          shapeData = getShapeCube({
+          shapeData = getShapeCube(this, {
             hasLight: this.hasLight,
-            size: (option as OptionProgram).size,
-            program: this,
+            size: option.size,
           })
           break
         case 'cylinder':
-          shapeData = getShapeCylinder({
+          shapeData = getShapeCylinder(this, {
             hasLight: this.hasLight,
             ...option,
-            program: this,
           })
           break
       }
@@ -648,7 +640,7 @@ export default class Program extends ObjectGl {
       this.createAttribute(attributes)
     }
 
-    if (this.isInstanced) {
+    if (this.isInstanced && instancedAttributes) {
       const instancedArraysExt = this.gl.getExtension('ANGLE_instanced_arrays')
       if (instancedArraysExt == null) {
         alert('ANGLE_instanced_arrays not supported')

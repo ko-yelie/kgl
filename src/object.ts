@@ -10,22 +10,22 @@ import {
 import { Array2, Array3 } from './type'
 import { Matrix, Vec2, Vec3 } from './vector'
 
-type Option = {
-  x: number
-  y: number
-  z: number
-  translate3d: Vec3
-  scale: number
-  scaleX: number
-  scaleY: number
-  scaleZ: number
-  scale2d: Vec2
-  scale3d: Vec3
-  rotateX: number
-  rotateY: number
-  rotateZ: number
-  rotate: number
-  rotate3d: Vec3
+export type Option = {
+  x?: number
+  y?: number
+  z?: number
+  translate3d?: Vec3
+  scale?: number
+  scaleX?: number
+  scaleY?: number
+  scaleZ?: number
+  scale2d?: Vec2
+  scale3d?: Vec3
+  rotateX?: number
+  rotateY?: number
+  rotateZ?: number
+  rotate?: number
+  rotate3d?: Vec3
 }
 
 export default class ObjectGl {
@@ -44,56 +44,56 @@ export default class ObjectGl {
   _scalePatch = 1
   isUpdateMatrix = false
 
-  constructor(kgl: Kgl, option: Option | {} = {}, hasMatrix = true) {
+  constructor(kgl: Kgl, option: Option = {}, hasMatrix = true) {
     this.kgl = kgl
 
     this.hasMatrix = hasMatrix
     if (!this.hasMatrix) return
 
     if ('x' in option) {
-      this.x = option.x
+      this.x = option.x!
     }
     if ('y' in option) {
-      this.y = option.y
+      this.y = option.y!
     }
     if ('z' in option) {
-      this.z = option.z
+      this.z = option.z!
     }
     if ('translate3d' in option) {
-      this.translate3d = option.translate3d
+      this.translate3d = option.translate3d!
     }
     if ('scale' in option) {
-      this.scale = option.scale
+      this.scale = option.scale!
     }
     if ('scaleX' in option) {
-      this.scaleX = option.scaleX
+      this.scaleX = option.scaleX!
     }
     if ('scaleY' in option) {
-      this.scaleY = option.scaleY
+      this.scaleY = option.scaleY!
     }
     if ('scaleZ' in option) {
-      this.scaleZ = option.scaleZ
+      this.scaleZ = option.scaleZ!
     }
     if ('scale2d' in option) {
-      this.scale2d = option.scale2d
+      this.scale2d = option.scale2d!
     }
     if ('scale3d' in option) {
-      this.scale3d = option.scale3d
+      this.scale3d = option.scale3d!
     }
     if ('rotateX' in option) {
-      this.rotateX = option.rotateX
+      this.rotateX = option.rotateX!
     }
     if ('rotateY' in option) {
-      this.rotateY = option.rotateY
+      this.rotateY = option.rotateY!
     }
     if ('rotateZ' in option) {
-      this.rotateZ = option.rotateZ
+      this.rotateZ = option.rotateZ!
     }
     if ('rotate' in option) {
-      this.rotate = option.rotate
+      this.rotate = option.rotate!
     }
     if ('rotate3d' in option) {
-      this.rotate3d = option.rotate3d
+      this.rotate3d = option.rotate3d!
     }
   }
 

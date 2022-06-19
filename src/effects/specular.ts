@@ -7,8 +7,8 @@ type Option = {
 }
 
 export default class Specular extends Program {
-  constructor(kgl: KglEffect, option: Option | {} = {}) {
-    const { threshold = 0.5 } = option as Option
+  constructor(kgl: KglEffect, option: Option = {}) {
+    const { threshold = 0.5 } = option
 
     const programOption = {
       fragmentShader: specularFrag,

@@ -1,11 +1,13 @@
+import { Option as OptionKgl, Framebuffer, OptionCreateProgram } from './kgl'
 import KglEffect from './kglEffect'
-import * as Effects from './effects/index'
 import Program from './program'
-import { Framebuffer } from './kgl'
+import * as Effects from './effects/index'
+
+type framebufferOptions = { [K: string]: { width: number; height: number } }
 
 type Option = {
-  programs: { [K: string]: Program }
-  effects: (
+  programs?: { [K: string]: OptionCreateProgram }
+  effects?: (
     | 'blur'
     | 'specular'
     | 'bloom'
@@ -13,14 +15,14 @@ type Option = {
     | 'godray'
     | 'godrayLight'
   )[]
-  framebuffers: string[] | { [K: string]: { width: number; height: number } }
-  framebufferFloats: { [K: string]: { width: number; height: number } }
-  tick: Function
-  onBefore: Function
-  onResize: Function
-  isAutoResize: boolean
-  isAutoStart: boolean
-}
+  framebuffers?: string[] | framebufferOptions
+  framebufferFloats?: framebufferOptions
+  tick?: Function
+  onBefore?: Function
+  onResize?: Function
+  isAutoResize?: boolean
+  isAutoStart?: boolean
+} & OptionKgl
 
 export default class KglAuto extends KglEffect {
   programs: { [K: string]: Program } = {}
@@ -36,12 +38,12 @@ export default class KglAuto extends KglEffect {
   framebuffers: { [K: string]: Framebuffer } = {}
   ticks: Function[] = []
 
-  onResize: Function
+  onResize?: Function
 
-  _resize?: EventListener
+  _resize?: EventListener | Function
   requestID: number = 0
 
-  constructor(option: Option | {} = {}) {
+  constructor(option: Option = {}) {
     super(option)
 
     const {
@@ -54,15 +56,19 @@ export default class KglAuto extends KglEffect {
       onResize,
       isAutoResize = true,
       isAutoStart = true,
-    } = option as Option
+    } = option
 
-    if (typeof tick === 'function') this.addTick(tick)
-    this.onResize = onResize
+    if (typeof tick === 'function') {
+      this.addTick(tick)
+    }
+    if (typeof onResize === 'function') {
+      this.onResize = onResize
+    }
 
     Object.keys(programs).forEach((key) => {
       const data = programs[key]
       const program = (this.programs[key] = this.createProgram(data))
-      if (!(data as any).isFloats) {
+      if (!data.isFloats) {
         this.add(program)
       }
     })
@@ -90,9 +96,7 @@ export default class KglAuto extends KglEffect {
         break
       case 'Object':
         Object.keys(framebuffers).forEach((key) => {
-          const { width, height } = (
-            framebuffers as { [K: string]: { width: number; height: number } }
-          )[key]
+          const { width, height } = (framebuffers as framebufferOptions)[key]
           this.createFramebuffer(key, width, height)
         })
         break
@@ -109,9 +113,14 @@ export default class KglAuto extends KglEffect {
   }
 
   _initResize() {
-    this.resize()
-    this._resize = this.resize.bind(this)
-    window.addEventListener('resize', this._resize)
+    this._resize = () => {
+      this.resize()
+      if (this.onResize) {
+        this.onResize()
+      }
+    }
+    ;(this._resize as Function)()
+    window.addEventListener('resize', this._resize as EventListener)
   }
 
   addTick(tick: Function) {
@@ -148,7 +157,7 @@ export default class KglAuto extends KglEffect {
     this.stop()
 
     if (this._resize) {
-      window.removeEventListener('resize', this._resize)
+      window.removeEventListener('resize', this._resize as EventListener)
     }
 
     super.destroy()

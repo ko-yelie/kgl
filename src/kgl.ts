@@ -6,7 +6,7 @@ import {
   rotate,
 } from './minMatrix'
 import ObjectGl from './object'
-import Program, { OptionProgram } from './program'
+import Program, { Option as OptionProgram } from './program'
 import { Array2, Array3, Array4 } from './type'
 import { Vec2, Vec3, Vec4 } from './vector'
 
@@ -25,11 +25,11 @@ export type Framebuffer = {
   isFloat?: boolean
 }
 
-type OptionCreateProgram = {
+export type OptionCreateProgram = {
   isAutoAdd?: boolean
 } & OptionProgram
 
-type Option = {
+export type Option = {
   canvas?: HTMLCanvasElement | string
   disableClear?: boolean
   clearedColor?: Vec4 | Array4
@@ -99,7 +99,7 @@ export default class Kgl {
   canvasNativeWidth: number = 0
   canvasNativeHeight: number = 0
 
-  constructor(option: Option | {} = {}) {
+  constructor(option: Option = {}) {
     const {
       canvas,
       disableClear = false,
@@ -112,7 +112,7 @@ export default class Kgl {
       premultipliedAlpha = true,
       pixelRatioMax = 0,
       pixelRatioFixed = 0,
-    } = option as Option
+    } = option
 
     this.disableClear = disableClear
     this.clearedColor =
@@ -136,7 +136,7 @@ export default class Kgl {
         cameraPosition = [0, 0, 30],
         cameraRotation = [0, 0],
         extraFar = 1,
-      } = option as Option
+      } = option
 
       this.fov = fov
       this.near = near
@@ -160,7 +160,7 @@ export default class Kgl {
         lightDirection = [-1, 1, 1],
         eyeDirection = this.cameraPosition,
         ambientColor = [0.1, 0.1, 0.1],
-      } = option as Option
+      } = option
 
       this.lightDirection =
         lightDirection && lightDirection.length === 3
@@ -248,17 +248,17 @@ export default class Kgl {
     this.root.remove(objectGl)
   }
 
-  createProgram(option: OptionCreateProgram | {} = {}) {
+  createProgram(option: OptionCreateProgram = {}) {
     const program = new Program(this, option)
-    if ((option as OptionCreateProgram).isAutoAdd) {
+    if (option.isAutoAdd) {
       this.add(program)
     }
     return program
   }
 
-  createGroup(option: OptionCreateProgram | {} = {}) {
+  createGroup(option: OptionCreateProgram = {}) {
     const group = new ObjectGl(this, option)
-    if ((option as OptionCreateProgram).isAutoAdd) {
+    if (option.isAutoAdd) {
       this.add(group)
     }
     return group
