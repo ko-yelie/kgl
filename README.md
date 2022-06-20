@@ -8,7 +8,7 @@ Minimal WebGL library
 
 - Lightweight
 - Can write with less code.
-- Automates calculations to match WebGL and DOM sizes.
+- Automates calculations to fit WebGL and DOM sizes.
 - Support TypeScript.
 
 ### Cons

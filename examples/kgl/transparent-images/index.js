@@ -61,13 +61,13 @@ async function main() {
     groupCloud.forEachProgram((program) => {
       program.x += 1 * program.scale
 
-      kgl.draw()
-
       const xMax = window.innerWidth * 0.5 + program.width * program.scale * 0.5
       if (program.x > xMax) {
         program.x = -xMax
       }
     })
+
+    kgl.draw()
 
     requestAnimationFrame(tick)
   }
