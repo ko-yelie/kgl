@@ -1,7 +1,7 @@
 {
   "name": "@ko-yelie/kgl",
   "moduleName": "kgl",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "Minimal WebGL library",
   "main": "dist/index.es.js",
   "types": "types/index.d.ts",
