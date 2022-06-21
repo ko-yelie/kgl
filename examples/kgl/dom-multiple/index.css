@@ -11,10 +11,29 @@ body {
 .wapper {
   position: relative;
   z-index: 2;
-  height: 100%;
+}
+
+.list {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 50%;
+  min-height: 150vh;
+  margin: 0 auto;
+  padding: 20% 0;
+  list-style: none;
+}
+
+.item {
+  align-self: flex-start;
+}
+
+.item:nth-child(even) {
+  align-self: flex-end;
+}
+
+.item:nth-child(n + 2) {
+  margin-top: 20%;
 }
 
 .link {
@@ -25,7 +44,7 @@ body {
 }
 
 .image {
-  width: 50vw;
+  width: 30vw;
   height: auto;
   opacity: 0;
 }

@@ -42,6 +42,8 @@ type AttributeProgram = {
   vbo?: WebGLBuffer | null
 }
 
+type AnyData = { [K: string]: any }
+
 export type Option = {
   shape?: 'plane' | 'cube' | 'cylinder' | 'point'
   vertexShaderId?: string
@@ -66,6 +68,8 @@ export type Option = {
   width?: number
   height?: number
   size?: number
+
+  data?: AnyData
 } & OptionObjectGl
 
 export default class Program extends ObjectGl {
@@ -122,6 +126,8 @@ export default class Program extends ObjectGl {
   openEnded?: boolean
   thetaStart?: number
   thetaLength?: number
+
+  data: AnyData = {}
 
   private _dummyCanvas?: HTMLCanvasElement
 
@@ -246,6 +252,10 @@ export default class Program extends ObjectGl {
     }
 
     this.createUniform(uniforms)
+
+    if (option.data) {
+      this.data = option.data
+    }
   }
 
   createProgram(codeVertexShader: string, codeFragmentShader: string) {
