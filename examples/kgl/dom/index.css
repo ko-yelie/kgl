@@ -17,7 +17,7 @@ body {
   width: 50%;
   min-height: 150vh;
   margin: 0 auto;
-  padding: 200px 300px;
+  padding: 20% 0;
   list-style: none;
 }
 
@@ -30,26 +30,26 @@ body {
 }
 
 .item:nth-child(n + 2) {
-  margin-top: 100px;
+  margin-top: 20%;
 }
 
 .link {
   display: block;
   color: rgba(255, 255, 255, 0.5);
   text-decoration: none;
+  text-align: center;
 }
 
 .image {
-  width: 22rem;
+  width: 30vw;
   height: auto;
-  visibility: hidden;
+  opacity: 0;
 }
 
 .title {
   background-color: rgba(0, 0, 0, 0.3);
   font-size: 0.8rem;
   padding: 0 0.3em;
-  text-align: center;
 }
 
 .link:hover {

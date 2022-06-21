@@ -9,7 +9,7 @@ const kgl = new Kgl({
 })
 
 function createImage(img) {
-  const { width, height, top, left } = img.getBoundingClientRect()
+  const { width, height } = img.getBoundingClientRect()
 
   const program = kgl.createProgram({
     shape: 'plane',
@@ -21,10 +21,9 @@ function createImage(img) {
     },
     isTransparent: true,
     isAutoAdd: true,
-    width: width,
-    height: height * 2,
-    x: left - (window.innerWidth * 0.5 - width * 0.5),
-    y: -(top + window.scrollY - (window.innerHeight * 0.5 - height * 0.5)),
+    data: {
+      img,
+    },
   })
 
   return program
@@ -42,6 +41,7 @@ async function main() {
     await onLoadImage(img)
     const program = createImage(img)
     groupCloud.add(program)
+    resizeProgram(program)
   })
 
   /**
@@ -70,8 +70,24 @@ async function main() {
   /**
    * resize
    */
+  function resizeProgram(program) {
+    const { width, height, top, left } =
+      program.data.img.getBoundingClientRect()
+
+    program.scale = width
+    program.x = left - (window.innerWidth * 0.5 - width * 0.5)
+    program.y = -(
+      top +
+      window.scrollY -
+      (window.innerHeight * 0.5 - height * 0.5)
+    )
+  }
   function resize() {
     kgl.resize()
+
+    groupCloud.forEachProgram((program) => {
+      resizeProgram(program)
+    })
   }
   resize()
   window.addEventListener('resize', resize)
@@ -80,13 +96,13 @@ async function main() {
    * tick
    */
   function tick(time) {
-    scrollDiffSmooth += (scrollDiff - scrollDiffSmooth) * 0.07
+    scrollDiffSmooth += (scrollDiff - scrollDiffSmooth) * 0.05
     if (Math.abs(scrollDiff - scrollDiffSmooth) < 0.01) {
       scrollDiffSmooth = scrollDiff
     }
 
     groupCloud.forEachProgram((program) => {
-      program.uniforms.uScrollDiff = scrollDiffSmooth * 0.005
+      program.uniforms.uScrollDiff = scrollDiffSmooth * 0.003
     })
 
     kgl.draw()
