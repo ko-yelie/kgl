@@ -1,3 +1,4 @@
+export * from './kgl'
 export { default } from './kgl'
 
 export { default as KglEffect } from './kglEffect'

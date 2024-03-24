@@ -10,6 +10,11 @@ import Program, { Option as OptionProgram } from './program'
 import { Array2, Array3, Array4 } from './type'
 import { Vec2, Vec3, Vec4 } from './vector'
 
+export { ObjectGl }
+export { Program, OptionProgram }
+export { Array2, Array3, Array4 }
+export { Vec2, Vec3, Vec4 }
+
 export type KglTexture = {
   isActive: boolean
   texture: WebGLTexture
