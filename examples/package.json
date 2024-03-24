@@ -16,5 +16,8 @@
     "glsl-curl-noise": "0.0.4",
     "glsl-random": "0.0.5",
     "glsl-y-rotate": "^3.0.0"
+  },
+  "volta": {
+    "node": "14.21.3"
   }
 }

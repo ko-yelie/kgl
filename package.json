@@ -48,5 +48,8 @@
   "dependencies": {
     "glsl-fast-gaussian-blur": "^1.0.2",
     "glsl-random": "^0.0.5"
+  },
+  "volta": {
+    "node": "14.21.3"
   }
 }
